@@ -328,3 +328,5 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+/src/ESFA.DC.DataMatch.ReportService/ApplicationParameters/Local.1Node.xml
+/src/ESFA.DC.DataMatch.ReportService/ApplicationParameters/Local.5Node.xml
