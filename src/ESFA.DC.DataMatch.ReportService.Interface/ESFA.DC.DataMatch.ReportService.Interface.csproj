@@ -4,4 +4,21 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="12.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ESFA.DC.DataMatch.ReportService.Model\ESFA.DC.DataMatch.ReportService.Model.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CsvHelper">
+      <HintPath>..\..\..\..\Users\Gayatri\.nuget\packages\csvhelper\12.1.2\lib\netstandard2.0\CsvHelper.dll</HintPath>
+    </Reference>
+    <Reference Include="ESFA.DC.IO.AzureStorage">
+      <HintPath>..\..\..\..\Users\Gayatri\.nuget\packages\esfa.dc.io.azurestorage\0.1.19-beta0001\lib\netstandard2.0\ESFA.DC.IO.AzureStorage.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

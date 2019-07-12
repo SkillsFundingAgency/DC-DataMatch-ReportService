@@ -1,8 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Fabric;
+using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
+using Autofac.Integration.ServiceFabric;
+using ESFA.DC.DataMatch.ReportService.Service;
+using ESFA.DC.DataMatch.ReportService.Stateless.Configuration;
+using ESFA.DC.ServiceFabric.Common.Config;
+using ESFA.DC.ServiceFabric.Common.Config.Interface;
 using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace ESFA.DC.DataMatch.ReportService.Stateless
@@ -16,22 +24,40 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
         {
             try
             {
-                // The ServiceManifest.XML file defines one or more service type names.
-                // Registering a service maps a service type name to a .NET type.
-                // When Service Fabric creates an instance of this service type,
-                // an instance of the class is created in this host process.
+                IServiceFabricConfigurationService serviceFabricConfigurationService = new ServiceFabricConfigurationService();
 
-                ServiceRuntime.RegisterServiceAsync("ESFA.DC.DataMatch.ReportService.StatelessType",
-                    context => new Stateless(context)).GetAwaiter().GetResult();
+                // License Aspose.Cells
+                SoftwareLicenceSection softwareLicenceSection = serviceFabricConfigurationService.GetConfigSectionAs<SoftwareLicenceSection>(nameof(SoftwareLicenceSection));
+                if (!string.IsNullOrEmpty(softwareLicenceSection.AsposeLicence))
+                {
+                    using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(softwareLicenceSection.AsposeLicence.Replace("&lt;", "<").Replace("&gt;", ">"))))
+                    {
+                        new Aspose.Cells.License().SetLicense(ms);
+                    }
+                }
 
-                ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(Stateless).Name);
+                // Setup Autofac
+                ContainerBuilder builder = DIComposition.BuildContainer(serviceFabricConfigurationService);
 
-                // Prevents this host process from terminating so services keep running.
-                Thread.Sleep(Timeout.Infinite);
+                // Register the Autofac magic for Service Fabric support.
+                builder.RegisterServiceFabricSupport();
+
+                // Register the stateless service.
+                builder.RegisterStatelessService<ServiceFabric.Common.Stateless>("ESFA.DC.DataMatch.ReportService.StatelessType");
+
+                using (var container = builder.Build())
+                {
+                    container.Resolve<EntryPoint>();
+
+                    ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(ServiceFabric.Common.Stateless).Name);
+
+                    // Prevents this host process from terminating so services keep running.
+                    Thread.Sleep(Timeout.Infinite);
+                }
             }
             catch (Exception e)
             {
-                ServiceEventSource.Current.ServiceHostInitializationFailed(e.ToString());
+                ServiceEventSource.Current.ServiceHostInitializationFailed(e + Environment.NewLine + (e.InnerException?.ToString() ?? "No inner exception"));
                 throw;
             }
         }
