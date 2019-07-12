@@ -370,7 +370,7 @@
   <ItemGroup>
     <Compile Include="Configuration\AzureStorageKeyValuePersistenceConfig.cs" />
     <Compile Include="Configuration\AzureStorageOptions.cs" />
-    <Compile Include="Configuration\PeriodEndReportServiceConfiguration.cs" />
+    <Compile Include="Configuration\ReportServiceConfiguration.cs" />
     <Compile Include="Configuration\SoftwareLicenceSection.cs" />
     <Compile Include="Configuration\VersionInfo.cs" />
     <Compile Include="Context\ReportServiceContext.cs" />

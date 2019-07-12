@@ -133,46 +133,22 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
             RegisterReports(containerBuilder);
             RegisterServices(containerBuilder);
             RegisterBuilders(containerBuilder);
-            //RegisterRules(containerBuilder);
-            //RegisterCommands(containerBuilder);
 
             return containerBuilder;
         }
 
         private static void RegisterReports(ContainerBuilder containerBuilder)
         {
-            //containerBuilder.RegisterType<AppsMonthlyPaymentReport>().As<IReport>()
-            //    .WithAttributeFiltering()
-            //    .InstancePerLifetimeScope();
-
             containerBuilder.Register(c => new List<IReport>(c.Resolve<IEnumerable<IReport>>()))
                 .As<IList<IReport>>();
         }
 
         private static void RegisterServices(ContainerBuilder containerBuilder)
         {
-            //containerBuilder.RegisterType<IlrPeriodEndProviderService>().As<IIlrPeriodEndProviderService>()
-            //    .WithAttributeFiltering()
-            //    .InstancePerLifetimeScope();
-
-            //containerBuilder.RegisterType<DASPaymentsProviderService>().As<IDASPaymentsProviderService>()
-            //    .InstancePerLifetimeScope();
-
-            //containerBuilder.RegisterType<LarsProviderService>().As<ILarsProviderService>()
-            //    .InstancePerLifetimeScope();
-
-            //containerBuilder.RegisterType<FM36PeriodEndProviderService>().As<IFM36PeriodEndProviderService>()
-            //    .WithAttributeFiltering()
-            //    .InstancePerLifetimeScope();
-
-            containerBuilder.RegisterType<ValueProvider>().As<IValueProvider>()
-                .InstancePerLifetimeScope();
         }
 
         private static void RegisterBuilders(ContainerBuilder containerBuilder)
         {
-            //containerBuilder.RegisterType<AppsMonthlyPaymentModelBuilder>().As<IAppsMonthlyPaymentModelBuilder>()
-            //    .InstancePerLifetimeScope();
         }
     }
 }
