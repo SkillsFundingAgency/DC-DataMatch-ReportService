@@ -25,35 +25,9 @@
     <!-- Topic Names -->
     <Parameter Name="TopicReports" DefaultValue="Reports" />
     <Parameter Name="TopicReports_TaskGenerateDataMatchReport" DefaultValue="GenerateDataMatchReport" />
-    <!-- DAS Commitments -->
-    <!--
-    <Parameter Name="DasCommitmentsConnectionString" DefaultValue="" />
-    -->
-    <!-- EAS -->
-    <!--
-    <Parameter Name="EasConnectionString" DefaultValue="" />
-    -->
-    <!-- Postcode -->
-    <!--
-    <Parameter Name="PostcodeConnectionString" DefaultValue="" />
-    -->
-    <!-- Large Employer -->
-    <!--
-    <Parameter Name="LargeEmployerConnectionString" DefaultValue="" />
-    -->
-    <!-- Org -->
-    <!--
-    <Parameter Name="OrgConnectionString" DefaultValue="" />-->
-    <!-- Collections Management -->
-    <Parameter Name="DASPaymentsConnectionString" DefaultValue="" />
-    <!-- LARS -->
-    <!--<Parameter Name="LarsConnectionString" DefaultValue="" />
-    -->
-    <!-- FCS -->
-    <!--
-    <Parameter Name="FCSConnectionString" DefaultValue="" />
-    -->
     <!-- DASPayments -->
+    <Parameter Name="DASPaymentsConnectionString" DefaultValue="" />
+    <!-- CollectionsManagement -->
     <Parameter Name="CollectionsManagementConnectionString" DefaultValue="" />
     <!-- ILR Validation Errors -->
     <Parameter Name="IlrValidationErrorsConnectionString" DefaultValue="" />
@@ -67,8 +41,6 @@
       <ConfigOverride Name="Config">
         <Settings>
           <Section Name="StatelessServiceConfiguration">
-            <!--<Parameter Name="LarsConnectionString" Value="[LarsConnectionString]" />-->
-            <!--<Parameter Name="FCSConnectionString" Value="[FCSConnectionString]" />-->
             <Parameter Name="ServiceBusConnectionString" Value="[ServiceBusConnectionString]" />
             <Parameter Name="TopicName" Value="[TopicName]" />
             <Parameter Name="SubscriptionName" Value="[ReportingSubscriptionName]" />
@@ -82,11 +54,6 @@
           </Section>
           <Section Name="ReportServiceConfiguration">
             <Parameter Name="DASPaymentsConnectionString" Value="[DASPaymentsConnectionString]" />
-            <!--<Parameter Name="EasConnectionString" Value="[EasConnectionString]" />
-            <Parameter Name="PostcodeConnectionString" Value="[PostcodeConnectionString]" />
-            <Parameter Name="LargeEmployerConnectionString" Value="[LargeEmployerConnectionString]" />-->
-            <!--<Parameter Name="DasCommitmentsConnectionString" Value="[DasCommitmentsConnectionString]" />-->
-            <!--<Parameter Name="OrgConnectionString" Value="[OrgConnectionString]" />-->
             <Parameter Name="IlrValidationErrorsConnectionString" Value="[IlrValidationErrorsConnectionString]" />
             <Parameter Name="ILRDataStoreConnectionString" Value="[ILRDataStoreConnectionString]" />
             <Parameter Name="ILRDataStoreValidConnectionString" Value="[ILRDataStoreValidConnectionString]" />
