@@ -63,8 +63,9 @@
     <Reference Include="ESFA.DC.Auditing.Interface, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ESFA.DC.Auditing.Interface.0.2.0-beta0001\lib\netstandard2.0\ESFA.DC.Auditing.Interface.dll</HintPath>
     </Reference>
-    <Reference Include="ESFA.DC.DASPayments.EF, Version=0.1.70.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ESFA.DC.DASPayments.EF.0.1.70\lib\netstandard2.0\ESFA.DC.DASPayments.EF.dll</HintPath>
+    <Reference Include="ESFA.DC.DASPayments.EF, Version=0.1.77.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ESFA.DC.DASPayments.EF.0.1.77\lib\netstandard2.0\ESFA.DC.DASPayments.EF.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="ESFA.DC.DateTimeProvider, Version=0.1.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ESFA.DC.DateTimeProvider.0.1.6-beta0001\lib\netstandard2.0\ESFA.DC.DateTimeProvider.dll</HintPath>
@@ -385,7 +386,9 @@
     <None Include="PackageRoot\Config\Settings.xml" />
     <None Include="PackageRoot\ServiceManifest.xml" />
     <None Include="App.config" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ESFA.DC.DataMatch.ReportService.Interface\ESFA.DC.DataMatch.ReportService.Interface.csproj">
