@@ -1,58 +1,41 @@
-﻿using System;
+﻿using ESFA.DC.DataMatch.ReportService.Interface;
+using ESFA.DC.DataMatch.ReportService.Interface.Service;
+using ESFA.DC.DataMatch.ReportService.Service;
+using ESFA.DC.DataMatch.ReportService.Service.Mapper;
+using ESFA.DC.DataMatch.ReportService.Service.Tests.Helpers;
+using ESFA.DC.DataMatch.ReportService.Tests.Models;
+using ESFA.DC.DateTimeProvider.Interface;
+using ESFA.DC.ILR.ReportService.Model.DASPayments;
+using ESFA.DC.IO.Interfaces;
+using ESFA.DC.Logging.Interfaces;
+using FluentAssertions;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ESFA.DC.Data.DAS.Model;
-using ESFA.DC.DataMatch.ReportService.Interface;
-using ESFA.DC.DataMatch.ReportService.Interface.Service;
+using CsvHelper;
+using ESFA.DC.DataMatch.ReportService.Interface.Builders;
+using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
-using ESFA.DC.DataMatch.ReportService.Service;
-using ESFA.DC.DataMatch.ReportService.Service.Comparer;
-using ESFA.DC.DateTimeProvider.Interface;
-using ESFA.DC.ILR1819.DataStore.EF;
-using ESFA.DC.ILR1819.DataStore.EF.Interface;
+using ESFA.DC.DataMatch.ReportService.Service.Builders;
 using ESFA.DC.ILR1819.DataStore.EF.Valid;
-using ESFA.DC.ILR1819.DataStore.EF.Valid.Interface;
-using ESFA.DC.IO.Interfaces;
-using ESFA.DC.Logging.Interfaces;
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 using Xunit;
 
 namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
 {
     public sealed class TestDataMatchReport
     {
+
         [Fact]
         public async Task TestDataMatchReportGeneration()
         {
             string csv = string.Empty;
             DateTime dateTime = DateTime.UtcNow;
             string filename = $"10033670_1_Apprenticeship Data Match Report {dateTime:yyyyMMdd-HHmmss}";
-            long ukPrn = 10033670;
-            string ilr = "ILR-10033670-1819-20180704-120055-03";
-
-            ReportServiceConfiguration dataStoreConfiguration = new DataStoreConfiguration()
-            {
-                ILRDataStoreConnectionString = new TestConfigurationHelper().GetSectionValues<DataStoreConfiguration>("DataStoreSection").ILRDataStoreConnectionString,
-                ILRDataStoreValidConnectionString = new TestConfigurationHelper().GetSectionValues<DataStoreConfiguration>("DataStoreSection").ILRDataStoreValidConnectionString
-            };
-
-
-            IIlr1819ValidContext IlrValidContextFactory()
-            {
-                var options = new DbContextOptionsBuilder<ILR1819_DataStoreEntitiesValid>().UseSqlServer(dataStoreConfiguration.ILRDataStoreValidConnectionString).Options;
-                return new ILR1819_DataStoreEntitiesValid(options);
-            }
-
-            IIlr1819RulebaseContext IlrRulebaseContextFactory()
-            {
-                var options = new DbContextOptionsBuilder<ILR1819_DataStoreEntities>().UseSqlServer(dataStoreConfiguration.ILRDataStoreConnectionString).Options;
-                return new ILR1819_DataStoreEntities(options);
-            }
+            int ukPrn = 10033670;
 
             Mock<IReportServiceContext> reportServiceContextMock = new Mock<IReportServiceContext>();
             reportServiceContextMock.SetupGet(x => x.JobId).Returns(1);
@@ -60,149 +43,142 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
             reportServiceContextMock.SetupGet(x => x.Ukprn).Returns(10033670);
 
             Mock<ILogger> logger = new Mock<ILogger>();
-            Mock<IStreamableKeyValuePersistenceService> storage = new Mock<IStreamableKeyValuePersistenceService>();
-            IFM36ProviderService fm36ProviderService = new FM36FileServiceProvider(logger.Object, MockFileServiceFor("Fm36.json"), jsonSerializationService);
-            Mock<IDasCommitmentsService> dasCommitmentsService = new Mock<IDasCommitmentsService>();
-            Mock<IPeriodProviderService> periodProviderService = new Mock<IPeriodProviderService>();
             Mock<IDateTimeProvider> dateTimeProviderMock = new Mock<IDateTimeProvider>();
+            Mock<IStreamableKeyValuePersistenceService> storage = new Mock<IStreamableKeyValuePersistenceService>();
+            Mock<IDASPaymentsProviderService> dasPaymentProviderMock = new Mock<IDASPaymentsProviderService>();
+            Mock<IValidLearnersService> validLearnersService = new Mock<IValidLearnersService>();
+            Mock<IFM36ProviderService> fm36ProviderServiceMock = new Mock<IFM36ProviderService>();
+            IDataMatchModelBuilder dataMatchModelBuilder = new DataMatchMonthEndModelBuilder();
 
-            List<DasCommitment> dasCommitments = new List<DasCommitment>
-            {
-                new DasCommitment(new DasCommitments
-                {
-                    Uln = 9900001906,
-                    Ukprn = ukPrn,
-                    //StandardCode = 0,
-                    FrameworkCode = 421, // No match - 420
-                    PathwayCode = 2, // No match - 1
-                    ProgrammeType = 3, // No match - 2
-                    AgreedCost = 1.80M, // No match?
-                    StartDate = dateTime, // No match
-                    PaymentStatus = (int)PaymentStatus.Active
-                })
-            };
+            storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>())).Callback<string, string, CancellationToken>((key, value, ct) => csv = value).Returns(Task.CompletedTask);
+
+
+            var ilrModel = BuildILRModel(ukPrn);
+            var dataMatchRulebaseInfo = BuildFm36Model(ukPrn);
+            var dasApprenticeshipInfo = BuildDasApprenticeshipInfo(ukPrn);
+
 
             storage.Setup(x => x.ContainsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
             storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>())).Callback<string, string, CancellationToken>((key, value, ct) => csv = value).Returns(Task.CompletedTask);
-            storage.Setup(x => x.GetAsync("FundingFm36Output", It.IsAny<CancellationToken>())).ReturnsAsync(File.ReadAllText("Fm36.json"));
-            dasCommitmentsService
-                .Setup(x => x.GetCommitments(It.IsAny<long>(), It.IsAny<List<long>>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(dasCommitments);
+
+            validLearnersService.Setup(x => x.GetLearnersAsync(reportServiceContextMock.Object, It.IsAny<CancellationToken>())).ReturnsAsync(ilrModel);
+            fm36ProviderServiceMock.Setup(x => x.GetFM36DataForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>())).ReturnsAsync(dataMatchRulebaseInfo);
+            dasPaymentProviderMock.Setup(x => x.GetApprenticeshipsInfoAsync(It.IsAny<long>(), It.IsAny<CancellationToken>())).ReturnsAsync(dasApprenticeshipInfo);
             dateTimeProviderMock.Setup(x => x.GetNowUtc()).Returns(dateTime);
             dateTimeProviderMock.Setup(x => x.ConvertUtcToUk(It.IsAny<DateTime>())).Returns(dateTime);
-            periodProviderService.Setup(x => x.MonthFromPeriod(It.IsAny<int>())).Returns(1);
-
-            IValueProvider valueProvider = new ValueProvider();
-            IValidationStageOutputCache validationStageOutputCache = new ValidationStageOutputCache();
-            IDatalockValidationResultBuilder datalockValidationResultBuilder = new DatalockValidationResultBuilder();
-            ITotalBuilder totalBuilder = new TotalBuilder();
 
             var report = new DataMatchReport(
                 logger.Object,
-                fm36ProviderService,
-                dasCommitmentsService.Object,
-                periodProviderService.Object,
+                dasPaymentProviderMock.Object,
+                validLearnersService.Object,
+                fm36ProviderServiceMock.Object,
                 storage.Object,
-                dateTimeProviderMock.Object,
-                valueProvider,
-                validationStageOutputCache,
-                datalockValidationResultBuilder,
-                totalBuilder);
+                dataMatchModelBuilder,
+                dateTimeProviderMock.Object);
 
             await report.GenerateReport(reportServiceContextMock.Object, null, false, CancellationToken.None);
 
             csv.Should().NotBeNullOrEmpty();
-            TestCsvHelper.CheckCsv(csv, new CsvEntry(new DataMatchReportMapper(), 1));
+            File.WriteAllText($"{filename}.csv", csv);
+            IEnumerable<DataMatchModel> result;
+            TestCsvHelper.CheckCsv(csv, new CsvEntry(new DataMatchMapper(), 1));
+            using (var reader = new StreamReader($"{filename}.csv"))
+            {
+                using (var csvReader = new CsvReader(reader))
+                {
+                    csvReader.Configuration.RegisterClassMap<DataMatchMapper>();
+                    result = csvReader.GetRecords<DataMatchModel>().ToList();
+                }
+            }
+
+            result.Should().NotBeNullOrEmpty();
+            result.Count().Should().Be(1);
         }
 
-        [Fact]
-        public async Task TestDataCommitmentsComparer()
+        private DataMatchRulebaseInfo BuildFm36Model(int ukPrn)
         {
-            List<DasCommitments> dasCommitments = new List<DasCommitments>
+            return new DataMatchRulebaseInfo()
             {
-                new DasCommitments
+                UkPrn = ukPrn,
+                LearnRefNumber = "9900000306",
+                AECApprenticeshipPriceEpisodes = new List<AECApprenticeshipPriceEpisodeInfo>()
                 {
-                    CommitmentId = 1,
-                    VersionId = "2"
-                },
-                new DasCommitments
-                {
-                    CommitmentId = 1,
-                    VersionId = "2"
+                    new AECApprenticeshipPriceEpisodeInfo()
+                    {
+                        LearnRefNumber = "9900000306",
+                        PriceEpisodeAgreeId = "PA101",
+                        EpisodeStartDate = new DateTime(2019, 06, 28),
+                        PriceEpisodeActualEndDate = new DateTime(2020, 06, 28),
+                    }
                 }
             };
-
-            dasCommitments = dasCommitments.Distinct(new DasCommitmentsComparer()).ToList();
-            Assert.Single(dasCommitments);
         }
 
-        [Fact]
-        public async Task TestDataMatchModelComparer1()
+        private List<Learner> BuildILRModel(int ukPrn)
         {
-            List<DataMatchModel> dataMatchModels = new List<DataMatchModel>
+            return new List<Learner>()
             {
-                new DataMatchModel
+                new Learner()
                 {
-                    LearnRefNumber = "321",
-                    AimSeqNumber = 321,
-                    RuleName = "Rule_2"
-                },
-                new DataMatchModel
-                {
-                    LearnRefNumber = "123",
-                    AimSeqNumber = 123,
-                    RuleName = "Rule_1"
+                    UKPRN = ukPrn,
+                    LearnRefNumber = "9900000306",
+                    ULN = 9900000111,
+                    LearningDeliveries = new List<LearningDelivery>()
+                    {
+                        new LearningDelivery()
+                        {
+                            LearnRefNumber = "9900000306",
+                            LearnAimRef = "50117889",
+                            AimSeqNumber = 1,
+                            FundModel = 36,
+                            ProgType = 3,
+                            StdCode = 12, // MisMatch
+                            FworkCode = 421,
+                            PwayCode = 2,
+                            LearningDeliveryFAMs = new List<LearningDeliveryFAM>()
+                            {
+                                new LearningDeliveryFAM()
+                                {
+                                    LearnDelFAMType =  "ACT",
+                                    LearnDelFAMCode = "1"
+                                }
+                            }
+                        }
+                    }
                 }
             };
-
-            dataMatchModels.Sort(new DataMatchModelComparer());
-            Assert.Equal("123", dataMatchModels[0].LearnRefNumber);
         }
 
-        [Fact]
-        public async Task TestDataMatchModelComparer2()
+
+        private List<DasApprenticeshipInfo> BuildDasApprenticeshipInfo(int ukPrn)
         {
-            List<DataMatchModel> dataMatchModels = new List<DataMatchModel>
+            return new List<DasApprenticeshipInfo>()
             {
-                new DataMatchModel
+                new DasApprenticeshipInfo()
                 {
-                    LearnRefNumber = "321",
-                    AimSeqNumber = 321,
-                    RuleName = "Rule_2"
-                },
-                new DataMatchModel
-                {
-                    LearnRefNumber = "321",
-                    AimSeqNumber = 123,
-                    RuleName = "Rule_1"
+                    UkPrn = 10000093,
+                    LearnerReferenceNumber = "9900000306",
+                    Uln = 9900000111,
+                    ApprenticeshipId = 114656,
+                    AgreementId = "YZ2V7Y",
+                    AimSequenceNumber = 1,
+                    AgreedOnDate = new DateTime(2017, 06, 28),
+                    EstimatedStartDate = new DateTime(2017, 06, 30),
+                    EstimatedEndDate = new DateTime(2018, 07, 30),
+                    StandardCode = 0,
+                    FrameworkCode = 421, // No match - 420
+                    PathwayCode = 2, // No match - 1
+                    ProgrammeType = 3, // No match - 2
+                    Cost = 1.80M,
+                    StopDate = new DateTime(2018, 05, 30),
+                    RuleId = 3,
+                    PauseDate = new DateTime(2018, 04, 30),
+                    LegalEntityName = "LegalEntityName",
+                    AppreticeshipServiceValue = "3"
                 }
-            };
+        };
 
-            dataMatchModels.Sort(new DataMatchModelComparer());
-            Assert.Equal(123, dataMatchModels[0].AimSeqNumber);
-        }
 
-        [Fact]
-        public async Task TestDataMatchModelComparer3()
-        {
-            List<DataMatchModel> dataMatchModels = new List<DataMatchModel>
-            {
-                new DataMatchModel
-                {
-                    LearnRefNumber = "321",
-                    AimSeqNumber = 321,
-                    RuleName = "Rule_2"
-                },
-                new DataMatchModel
-                {
-                    LearnRefNumber = "321",
-                    AimSeqNumber = 321,
-                    RuleName = "Rule_1"
-                }
-            };
-
-            dataMatchModels.Sort(new DataMatchModelComparer());
-            Assert.Equal("Rule_1", dataMatchModels[0].RuleName);
         }
     }
 }

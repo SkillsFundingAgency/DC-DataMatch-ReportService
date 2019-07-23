@@ -4,7 +4,7 @@ namespace ESFA.DC.ILR.ReportService.Model.DASPayments
 {
     public sealed class DasApprenticeshipInfo
     {
-        public long AppreticeshipId { get; set; }
+        public long ApprenticeshipId { get; set; }
         public string AgreementId { get; set; }
         public DateTime AgreedOnDate { get; set; }
         public long Uln { get; set; }

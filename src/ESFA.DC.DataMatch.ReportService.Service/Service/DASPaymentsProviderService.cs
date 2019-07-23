@@ -38,7 +38,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                         where a.Ukprn == ukPrn
                         select new DasApprenticeshipInfo()
                         {
-                            AppreticeshipId = a.Id,
+                            ApprenticeshipId = a.Id,
                             AgreementId = a.AgreementId,
                             AgreedOnDate = a.AgreedOnDate,
                             Uln = a.Uln,

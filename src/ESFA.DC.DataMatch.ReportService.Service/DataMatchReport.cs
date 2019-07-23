@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CsvHelper;
 using ESFA.DC.DataMatch.ReportService.Interface;
+using ESFA.DC.DataMatch.ReportService.Interface.Builders;
 using ESFA.DC.DataMatch.ReportService.Interface.Reports;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
@@ -26,8 +27,8 @@ namespace ESFA.DC.DataMatch.ReportService.Service
         private readonly IDASPaymentsProviderService _dasPaymentsProviderService;
         private readonly IValidLearnersService _validLearnersService;
         private readonly IFM36ProviderService _fm36ProviderService;
+        private readonly IDataMatchModelBuilder _dataMatchModelBuilder;
 
-        private readonly DataMatchMonthEndModelBuilder _dataMatchMonthEndModelBuilder;
         private static readonly DataMatchModelComparer DataMatchModelComparer = new DataMatchModelComparer();
 
         public DataMatchReport(
@@ -36,12 +37,14 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             IValidLearnersService validLearnersService,
             IFM36ProviderService fm36ProviderService,
             IStreamableKeyValuePersistenceService streamableKeyValuePersistenceService,
+            IDataMatchModelBuilder dataMatchModelBuilder,
             IDateTimeProvider dateTimeProvider)
             : base(dateTimeProvider, streamableKeyValuePersistenceService, logger)
         {
             _dasPaymentsProviderService = dasPaymentsProviderService;
             _validLearnersService = validLearnersService;
             _fm36ProviderService = fm36ProviderService;
+            _dataMatchModelBuilder = dataMatchModelBuilder;
         }
 
         public override string ReportFileName => "Apprenticeship Data Match Report";
@@ -80,7 +83,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
                         dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.FirstOrDefault(x =>
                             x.LearnRefNumber == learningDelivery.LearnRefNumber);
 
-                    var model = _dataMatchMonthEndModelBuilder.BuildModel(dasApprenticeshipInfo, aecApprenticeshipPriceEpisodeInfo, learningDelivery);
+                    var model = _dataMatchModelBuilder.BuildModel(dasApprenticeshipInfo, aecApprenticeshipPriceEpisodeInfo, learningDelivery);
                     dataMatchModels.Add(model);
                 }
             }
