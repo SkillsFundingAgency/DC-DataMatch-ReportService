@@ -16,12 +16,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
     public class TestDataMatchModelBuilder
     {
         [Theory]
-        [InlineData(11111, 1111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 3, 4, 4, DataLockValidationMessages.DLOCK_01)]
-        [InlineData(11111, 11111, "9900000306", 9900000111, 9900000112, 1, 1, 2, 2, 3, 3, 4, 4, DataLockValidationMessages.DLOCK_02)]
-        [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 0, 2, 2, 3, 3, 4, 4, DataLockValidationMessages.DLOCK_03)]
-        [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 0, 3, 3, 4, 4, DataLockValidationMessages.DLOCK_04)]
-        [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 0, 4, 4, DataLockValidationMessages.DLOCK_05)]
-        [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 3, 4, 0, DataLockValidationMessages.DLOCK_06)]
+        [InlineData(11111, 1111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 3, 4, 4, DataLockValidationMessages.DLOCK_01, "11111", "1111")]
+        [InlineData(11111, 11111, "9900000306", 9900000111, 9900000112, 1, 1, 2, 2, 3, 3, 4, 4, DataLockValidationMessages.DLOCK_02, "9900000111", "")]
+        [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 0, 2, 2, 3, 3, 4, 4, DataLockValidationMessages.DLOCK_03, "1", "0")]
+        [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 0, 3, 3, 4, 4, DataLockValidationMessages.DLOCK_04, "2", "0")]
+        [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 0, 4, 4, DataLockValidationMessages.DLOCK_05, "3", "0")]
+        [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 3, 4, 0, DataLockValidationMessages.DLOCK_06, "4", "0")]
         public void VerifyDataMatchModelBuilder(
             int ilrukPrn, int dasUkPrn,
             string learnRefNumber,
@@ -30,7 +30,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             int ilrFworkCode, int dasFworkCode,
             int ilrProgType, int dasProgType,
             int ilrPwayCode, int dasPwayCode,
-            string expectedErrorCode)
+            string expectedErrorCode, string expectedIlrValue = "", string expectedApprenticeshipValue = "")
         {
             var dataMatchModelBuilder = new DataMatchMonthEndModelBuilder();
             var learnersList = BuildBasicILRModelForTests(ilrukPrn, learnRefNumber, ilrUln, ilrProgType, ilrStdCode, ilrFworkCode, ilrPwayCode);
@@ -42,6 +42,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             result.Should().NotBeNullOrEmpty();
             result.Count().Should().Be(1);
             result.First().RuleName.Should().Be(expectedErrorCode);
+
+            result.First().AimSeqNumber.Should().Be(1);
+            result.First().ILRValue.Should().Be(expectedIlrValue);
+            result.First().ApprenticeshipServiceValue.Should().Be(expectedApprenticeshipValue);
         }
 
         private DataMatchRulebaseInfo BuildBasicFmModelForTests(int ukPrn, string learnRefNumber)
