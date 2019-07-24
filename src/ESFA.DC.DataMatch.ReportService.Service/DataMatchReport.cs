@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,11 +11,9 @@ using ESFA.DC.DataMatch.ReportService.Interface.Reports;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 using ESFA.DC.DataMatch.ReportService.Service.Abstract;
-using ESFA.DC.DataMatch.ReportService.Service.Builders;
 using ESFA.DC.DataMatch.ReportService.Service.Comparer;
 using ESFA.DC.DataMatch.ReportService.Service.Mapper;
 using ESFA.DC.DateTimeProvider.Interface;
-using ESFA.DC.ILR1819.DataStore.EF.Valid;
 using ESFA.DC.IO.Interfaces;
 using ESFA.DC.Logging.Interfaces;
 

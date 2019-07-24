@@ -8,11 +8,6 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Builders
 {
     public interface IDataMatchModelBuilder
     {
-        DataMatchModel BuildModel(
-            DasApprenticeshipInfo dasApprenticeshipInfo,
-            AECApprenticeshipPriceEpisodeInfo dataMatchRulebaseInfo,
-            LearningDelivery learningDelivery);
-
         List<DataMatchModel> BuildModels(List<Learner> validIlrLearners, List<DasApprenticeshipInfo> dasApprenticeshipInfos, DataMatchRulebaseInfo dataMatchRulebaseInfo);
     }
 }

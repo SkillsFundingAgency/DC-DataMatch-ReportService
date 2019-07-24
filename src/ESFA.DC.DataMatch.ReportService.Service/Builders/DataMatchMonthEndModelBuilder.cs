@@ -14,30 +14,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 {
     public class DataMatchMonthEndModelBuilder : IDataMatchModelBuilder
     {
-        public DataMatchModel BuildModel(
-            DasApprenticeshipInfo dasApprenticeshipInfo,
-            AECApprenticeshipPriceEpisodeInfo aecApprenticeshipPriceEpisodeInfo,
-            LearningDelivery learningDelivery)
-        {
-            var model = new DataMatchModel()
-            {
-                LearnRefNumber = dasApprenticeshipInfo.LearnerReferenceNumber,
-                Uln = dasApprenticeshipInfo.Uln,
-                AimSeqNumber = dasApprenticeshipInfo.AimSequenceNumber,
-                RuleName = dasApprenticeshipInfo.RuleId.ToString(), //todo: this should be DATALOCK_01 etc, whereas in daspayments, it's defined as a tinyint
-                Description = DataLockValidationMessages.Validations.FirstOrDefault(x => x.RuleId == dasApprenticeshipInfo.RuleId.ToString())?.ErrorMessage,
-                PriceEpisodeStartDate = aecApprenticeshipPriceEpisodeInfo.EpisodeStartDate,
-                PriceEpisodeActualEndDate = aecApprenticeshipPriceEpisodeInfo.PriceEpisodeActualEndDate,
-                PriceEpisodeIdentifier = aecApprenticeshipPriceEpisodeInfo.PriceEpisodeAgreeId,
-                LegalEntityName = dasApprenticeshipInfo.LegalEntityName,
-                OfficialSensitive = "N/A",
-                //ILRValue = GetIlrValue(dasApprenticeshipInfo.RuleId.ToString(), learningDelivery, dasApprenticeshipInfo.Uln),
-                ApprenticeshipServiceValue = dasApprenticeshipInfo.AppreticeshipServiceValue
-            };
-
-            return model;
-        }
-
         public List<DataMatchModel> BuildModels(List<Learner> validIlrLearners,
             List<DasApprenticeshipInfo> dasApprenticeshipInfos, DataMatchRulebaseInfo dataMatchRulebaseInfo)
         {

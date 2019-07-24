@@ -94,7 +94,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
             result.Should().NotBeNullOrEmpty();
             result.Count().Should().Be(1);
         }
-
+  
         private DataMatchRulebaseInfo BuildFm36Model(int ukPrn)
         {
             return new DataMatchRulebaseInfo()
@@ -149,7 +149,6 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                 }
             };
         }
-
 
         private List<DasApprenticeshipInfo> BuildDasApprenticeshipInfo(int ukPrn)
         {
