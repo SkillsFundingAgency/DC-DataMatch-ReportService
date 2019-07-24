@@ -1,4 +1,5 @@
 ﻿using System;
+using ESFA.DC.DataMatch.ReportService.Model.DasPaymenets;
 
 namespace ESFA.DC.ILR.ReportService.Model.DASPayments
 {
@@ -23,5 +24,8 @@ namespace ESFA.DC.ILR.ReportService.Model.DASPayments
         public DateTime PauseDate { get; set; }
         public string LegalEntityName { get; set; }
         public string AppreticeshipServiceValue { get; set; }
+
+        public DateTime? EffectiveFromDate { get; set; }
+        public int PaymentStatus { get; set; }
     }
 }

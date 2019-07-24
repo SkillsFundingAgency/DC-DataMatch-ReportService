@@ -67,27 +67,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             var dataMatchRulebaseInfo = dataMatchRulebaseInfoTask.Result;
 
             cancellationToken.ThrowIfCancellationRequested();
-            var dataMatchModels = new List<DataMatchModel>();
-            foreach (var learner in validIlrLearners)
-            {
-                foreach (var learningDelivery in learner.LearningDeliveries)
-                {
-                    if (!ValidLearningDelivery(learningDelivery))
-                    {
-                        continue;
-                    }
-
-                    var dasApprenticeshipInfo = dasApprenticeshipInfos.FirstOrDefault(x => x.Uln == learner.ULN);
-
-                    var aecApprenticeshipPriceEpisodeInfo =
-                        dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.FirstOrDefault(x =>
-                            x.LearnRefNumber == learningDelivery.LearnRefNumber);
-
-                    var model = _dataMatchModelBuilder.BuildModel(dasApprenticeshipInfo, aecApprenticeshipPriceEpisodeInfo, learningDelivery);
-                    dataMatchModels.Add(model);
-                }
-            }
-
+            var dataMatchModels = _dataMatchModelBuilder.BuildModels(validIlrLearners, dasApprenticeshipInfos, dataMatchRulebaseInfo);
             dataMatchModels.Sort(DataMatchModelComparer);
 
             var externalFileName = GetFilename(reportServiceContext);
@@ -95,13 +75,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             string csv = WriteResults(dataMatchModels);
             await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
             await WriteZipEntry(archive, $"{fileName}.csv", csv);
-        }
-
-        private bool ValidLearningDelivery(LearningDelivery learningDelivery)
-        {
-            return learningDelivery.FundModel == 36 &&
-                   learningDelivery.LearningDeliveryFAMs.Any(
-                       x => x.LearnDelFAMType == "ACT" && x.LearnDelFAMCode == "1");
         }
 
         private string WriteResults(IReadOnlyCollection<DataMatchModel> models)

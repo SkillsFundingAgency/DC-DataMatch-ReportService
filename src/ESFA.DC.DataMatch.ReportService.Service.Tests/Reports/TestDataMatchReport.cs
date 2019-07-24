@@ -106,9 +106,10 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                     new AECApprenticeshipPriceEpisodeInfo()
                     {
                         LearnRefNumber = "9900000306",
-                        PriceEpisodeAgreeId = "PA101",
+                        PriceEpisodeAgreeId = "YZ2V7Y",
                         EpisodeStartDate = new DateTime(2019, 06, 28),
                         PriceEpisodeActualEndDate = new DateTime(2020, 06, 28),
+                        UkPrn = ukPrn
                     }
                 }
             };
@@ -132,7 +133,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                             AimSeqNumber = 1,
                             FundModel = 36,
                             ProgType = 3,
-                            StdCode = 12, // MisMatch
+                            StdCode = 0,
                             FworkCode = 421,
                             PwayCode = 2,
                             LearningDeliveryFAMs = new List<LearningDeliveryFAM>()
@@ -156,7 +157,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
             {
                 new DasApprenticeshipInfo()
                 {
-                    UkPrn = 10000093,
+                    UkPrn = ukPrn,
                     LearnerReferenceNumber = "9900000306",
                     Uln = 9900000111,
                     ApprenticeshipId = 114656,
@@ -166,7 +167,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                     EstimatedStartDate = new DateTime(2017, 06, 30),
                     EstimatedEndDate = new DateTime(2018, 07, 30),
                     StandardCode = 0,
-                    FrameworkCode = 421, // No match - 420
+                    FrameworkCode = 420, // No match - 420
                     PathwayCode = 2, // No match - 1
                     ProgrammeType = 3, // No match - 2
                     Cost = 1.80M,
@@ -176,9 +177,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                     LegalEntityName = "LegalEntityName",
                     AppreticeshipServiceValue = "3"
                 }
-        };
-
-
+            };
         }
     }
 }

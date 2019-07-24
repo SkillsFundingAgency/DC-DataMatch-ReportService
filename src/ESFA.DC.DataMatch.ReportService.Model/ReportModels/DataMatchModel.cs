@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ESFA.DC.DataMatch.ReportService.Model.ReportModels
 {
@@ -27,5 +28,7 @@ namespace ESFA.DC.DataMatch.ReportService.Model.ReportModels
         public string PriceEpisodeIdentifier { get; set; }
 
         public string LegalEntityName { get; set; }
+
+        public DataMatchErrorValues DataMatchErrorValues { get; set; }
     }
 }

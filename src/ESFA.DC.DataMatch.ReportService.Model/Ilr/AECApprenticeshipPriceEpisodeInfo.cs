@@ -15,6 +15,8 @@ namespace ESFA.DC.DataMatch.ReportService.Model.Ilr
         public DateTime? PriceEpisodeActualEndDate { get; set; }
 
         public string PriceEpisodeAgreeId { get; set; }
+
+        public DateTime? EffectiveTnpStartDate { get; set; }
         
     }
 }

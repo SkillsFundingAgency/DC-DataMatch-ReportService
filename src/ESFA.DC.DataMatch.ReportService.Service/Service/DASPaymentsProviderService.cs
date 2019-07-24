@@ -35,6 +35,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                             equals dlenpp.DataLockEventNonPayablePeriodId
                         join dle in context.DataLockEvents on dlenpp.DataLockEventId equals dle.EventId
                         join ee in context.EarningEvents on dle.EarningEventId equals ee.EventId
+                        join eepe in context.EarningEventPriceEpisodes on ee.EventId equals eepe.EarningEventId
                         where a.Ukprn == ukPrn
                         select new DasApprenticeshipInfo()
                         {
@@ -55,7 +56,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                             Cost = ape.Cost,
                             RuleId = dlenppf.DataLockFailureId,
                             LearnerReferenceNumber = dle.LearnerReferenceNumber,
-                            AimSequenceNumber = ee.LearningAimSequenceNumber
+                            AimSequenceNumber = ee.LearningAimSequenceNumber,
+                            EffectiveFromDate = eepe.StartDate,
+                            PaymentStatus = a.Status
                         }).ToListAsync(cancellationToken);
 
                 return apprenticeshipsData;

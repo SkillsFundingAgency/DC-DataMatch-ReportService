@@ -40,7 +40,8 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                         LearnRefNumber = pe.LearnRefNumber,
                         PriceEpisodeActualEndDate = pe.PriceEpisodeActualEndDate,
                         PriceEpisodeAgreeId = pe.PriceEpisodeAgreeId,
-                        EpisodeStartDate =  pe.EpisodeStartDate
+                        EpisodeStartDate =  pe.EpisodeStartDate,
+                        EffectiveTnpStartDate = pe.EpisodeEffectiveTNPStartDate
                     }).ToListAsync(cancellationToken);
                 appsMonthlyPaymentRulebaseInfo.AECApprenticeshipPriceEpisodes.AddRange(aecApprenticeshipPriceEpisodeInfos);
             }
