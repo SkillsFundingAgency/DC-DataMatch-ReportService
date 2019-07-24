@@ -5,6 +5,7 @@ using ESFA.DC.DataMatch.ReportService.Interface.Builders;
 using ESFA.DC.DataMatch.ReportService.Model.DasPaymenets;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
+using ESFA.DC.DataMatch.ReportService.Service.Extensions;
 using ESFA.DC.DataMatch.ReportService.Service.ReferenceData;
 using ESFA.DC.DASPayments.EF;
 using ESFA.DC.ILR.ReportService.Model.DASPayments;
@@ -14,8 +15,8 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 {
     public class DataMatchMonthEndModelBuilder : IDataMatchModelBuilder
     {
-        public List<DataMatchModel> BuildModels(List<Learner> validIlrLearners,
-            List<DasApprenticeshipInfo> dasApprenticeshipInfos, DataMatchRulebaseInfo dataMatchRulebaseInfo)
+        public IEnumerable<DataMatchModel> BuildModels(IEnumerable<Learner> validIlrLearners,
+            IEnumerable<DasApprenticeshipInfo> dasApprenticeshipInfos, DataMatchRulebaseInfo dataMatchRulebaseInfo)
         {
             var populatedDataMatchModels = new List<DataMatchModel>();
             foreach (var learner in validIlrLearners)
@@ -28,13 +29,13 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                     }
                     
                     var matchedAecApprenticeshipPriceEpisodeInfo =
-                        dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.Where(x => x.LearnRefNumber == learningDelivery.LearnRefNumber);
+                        dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.Where(x => x.LearnRefNumber.CaseInsensitiveEquals(learningDelivery.LearnRefNumber));
 
                     foreach (var aecApprenticeshipPriceEpisode in matchedAecApprenticeshipPriceEpisodeInfo)
                     {
                         var matchedDasApprenticeshipInfoAgainstAgreementId =
                             dasApprenticeshipInfos.FirstOrDefault(x =>
-                                x.AgreementId == aecApprenticeshipPriceEpisode.PriceEpisodeAgreeId);
+                                x.AgreementId.CaseInsensitiveEquals(aecApprenticeshipPriceEpisode.PriceEpisodeAgreeId));
 
                         var dasApprenticeshipInfoToMatch =
                             dasApprenticeshipInfos.Where(x => x.UkPrn == aecApprenticeshipPriceEpisode.UkPrn);
@@ -155,7 +156,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                         {
                             var model = PopuDataMatchModel(DataLockValidationMessages.DLOCK_10, aecApprenticeshipPriceEpisode,
                                 matchedDasApprenticeshipInfoAgainstAgreementId,
-                                "",
+                                string.Empty,
                                 withdrawnApprenticeships.FirstOrDefault(x => x.LearnerReferenceNumber == learningDelivery.LearnRefNumber)?.StopDate.ToString());
                             populatedDataMatchModels.Add(model);
                             continue;
@@ -166,7 +167,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                         {
                             var model = PopuDataMatchModel(DataLockValidationMessages.DLOCK_12, aecApprenticeshipPriceEpisode,
                                 matchedDasApprenticeshipInfoAgainstAgreementId,
-                                "",
+                                string.Empty,
                                 pausedApprenticeships.FirstOrDefault(x => x.LearnerReferenceNumber == learningDelivery.LearnRefNumber)?.StopDate.ToString());
                             populatedDataMatchModels.Add(model);
                             continue;

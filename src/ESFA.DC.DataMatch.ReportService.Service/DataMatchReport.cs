@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,8 +65,8 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             var dataMatchRulebaseInfo = dataMatchRulebaseInfoTask.Result;
 
             cancellationToken.ThrowIfCancellationRequested();
-            var dataMatchModels = _dataMatchModelBuilder.BuildModels(validIlrLearners, dasApprenticeshipInfos, dataMatchRulebaseInfo);
-            dataMatchModels.Sort(DataMatchModelComparer);
+            var dataMatchModels = _dataMatchModelBuilder.BuildModels(validIlrLearners, dasApprenticeshipInfos, dataMatchRulebaseInfo)?.ToList();
+            dataMatchModels?.Sort(DataMatchModelComparer);
 
             var externalFileName = GetFilename(reportServiceContext);
             var fileName = GetZipFilename(reportServiceContext);

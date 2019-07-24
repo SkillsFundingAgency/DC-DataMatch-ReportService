@@ -10,6 +10,6 @@ namespace ESFA.DC.DataMatch.ReportService.Model.Ilr
 
         public string LearnRefNumber { get; set; }
 
-        public List<AECApprenticeshipPriceEpisodeInfo> AECApprenticeshipPriceEpisodes { get; set; }
+        public IEnumerable<AECApprenticeshipPriceEpisodeInfo> AECApprenticeshipPriceEpisodes { get; set; }
     }
 }

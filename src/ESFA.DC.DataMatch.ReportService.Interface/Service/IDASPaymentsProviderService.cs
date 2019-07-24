@@ -8,6 +8,6 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Service
 {
     public interface IDASPaymentsProviderService
     {
-        Task<List<DasApprenticeshipInfo>> GetApprenticeshipsInfoAsync(long ukPrn, CancellationToken cancellationToken);
+        Task<IEnumerable<DasApprenticeshipInfo>> GetApprenticeshipsInfoAsync(long ukPrn, CancellationToken cancellationToken);
     }
 }

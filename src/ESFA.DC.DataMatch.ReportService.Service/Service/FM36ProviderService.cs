@@ -43,7 +43,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                         EpisodeStartDate =  pe.EpisodeStartDate,
                         EffectiveTnpStartDate = pe.EpisodeEffectiveTNPStartDate
                     }).ToListAsync(cancellationToken);
-                appsMonthlyPaymentRulebaseInfo.AECApprenticeshipPriceEpisodes.AddRange(aecApprenticeshipPriceEpisodeInfos);
+                appsMonthlyPaymentRulebaseInfo.AECApprenticeshipPriceEpisodes?.ToList().AddRange(aecApprenticeshipPriceEpisodeInfos);
             }
 
             return appsMonthlyPaymentRulebaseInfo;

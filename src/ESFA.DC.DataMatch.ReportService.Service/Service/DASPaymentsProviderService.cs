@@ -19,7 +19,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             _dasPaymentsContextFactory = dasPaymentsContextFactory;
         }
 
-        public async Task<List<DasApprenticeshipInfo>> GetApprenticeshipsInfoAsync(long ukPrn, CancellationToken cancellationToken)
+        public async Task<IEnumerable<DasApprenticeshipInfo>> GetApprenticeshipsInfoAsync(long ukPrn, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 

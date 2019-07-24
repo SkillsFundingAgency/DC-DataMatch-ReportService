@@ -39,7 +39,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             _jsonSerializationService = jsonSerializationService;
         }
 
-        public async Task<List<Learner>> GetLearnersAsync(IReportServiceContext reportServiceContext, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Learner>> GetLearnersAsync(IReportServiceContext reportServiceContext, CancellationToken cancellationToken)
         {
             await _getDataLock.WaitAsync(cancellationToken);
 
