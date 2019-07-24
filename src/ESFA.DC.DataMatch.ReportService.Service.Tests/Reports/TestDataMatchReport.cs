@@ -1,34 +1,33 @@
-﻿using ESFA.DC.DataMatch.ReportService.Interface;
-using ESFA.DC.DataMatch.ReportService.Interface.Service;
-using ESFA.DC.DataMatch.ReportService.Service;
-using ESFA.DC.DataMatch.ReportService.Service.Mapper;
-using ESFA.DC.DataMatch.ReportService.Service.Tests.Helpers;
-using ESFA.DC.DataMatch.ReportService.Tests.Models;
-using ESFA.DC.DateTimeProvider.Interface;
-using ESFA.DC.ILR.ReportService.Model.DASPayments;
-using ESFA.DC.IO.Interfaces;
-using ESFA.DC.Logging.Interfaces;
-using FluentAssertions;
-using Moq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CsvHelper;
+using ESFA.DC.DataMatch.ReportService.Interface;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
+using ESFA.DC.DataMatch.ReportService.Interface.Service;
+using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
+using ESFA.DC.DataMatch.ReportService.Service;
 using ESFA.DC.DataMatch.ReportService.Service.Builders;
+using ESFA.DC.DataMatch.ReportService.Service.Mapper;
+using ESFA.DC.DataMatch.ReportService.Service.Tests.Helpers;
+using ESFA.DC.DataMatch.ReportService.Tests.Models;
+using ESFA.DC.DateTimeProvider.Interface;
 using ESFA.DC.ILR1819.DataStore.EF.Valid;
+using ESFA.DC.IO.Interfaces;
+using ESFA.DC.Logging.Interfaces;
+using FluentAssertions;
+using Moq;
 using Xunit;
 
 namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
 {
     public sealed class TestDataMatchReport
     {
-
         [Fact]
         public async Task TestDataMatchReportGeneration()
         {
@@ -52,11 +51,9 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
 
             storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>())).Callback<string, string, CancellationToken>((key, value, ct) => csv = value).Returns(Task.CompletedTask);
 
-
             var ilrModel = BuildILRModel(ukPrn);
             var dataMatchRulebaseInfo = BuildFm36Model(ukPrn);
             var dasApprenticeshipInfo = BuildDasApprenticeshipInfo(ukPrn);
-
 
             storage.Setup(x => x.ContainsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
             storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>())).Callback<string, string, CancellationToken>((key, value, ct) => csv = value).Returns(Task.CompletedTask);
@@ -94,7 +91,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
             result.Should().NotBeNullOrEmpty();
             result.Count().Should().Be(1);
         }
-  
+
         private DataMatchRulebaseInfo BuildFm36Model(int ukPrn)
         {
             return new DataMatchRulebaseInfo()
@@ -140,13 +137,13 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                             {
                                 new LearningDeliveryFAM()
                                 {
-                                    LearnDelFAMType =  "ACT",
-                                    LearnDelFAMCode = "1"
-                                }
-                            }
-                        }
-                    }
-                }
+                                    LearnDelFAMType = "ACT",
+                                    LearnDelFAMCode = "1",
+                                },
+                            },
+                        },
+                    },
+                },
             };
         }
 

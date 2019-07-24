@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ESFA.DC.ILR.ReportService.Model.DASPayments
+namespace ESFA.DC.DataMatch.ReportService.Model.DASPayments
 {
     public sealed class DasApprenticeshipInfo
     {

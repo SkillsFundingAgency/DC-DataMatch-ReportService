@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Service.Builders;
 using ESFA.DC.DataMatch.ReportService.Service.ReferenceData;
-using ESFA.DC.ILR.ReportService.Model.DASPayments;
 using ESFA.DC.ILR1819.DataStore.EF.Valid;
 using FluentAssertions;
 using Xunit;
@@ -23,21 +21,30 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
         [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 0, 4, 4, DataLockValidationMessages.DLOCK_05, "3", "0")]
         [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 3, 4, 0, DataLockValidationMessages.DLOCK_06, "4", "0")]
         public void VerifyDataMatchModelBuilder(
-            int ilrukPrn, int dasUkPrn,
+            int ilrukPrn,
+            int dasUkPrn,
             string learnRefNumber,
-            long ilrUln, long dasUln,
-            int ilrStdCode, int dasStdCode,
-            int ilrFworkCode, int dasFworkCode,
-            int ilrProgType, int dasProgType,
-            int ilrPwayCode, int dasPwayCode,
-            string expectedErrorCode, string expectedIlrValue = "", string expectedApprenticeshipValue = "")
+            long ilrUln,
+            long dasUln,
+            int ilrStdCode,
+            int dasStdCode,
+            int ilrFworkCode,
+            int dasFworkCode,
+            int ilrProgType,
+            int dasProgType,
+            int ilrPwayCode,
+            int dasPwayCode,
+            string expectedErrorCode,
+            string expectedIlrValue = "",
+            string expectedApprenticeshipValue = "")
         {
             var dataMatchModelBuilder = new DataMatchMonthEndModelBuilder();
             var learnersList = BuildBasicILRModelForTests(ilrukPrn, learnRefNumber, ilrUln, ilrProgType, ilrStdCode, ilrFworkCode, ilrPwayCode);
             var dasApprenticeshipInfoList = BuildBasicDasApprenticeshipInfo(dasUkPrn, learnRefNumber, dasUln, dasProgType, dasStdCode, dasFworkCode, dasPwayCode);
             var dataMatchRulebaseInfo = BuildBasicFmModelForTests(ilrukPrn, learnRefNumber);
 
-            var result = dataMatchModelBuilder.BuildModels(learnersList, dasApprenticeshipInfoList, dataMatchRulebaseInfo);
+            var result =
+                dataMatchModelBuilder.BuildModels(learnersList, dasApprenticeshipInfoList, dataMatchRulebaseInfo);
 
             result.Should().NotBeNullOrEmpty();
             result.Count().Should().Be(1);
@@ -93,13 +100,13 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
                             {
                                 new LearningDeliveryFAM()
                                 {
-                                    LearnDelFAMType =  "ACT",
-                                    LearnDelFAMCode = "1"
-                                }
-                            }
-                        }
-                    }
-                }
+                                    LearnDelFAMType = "ACT",
+                                    LearnDelFAMCode = "1",
+                                },
+                            },
+                        },
+                    },
+                },
             };
         }
 
@@ -126,10 +133,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
                     StopDate = new DateTime(2018, 05, 30),
                     RuleId = 3,
                     PauseDate = new DateTime(2018, 04, 30),
-                    LegalEntityName = "LegalEntityName"
-                }
+                    LegalEntityName = "LegalEntityName",
+                },
             };
         }
-
     }
 }

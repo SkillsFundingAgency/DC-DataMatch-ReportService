@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Autofac;
 using Autofac.Features.AttributeFilters;
+using ESFA.DC.DASPayments.EF;
+using ESFA.DC.DASPayments.EF.Interfaces;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
 using ESFA.DC.DataMatch.ReportService.Interface.Configuration;
 using ESFA.DC.DataMatch.ReportService.Interface.Provider;
@@ -13,8 +15,6 @@ using ESFA.DC.DataMatch.ReportService.Service.Service;
 using ESFA.DC.DataMatch.ReportService.Stateless.Configuration;
 using ESFA.DC.DataMatch.ReportService.Stateless.Handlers;
 using ESFA.DC.DateTimeProvider.Interface;
-using ESFA.DC.DASPayments.EF;
-using ESFA.DC.DASPayments.EF.Interfaces;
 using ESFA.DC.FileService;
 using ESFA.DC.FileService.Config;
 using ESFA.DC.FileService.Config.Interface;
@@ -159,7 +159,6 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
             containerBuilder.RegisterType<FM36ProviderService>().As<IFM36ProviderService>()
                 .WithAttributeFiltering()
                 .InstancePerLifetimeScope();
-
         }
 
         private static void RegisterBuilders(ContainerBuilder containerBuilder)

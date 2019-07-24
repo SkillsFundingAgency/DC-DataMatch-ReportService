@@ -25,6 +25,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
         private bool _loadedDataAlready;
         private List<Learner> _loadedData;
         private readonly ILogger _logger;
+
         public ValidLearnerService(
             string key,
             ILogger logger,

@@ -53,8 +53,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
         {
             var validIlrLearnersTask = _validLearnersService.GetLearnersAsync(reportServiceContext, cancellationToken);
             var DasApprenticeshipInfoTask =
-                _dasPaymentsProviderService.GetApprenticeshipsInfoAsync(reportServiceContext.Ukprn,
-                    cancellationToken);
+                _dasPaymentsProviderService.GetApprenticeshipsInfoAsync(reportServiceContext.Ukprn, cancellationToken);
             var dataMatchRulebaseInfoTask =
                 _fm36ProviderService.GetFM36DataForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
 

@@ -1,12 +1,12 @@
-﻿using ESFA.DC.DataMatch.ReportService.Interface.Service;
-using ESFA.DC.ILR.ReportService.Model.DASPayments;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ESFA.DC.DASPayments.EF.Interfaces;
+using ESFA.DC.DataMatch.ReportService.Interface.Service;
+using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
+using Microsoft.EntityFrameworkCore;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Service
 {
