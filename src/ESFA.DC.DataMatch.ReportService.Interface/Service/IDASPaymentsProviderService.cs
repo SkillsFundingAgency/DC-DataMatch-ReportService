@@ -7,6 +7,8 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Service
 {
     public interface IDASPaymentsProviderService
     {
-        Task<IEnumerable<DasApprenticeshipInfo>> GetApprenticeshipsInfoAsync(long ukPrn, CancellationToken cancellationToken);
+        Task<DataMatchDataLockValidationErrorInfo> GetDataLockValidationErrorInfoForDataMatchReport(int collectionPeriod, int ukPrn, CancellationToken cancellationToken);
+
+        Task<DataMatchDasApprenticeshipInfo> GetDasApprenticeshipInfoForDataMatchReport(int ukPrn, CancellationToken cancellationToken);
     }
 }

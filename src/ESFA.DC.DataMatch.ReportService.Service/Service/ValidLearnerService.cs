@@ -15,7 +15,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Service
 {
-    public class ValidLearnerService : IValidLearnersService
+    /// <summary>
+    /// valid learners service
+    /// </summary>
+    public sealed class ValidLearnerService : IValidLearnersService
     {
         private readonly string _filename;
         private readonly IReportServiceConfiguration _reportServiceConfiguration;
@@ -23,24 +26,37 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
         private readonly IJsonSerializationService _jsonSerializationService;
         private readonly SemaphoreSlim _getDataLock = new SemaphoreSlim(1, 1);
         private bool _loadedDataAlready;
-        private List<Learner> _loadedData;
+        private List<string> _loadedDataLearnRefNumbers;
         private readonly ILogger _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ValidLearnerService"/> class.
+        /// constructor
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="logger"></param>
+        /// <param name="reportServiceConfiguration"></param>
+        /// <param name="jsonSerializationService"></param>
+        /// <param name="storage"></param>
         public ValidLearnerService(
-            string key,
             ILogger logger,
             IReportServiceConfiguration reportServiceConfiguration,
             IJsonSerializationService jsonSerializationService,
             IStreamableKeyValuePersistenceService storage)
         {
-            _filename = key;
             _storage = storage;
             _logger = logger;
             _reportServiceConfiguration = reportServiceConfiguration;
             _jsonSerializationService = jsonSerializationService;
         }
 
-        public async Task<IEnumerable<Learner>> GetLearnersAsync(IReportServiceContext reportServiceContext, CancellationToken cancellationToken)
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="reportServiceContext"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<string>> GetLearnersAsync(IReportServiceContext reportServiceContext, CancellationToken cancellationToken)
         {
             await _getDataLock.WaitAsync(cancellationToken);
 
@@ -48,34 +64,32 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             {
                 if (_loadedDataAlready)
                 {
-                    return _loadedData;
+                    return _loadedDataLearnRefNumbers;
                 }
 
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return null;
-                }
+                //if (cancellationToken.IsCancellationRequested)
+                //{
+                //    return null;
+                //}
 
                 _loadedDataAlready = true;
                 int ukPrn = reportServiceContext.Ukprn;
-
-                if (await _storage.ContainsAsync(_filename, cancellationToken))
+                //if (await _storage.ContainsAsync(_filename, cancellationToken))
+                //{
+                //    string learnersValidStr = await _storage.GetAsync(_filename, cancellationToken);
+                //    _loadedDataLearnRefNumbers = _jsonSerializationService.Deserialize<List<Learner>>(learnersValidStr);
+                //}
+                //else
+                //{
+                var validLearnersList = new List<string>();
+                DbContextOptions<ILR1819_DataStoreEntitiesValid> validContextOptions = new DbContextOptionsBuilder<ILR1819_DataStoreEntitiesValid>().UseSqlServer(_reportServiceConfiguration.ILRDataStoreValidConnectionString).Options;
+                using (var ilrValidContext = new ILR1819_DataStoreEntitiesValid(validContextOptions))
                 {
-                    string learnersValidStr = await _storage.GetAsync(_filename, cancellationToken);
-                    _loadedData = _jsonSerializationService.Deserialize<List<Learner>>(learnersValidStr);
+                    validLearnersList = ilrValidContext.Learners.Where(x => x.UKPRN == ukPrn).Select(x => x.LearnRefNumber).ToList();
                 }
-                else
-                {
-                    var validLearnersList = new List<Learner>();
 
-                    DbContextOptions<ILR1819_DataStoreEntitiesValid> validContextOptions = new DbContextOptionsBuilder<ILR1819_DataStoreEntitiesValid>().UseSqlServer(_reportServiceConfiguration.ILRDataStoreValidConnectionString).Options;
-                    using (var ilrValidContext = new ILR1819_DataStoreEntitiesValid(validContextOptions))
-                    {
-                        validLearnersList = ilrValidContext.Learners.Where(x => x.UKPRN == ukPrn).ToList(); //.Select(x => x.LearnRefNumber).ToList();
-                    }
-
-                    _loadedData = validLearnersList;
-                }
+                _loadedDataLearnRefNumbers = validLearnersList;
+                //}
             }
             catch (Exception ex)
             {
@@ -87,7 +101,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                 _getDataLock.Release();
             }
 
-            return _loadedData;
+            return _loadedDataLearnRefNumbers;
         }
     }
 }

@@ -9,236 +9,190 @@ using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 using ESFA.DC.DataMatch.ReportService.Service.Extensions;
 using ESFA.DC.DataMatch.ReportService.Service.ReferenceData;
 using ESFA.DC.ILR1819.DataStore.EF.Valid;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 {
     public class DataMatchMonthEndModelBuilder : IDataMatchModelBuilder
     {
-        public IEnumerable<DataMatchModel> BuildModels(IEnumerable<Learner> validIlrLearners, IEnumerable<DasApprenticeshipInfo> dasApprenticeshipInfos, DataMatchRulebaseInfo dataMatchRulebaseInfo)
+        public IEnumerable<DataMatchModel> BuildModels(
+            DataMatchILRInfo dataMatchILRInfo,
+            DataMatchRulebaseInfo dataMatchRulebaseInfo,
+            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
+            DataMatchDasApprenticeshipInfo dasApprenticeshipPriceInfo)
         {
-            var populatedDataMatchModels = new List<DataMatchModel>();
-            foreach (var learner in validIlrLearners)
+            var dataMatchModels = new List<DataMatchModel>();
+            foreach (var dataLockValidationError in dataLockValidationErrorInfo.DataLockValidationErrors)
             {
-                foreach (var learningDelivery in learner.LearningDeliveries)
+                var learner = dataMatchILRInfo.DataMatchLearners.SingleOrDefault(
+                    x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber.ToString()) ||
+                         x.Uln == dataLockValidationError.LearnerUln);
+
+                var matchedRulebaseInfo = dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.LastOrDefault(x =>
+                    x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber));
+
+                var matchedDasPriceInfo = dasApprenticeshipPriceInfo.DasApprenticeshipPriceInfos.FirstOrDefault(x => x.LearnerUln == dataLockValidationError.LearnerUln);
+
+                var ruleName = PopulateRuleName(dataLockValidationError.RuleId);
+                if (learner != null)
                 {
-                    if (!ValidLearningDelivery(learningDelivery))
+                    var dataMatchModel = new DataMatchModel()
                     {
-                        continue;
-                    }
+                        LearnRefNumber = dataLockValidationError.LearnerReferenceNumber,
+                        Uln = learner.Uln,
+                        AimSeqNumber = dataLockValidationError.AimSeqNumber,
+                        RuleName = ruleName,
+                        Description = PopulateRuleDescription(ruleName),
+                        ILRValue = GetILRValue(ruleName, learner),
+                        ApprenticeshipServiceValue = GetApprenticeshipServiceValue(ruleName, dataLockValidationError, matchedDasPriceInfo),
+                        PriceEpisodeStartDate = matchedRulebaseInfo?.EpisodeStartDate,
+                        PriceEpisodeActualEndDate = matchedRulebaseInfo?.PriceEpisodeActualEndDate,
+                        PriceEpisodeIdentifier = matchedRulebaseInfo?.PriceEpisodeAgreeId,
+                        LegalEntityName = GetLegalEntityName(ruleName, matchedDasPriceInfo),
+                    };
 
-                    var matchedAecApprenticeshipPriceEpisodeInfo = dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.Where(x => x.LearnRefNumber.CaseInsensitiveEquals(learningDelivery.LearnRefNumber));
-
-                    foreach (var aecApprenticeshipPriceEpisode in matchedAecApprenticeshipPriceEpisodeInfo)
-                    {
-                        var matchedDasApprenticeshipInfoAgainstAgreementId =
-                            dasApprenticeshipInfos.FirstOrDefault(x =>
-                                x.AgreementId.CaseInsensitiveEquals(aecApprenticeshipPriceEpisode.PriceEpisodeAgreeId));
-
-                        var dasApprenticeshipInfoToMatch =
-                            dasApprenticeshipInfos.Where(x => x.UkPrn == aecApprenticeshipPriceEpisode.UkPrn);
-
-                        if (!dasApprenticeshipInfoToMatch.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_01,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                learner.UKPRN.ToString(),
-                                matchedDasApprenticeshipInfoAgainstAgreementId.UkPrn.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-
-                        dasApprenticeshipInfoToMatch =
-                            dasApprenticeshipInfos.Where(x => x.Uln == learner.ULN);
-                        if (!dasApprenticeshipInfoToMatch.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_02,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                learner.ULN.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-
-                        dasApprenticeshipInfoToMatch =
-                            dasApprenticeshipInfos.Where(x => x.StandardCode == learningDelivery.StdCode);
-                        if (!dasApprenticeshipInfoToMatch.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_03,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                learningDelivery.StdCode.ToString(),
-                                matchedDasApprenticeshipInfoAgainstAgreementId?.StandardCode.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-
-                        dasApprenticeshipInfoToMatch =
-                            dasApprenticeshipInfos.Where(x => x.FrameworkCode == learningDelivery.FworkCode);
-                        if (!dasApprenticeshipInfoToMatch.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_04,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                learningDelivery.FworkCode.ToString(),
-                                matchedDasApprenticeshipInfoAgainstAgreementId?.FrameworkCode.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-
-                        dasApprenticeshipInfoToMatch =
-                            dasApprenticeshipInfos.Where(x => x.ProgrammeType == learningDelivery.ProgType);
-                        if (!dasApprenticeshipInfoToMatch.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_05,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                learningDelivery.ProgType.ToString(),
-                                matchedDasApprenticeshipInfoAgainstAgreementId?.ProgrammeType.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-
-                        dasApprenticeshipInfoToMatch =
-                            dasApprenticeshipInfos.Where(x => x.PathwayCode == learningDelivery.PwayCode);
-                        if (!dasApprenticeshipInfoToMatch.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_06,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                learningDelivery.PwayCode.ToString(),
-                                matchedDasApprenticeshipInfoAgainstAgreementId?.PathwayCode.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-
-                        var calculatedIlrCost = CalculateIlrValueForDataLock07(learningDelivery);
-                        dasApprenticeshipInfoToMatch =
-                            dasApprenticeshipInfos.Where(x => x.Cost == calculatedIlrCost);
-                        if (!dasApprenticeshipInfoToMatch.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_07,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                calculatedIlrCost.ToString(),
-                                matchedDasApprenticeshipInfoAgainstAgreementId?.Cost.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-
-                        //todo: DLOCK_08
-
-                        dasApprenticeshipInfoToMatch =
-                            dasApprenticeshipInfos.Where(x => x.EffectiveFromDate <= aecApprenticeshipPriceEpisode.EffectiveTnpStartDate);
-                        if (!dasApprenticeshipInfoToMatch.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_09,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                learningDelivery.LearnStartDate.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-
-                        dasApprenticeshipInfoToMatch =
-                            dasApprenticeshipInfos.Where(x => x.EffectiveFromDate <= aecApprenticeshipPriceEpisode.EffectiveTnpStartDate);
-                        if (!dasApprenticeshipInfoToMatch.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_09,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                learningDelivery.LearnStartDate.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-
-                        var withdrawnApprenticeships = dasApprenticeshipInfos
-                            .Where(x => x.PaymentStatus == (int)DasPaymentStatus.Withdrawn || x.StopDate.HasValue)
-                            .ToList();
-                        //var activeWithdrawnCommitments = withdrawnCommitments
-                        //    .Where(x => x.StopDate >= censusDate)
-                        //    .ToList();
-                        if (withdrawnApprenticeships.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_10,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                string.Empty,
-                                withdrawnApprenticeships.FirstOrDefault(x => x.LearnerReferenceNumber == learningDelivery.LearnRefNumber)?.StopDate.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-
-                        var pausedApprenticeships = dasApprenticeshipInfos.Where(x => x.PaymentStatus == (int)DasPaymentStatus.Paused).ToList();
-                        if (pausedApprenticeships.Any())
-                        {
-                            var model = PopulateDataMatchModel(
-                                DataLockValidationMessages.DLOCK_12,
-                                aecApprenticeshipPriceEpisode,
-                                matchedDasApprenticeshipInfoAgainstAgreementId,
-                                string.Empty,
-                                pausedApprenticeships.FirstOrDefault(x => x.LearnerReferenceNumber == learningDelivery.LearnRefNumber)?.StopDate.ToString());
-                            populatedDataMatchModels.Add(model);
-                            continue;
-                        }
-                    }
+                    dataMatchModels.Add(dataMatchModel);
                 }
             }
 
-            return populatedDataMatchModels;
+            return dataMatchModels;
         }
 
-        private DataMatchModel PopulateDataMatchModel(
-            string ruleName,
-            AECApprenticeshipPriceEpisodeInfo aecApprenticeshipPriceEpisodeInfo,
-            DasApprenticeshipInfo dasApprenticeshipInfo,
-            string ilrValue = "",
-            string apprenticeShipValue = "")
+        private string GetILRValue(string ruleName, DataMatchLearner learner)
         {
-            return new DataMatchModel()
+            var rulesWithBlankILRValues = new[]
             {
-                LearnRefNumber = dasApprenticeshipInfo.LearnerReferenceNumber,
-                Uln = dasApprenticeshipInfo.Uln,
-                AimSeqNumber = dasApprenticeshipInfo.AimSequenceNumber,
-                RuleName = ruleName, //todo: this should be DATALOCK_01 etc, whereas in daspayments, it's defined as a tinyint
-                Description = DataLockValidationMessages.Validations.FirstOrDefault(x => x.RuleId == ruleName)?.ErrorMessage,
-                PriceEpisodeStartDate = aecApprenticeshipPriceEpisodeInfo.EpisodeStartDate,
-                PriceEpisodeActualEndDate = aecApprenticeshipPriceEpisodeInfo.PriceEpisodeActualEndDate,
-                PriceEpisodeIdentifier = aecApprenticeshipPriceEpisodeInfo.PriceEpisodeAgreeId,
-                LegalEntityName = dasApprenticeshipInfo.LegalEntityName,
-                OfficialSensitive = "N/A",
-                ILRValue = ilrValue,
-                ApprenticeshipServiceValue = apprenticeShipValue
+                DataLockValidationMessages.DLOCK_08,
+                DataLockValidationMessages.DLOCK_10,
+                DataLockValidationMessages.DLOCK_11,
+                DataLockValidationMessages.DLOCK_12,
             };
+
+            if (rulesWithBlankILRValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
+            {
+                return string.Empty;
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_01))
+            {
+                return learner.UkPrn.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_02))
+            {
+                return learner.Uln.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_03))
+            {
+                return learner.DataMatchLearningDeliveries.FirstOrDefault()?.StdCode.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_04))
+            {
+                return learner.DataMatchLearningDeliveries.FirstOrDefault()?.FworkCode.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_05))
+            {
+                return learner.DataMatchLearningDeliveries.FirstOrDefault()?.ProgType.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_06))
+            {
+                return learner.DataMatchLearningDeliveries.FirstOrDefault()?.PwayCode.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_07))
+            {
+                var negotiatedCostOfTraining = learner.DataMatchLearningDeliveries.FirstOrDefault()?.AppFinRecords?
+                                                   .Where(x => string.Equals(x.AFinType, "TNP", StringComparison.OrdinalIgnoreCase) &&
+                                                               x.AFinCode == 1).OrderByDescending(x => x.AFinDate).FirstOrDefault()?.AFinAmount +
+                                               learner.DataMatchLearningDeliveries.FirstOrDefault()?.AppFinRecords?
+                                                   .Where(x => string.Equals(x.AFinType, "TNP", StringComparison.OrdinalIgnoreCase) &&
+                                                               x.AFinCode == 2).OrderByDescending(x => x.AFinDate).FirstOrDefault()?.AFinAmount;
+
+                return negotiatedCostOfTraining.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_09))
+            {
+                return learner.DataMatchLearningDeliveries.FirstOrDefault()?.LearnStartDate.ToString();
+            }
+
+            return string.Empty;
         }
 
-        private bool ValidLearningDelivery(LearningDelivery learningDelivery)
+        private string GetLegalEntityName(string ruleName, DasApprenticeshipPriceInfo dasApprenticeshipPriceInfo)
         {
-            return learningDelivery.FundModel == 36 &&
-                   learningDelivery.LearningDeliveryFAMs.Any(
-                       x => x.LearnDelFAMType == "ACT" && x.LearnDelFAMCode == "1");
+            var rulesWithBlankLegalEntityValues = new[] { DataLockValidationMessages.DLOCK_01, DataLockValidationMessages.DLOCK_02 };
+            if (rulesWithBlankLegalEntityValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
+            {
+                return string.Empty;
+            }
+
+            return dasApprenticeshipPriceInfo.LegalEntityName ?? string.Empty;
         }
 
-        private long? CalculateIlrValueForDataLock07(LearningDelivery learningDelivery)
+        private string PopulateRuleName(int ruleId)
         {
-            var negotiatedCostOfTraining = (learningDelivery.AppFinRecords?
-                .Where(x => string.Equals(x.AFinType, "TNP", StringComparison.OrdinalIgnoreCase) &&
-                            x.AFinCode == 1).OrderByDescending(x => x.AFinDate).FirstOrDefault()?.AFinAmount) +
-                   (learningDelivery.AppFinRecords?
-                       .Where(x => string.Equals(x.AFinType, "TNP", StringComparison.OrdinalIgnoreCase) &&
-                                   x.AFinCode == 2).OrderByDescending(x => x.AFinDate).FirstOrDefault()?.AFinAmount);
+            return "DLOCK_" + ruleId.ToString("00");
+        }
 
-            return negotiatedCostOfTraining;
+        private string PopulateRuleDescription(string ruleName)
+        {
+            return DataLockValidationMessages.Validations.FirstOrDefault(x => x.RuleId.CaseInsensitiveEquals(ruleName))?.ErrorMessage;
+        }
+
+        private string GetApprenticeshipServiceValue(string ruleName, DataLockValidationError dataLockValidationError, DasApprenticeshipPriceInfo dasApprenticeshipPriceInfo)
+        {
+            var rulesWithBlankILRValues = new string[] { "DLOCK_02", "DLOCK_08", "DLOCK_09", "DLOCK_11" };
+            if (rulesWithBlankILRValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
+            {
+                return string.Empty;
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_01))
+            {
+                return dataLockValidationError.UkPrn.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_03))
+            {
+                return dataLockValidationError.StandardCode.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_04))
+            {
+                return dataLockValidationError.FrameworkCode.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_05))
+            {
+                return dataLockValidationError.ProgrammeType.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_06))
+            {
+                return dataLockValidationError.PathwayCode.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_07))
+            {
+                return dasApprenticeshipPriceInfo.Cost.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_10))
+            {
+                return dasApprenticeshipPriceInfo.WithdrawnOnDate?.ToString();
+            }
+
+            if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_12))
+            {
+                return dasApprenticeshipPriceInfo.PausedOnDate?.ToString();
+            }
+
+            return string.Empty;
         }
     }
 }

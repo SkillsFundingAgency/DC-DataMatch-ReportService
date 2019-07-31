@@ -4,12 +4,12 @@ using System.Text;
 
 namespace ESFA.DC.DataMatch.ReportService.Model.Ilr
 {
-    public class DataMatchRulebaseInfo
+    public class DataMatchLearner
     {
         public int UkPrn { get; set; }
-
         public string LearnRefNumber { get; set; }
 
-        public List<AECApprenticeshipPriceEpisodeInfo> AECApprenticeshipPriceEpisodes { get; set; }
+        public IEnumerable<DataMatchLearningDelivery> DataMatchLearningDeliveries { get; set; }
+        public long Uln { get; set; }
     }
 }

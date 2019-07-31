@@ -22,10 +22,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
 
         public async Task<DataMatchRulebaseInfo> GetFM36DataForDataMatchReport(int ukPrn, CancellationToken cancellationToken)
         {
-            var appsMonthlyPaymentRulebaseInfo = new DataMatchRulebaseInfo()
+            var dataMatchRulebaseInfo = new DataMatchRulebaseInfo()
             {
                 UkPrn = ukPrn,
-                AECApprenticeshipPriceEpisodes = new List<AECApprenticeshipPriceEpisodeInfo>()
+                AECApprenticeshipPriceEpisodes = new List<AECApprenticeshipPriceEpisodeInfo>(),
             };
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -41,12 +41,13 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                         PriceEpisodeActualEndDate = pe.PriceEpisodeActualEndDate,
                         PriceEpisodeAgreeId = pe.PriceEpisodeAgreeId,
                         EpisodeStartDate = pe.EpisodeStartDate,
-                        EffectiveTnpStartDate = pe.EpisodeEffectiveTNPStartDate
+                        EffectiveTnpStartDate = pe.EpisodeEffectiveTNPStartDate,
                     }).ToListAsync(cancellationToken);
-                appsMonthlyPaymentRulebaseInfo.AECApprenticeshipPriceEpisodes?.ToList().AddRange(aecApprenticeshipPriceEpisodeInfos);
+
+                dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.AddRange(aecApprenticeshipPriceEpisodeInfos);
             }
 
-            return appsMonthlyPaymentRulebaseInfo;
+            return dataMatchRulebaseInfo;
         }
     }
 }

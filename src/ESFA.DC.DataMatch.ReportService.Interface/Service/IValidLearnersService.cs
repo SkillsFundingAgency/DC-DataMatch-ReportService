@@ -7,6 +7,6 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Service
 {
     public interface IValidLearnersService
     {
-        Task<IEnumerable<Learner>> GetLearnersAsync(IReportServiceContext reportServiceContext, CancellationToken cancellationToken);
+        Task<IEnumerable<string>> GetLearnersAsync(IReportServiceContext reportServiceContext, CancellationToken cancellationToken);
     }
 }

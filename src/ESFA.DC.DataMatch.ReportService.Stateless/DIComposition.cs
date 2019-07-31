@@ -31,6 +31,8 @@ using ESFA.DC.JobContextManager.Interface;
 using ESFA.DC.JobContextManager.Model;
 using ESFA.DC.JobContextManager.Model.Interface;
 using ESFA.DC.Mapping.Interface;
+using ESFA.DC.Serialization.Interfaces;
+using ESFA.DC.Serialization.Json;
 using ESFA.DC.ServiceFabric.Common.Modules;
 using Microsoft.EntityFrameworkCore;
 using VersionInfo = ESFA.DC.DataMatch.ReportService.Stateless.Configuration.VersionInfo;
@@ -68,6 +70,8 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
 
             containerBuilder.RegisterInstance(azureStorageFileServiceConfiguration).As<IAzureStorageFileServiceConfiguration>();
             containerBuilder.RegisterType<AzureStorageFileService>().As<IFileService>();
+
+            containerBuilder.RegisterType<JsonSerializationService>().As<IJsonSerializationService>();
 
             containerBuilder.RegisterModule(new StatelessServiceModule(statelessServiceConfiguration));
             containerBuilder.RegisterModule<SerializationModule>();
@@ -157,6 +161,9 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
             containerBuilder.RegisterType<DASPaymentsProviderService>().As<IDASPaymentsProviderService>()
                 .InstancePerLifetimeScope();
             containerBuilder.RegisterType<FM36ProviderService>().As<IFM36ProviderService>()
+                .WithAttributeFiltering()
+                .InstancePerLifetimeScope();
+            containerBuilder.RegisterType<ILRProviderService>().As<IILRProviderService>()
                 .WithAttributeFiltering()
                 .InstancePerLifetimeScope();
         }

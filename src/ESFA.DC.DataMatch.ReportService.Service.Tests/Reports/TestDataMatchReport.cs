@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Castle.Components.DictionaryAdapter;
 using CsvHelper;
 using ESFA.DC.DataMatch.ReportService.Interface;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
@@ -47,20 +48,33 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
             Mock<IDASPaymentsProviderService> dasPaymentProviderMock = new Mock<IDASPaymentsProviderService>();
             Mock<IValidLearnersService> validLearnersService = new Mock<IValidLearnersService>();
             Mock<IFM36ProviderService> fm36ProviderServiceMock = new Mock<IFM36ProviderService>();
+            Mock<IILRProviderService> iIlrProviderService = new Mock<IILRProviderService>();
             IDataMatchModelBuilder dataMatchModelBuilder = new DataMatchMonthEndModelBuilder();
 
             storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>())).Callback<string, string, CancellationToken>((key, value, ct) => csv = value).Returns(Task.CompletedTask);
 
-            var ilrModel = BuildILRModel(ukPrn);
+            var ilrModel = BuildILRModel(ukPrn).Select(x => x.LearnRefNumber).ToArray();
+            var ilrModelForDataMatchReport = BuildILRModelForDataMatchReport(ukPrn);
             var dataMatchRulebaseInfo = BuildFm36Model(ukPrn);
             var dasApprenticeshipInfo = BuildDasApprenticeshipInfo(ukPrn);
+
+            var dasApprenticeshipInfoForDataMatchReport = GetDasApprenticeshipInfoForDataMatchReport(ukPrn);
+            var dataLockValidationErrorInfoForDataMatchReport = GetDataLockValidationErrorInfoForDataMatchReport(ukPrn);
 
             storage.Setup(x => x.ContainsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
             storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>())).Callback<string, string, CancellationToken>((key, value, ct) => csv = value).Returns(Task.CompletedTask);
 
             validLearnersService.Setup(x => x.GetLearnersAsync(reportServiceContextMock.Object, It.IsAny<CancellationToken>())).ReturnsAsync(ilrModel);
             fm36ProviderServiceMock.Setup(x => x.GetFM36DataForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>())).ReturnsAsync(dataMatchRulebaseInfo);
-            dasPaymentProviderMock.Setup(x => x.GetApprenticeshipsInfoAsync(It.IsAny<long>(), It.IsAny<CancellationToken>())).ReturnsAsync(dasApprenticeshipInfo);
+            iIlrProviderService
+                .Setup(x => x.GetILRInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(ilrModelForDataMatchReport);
+            dasPaymentProviderMock.Setup(x => x.GetDasApprenticeshipInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(dasApprenticeshipInfoForDataMatchReport);
+
+            dasPaymentProviderMock.Setup(x => x.GetDataLockValidationErrorInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(dataLockValidationErrorInfoForDataMatchReport);
+
             dateTimeProviderMock.Setup(x => x.GetNowUtc()).Returns(dateTime);
             dateTimeProviderMock.Setup(x => x.ConvertUtcToUk(It.IsAny<DateTime>())).Returns(dateTime);
 
@@ -69,6 +83,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                 dasPaymentProviderMock.Object,
                 validLearnersService.Object,
                 fm36ProviderServiceMock.Object,
+                iIlrProviderService.Object,
                 storage.Object,
                 dataMatchModelBuilder,
                 dateTimeProviderMock.Object);
@@ -92,6 +107,48 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
             result.Count().Should().Be(1);
         }
 
+        private DataMatchDataLockValidationErrorInfo GetDataLockValidationErrorInfoForDataMatchReport(int ukPrn)
+        {
+            return new DataMatchDataLockValidationErrorInfo()
+            {
+                DataLockValidationErrors = new List<DataLockValidationError>()
+                {
+                    new DataLockValidationError()
+                    {
+                        UkPrn = ukPrn,
+                        LearnerReferenceNumber = "9900000306",
+                        AimSeqNumber = 1,
+                        LearnerUln = 9900000111,
+                        FrameworkCode = 1,
+                        ProgrammeType = 2,
+                        PathwayCode = 3,
+                        StandardCode = 4,
+                        RuleId = 1,
+                        PriceEpisodeMatchAppId = 12345,
+                    },
+                },
+            };
+        }
+
+        private DataMatchDasApprenticeshipInfo GetDasApprenticeshipInfoForDataMatchReport(int ukPrn)
+        {
+            return new DataMatchDasApprenticeshipInfo()
+            {
+                UkPrn = ukPrn,
+                DasApprenticeshipPriceInfos = new List<DasApprenticeshipPriceInfo>()
+                {
+                    new DasApprenticeshipPriceInfo()
+                    {
+                        LearnerUln = 9900000111,
+                        PausedOnDate = null,
+                        WithdrawnOnDate = null,
+                        LegalEntityName = "LegalEntityName",
+                        Cost = 100,
+                    },
+                },
+            };
+        }
+
         private DataMatchRulebaseInfo BuildFm36Model(int ukPrn)
         {
             return new DataMatchRulebaseInfo()
@@ -106,9 +163,64 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                         PriceEpisodeAgreeId = "YZ2V7Y",
                         EpisodeStartDate = new DateTime(2019, 06, 28),
                         PriceEpisodeActualEndDate = new DateTime(2020, 06, 28),
-                        UkPrn = ukPrn
-                    }
-                }
+                        UkPrn = ukPrn,
+                        AimSequenceNumber = 1,
+                        EffectiveTnpStartDate = new DateTime(2017, 07, 30),
+                    },
+                },
+            };
+        }
+
+        private DataMatchILRInfo BuildILRModelForDataMatchReport(int ukPrn)
+        {
+            return new DataMatchILRInfo()
+            {
+                UkPrn = ukPrn,
+                DataMatchLearners = new List<DataMatchLearner>()
+                {
+                    new DataMatchLearner()
+                    {
+                        UkPrn = ukPrn,
+                        LearnRefNumber = "9900000306",
+                        Uln = 9900000111,
+                        DataMatchLearningDeliveries = new List<DataMatchLearningDelivery>()
+                        {
+                            new DataMatchLearningDelivery()
+                            {
+                                LearnRefNumber = "9900000306",
+                                LearnAimRef = "50117889",
+                                AimSeqNumber = 1,
+                                ProgType = 3,
+                                StdCode = 0,
+                                FworkCode = 421,
+                                PwayCode = 2,
+                                DataMatchLearningDeliveryFams = new List<DataMatchLearningDeliveryFAM>()
+                                {
+                                    new DataMatchLearningDeliveryFAM()
+                                    {
+                                        LearnDelFAMType = "ACT",
+                                        LearnDelFAMCode = "1",
+                                        UKPRN = ukPrn,
+                                    },
+                                },
+                                UkPrn = ukPrn,
+                                LearnStartDate = new DateTime(2017, 06, 30),
+                                AppFinRecords = new List<AppFinRecordInfo>
+                                {
+                                    new AppFinRecordInfo()
+                                    {
+                                        LearnRefNumber = "9900000306",
+                                        AimSeqNumber = 1,
+                                        AFinAmount = 100,
+                                        AFinCode = 1,
+                                        AFinType = "TNP",
+                                        AFinDate = new DateTime(2017, 07, 30),
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             };
         }
 
@@ -171,8 +283,8 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                     RuleId = 3,
                     PauseDate = new DateTime(2018, 04, 30),
                     LegalEntityName = "LegalEntityName",
-                    AppreticeshipServiceValue = "3"
-                }
+                    AppreticeshipServiceValue = "3",
+                },
             };
         }
     }
