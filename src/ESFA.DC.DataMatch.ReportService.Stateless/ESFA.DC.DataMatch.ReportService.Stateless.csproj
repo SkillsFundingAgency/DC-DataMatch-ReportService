@@ -91,6 +91,18 @@
     <Reference Include="ESFA.DC.ILR1819.DataStore.EF.Valid, Version=0.1.381.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ESFA.DC.ILR1819.Database.EF.0.1.381\lib\netstandard2.0\ESFA.DC.ILR1819.DataStore.EF.Valid.dll</HintPath>
     </Reference>
+    <Reference Include="ESFA.DC.ILR1920.Database.EF, Version=0.0.273.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ESFA.DC.ILR1920.Database.EF.0.0.273\lib\netstandard2.0\ESFA.DC.ILR1920.Database.EF.dll</HintPath>
+    </Reference>
+    <Reference Include="ESFA.DC.ILR1920.DataStore.EF, Version=0.0.273.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ESFA.DC.ILR1920.Database.EF.0.0.273\lib\netstandard2.0\ESFA.DC.ILR1920.DataStore.EF.dll</HintPath>
+    </Reference>
+    <Reference Include="ESFA.DC.ILR1920.DataStore.EF.Invalid, Version=0.0.273.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ESFA.DC.ILR1920.Database.EF.0.0.273\lib\netstandard2.0\ESFA.DC.ILR1920.DataStore.EF.Invalid.dll</HintPath>
+    </Reference>
+    <Reference Include="ESFA.DC.ILR1920.DataStore.EF.Valid, Version=0.0.273.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ESFA.DC.ILR1920.Database.EF.0.0.273\lib\netstandard2.0\ESFA.DC.ILR1920.DataStore.EF.Valid.dll</HintPath>
+    </Reference>
     <Reference Include="ESFA.DC.IO.AzureStorage, Version=0.1.19.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ESFA.DC.IO.AzureStorage.0.1.19-beta0001\lib\netstandard2.0\ESFA.DC.IO.AzureStorage.dll</HintPath>
     </Reference>
@@ -146,11 +158,11 @@
       <HintPath>..\packages\Microsoft.Azure.Services.AppAuthentication.1.0.1\lib\net452\Microsoft.Azure.Services.AppAuthentication.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.EntityFrameworkCore, Version=2.2.3.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.EntityFrameworkCore.2.2.3\lib\netstandard2.0\Microsoft.EntityFrameworkCore.dll</HintPath>
+    <Reference Include="Microsoft.EntityFrameworkCore, Version=2.2.4.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.EntityFrameworkCore.2.2.4\lib\netstandard2.0\Microsoft.EntityFrameworkCore.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.EntityFrameworkCore.Abstractions, Version=2.2.3.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.EntityFrameworkCore.Abstractions.2.2.3\lib\netstandard2.0\Microsoft.EntityFrameworkCore.Abstractions.dll</HintPath>
+    <Reference Include="Microsoft.EntityFrameworkCore.Abstractions, Version=2.2.4.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.EntityFrameworkCore.Abstractions.2.2.4\lib\netstandard2.0\Microsoft.EntityFrameworkCore.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.EntityFrameworkCore.Design, Version=2.2.2.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.EntityFrameworkCore.Design.2.2.2\lib\net461\Microsoft.EntityFrameworkCore.Design.dll</HintPath>
@@ -386,7 +398,9 @@
     <None Include="ESFA.DC.DataMatch.ReportService.Stateless.ruleset" />
     <None Include="PackageRoot\Config\Settings.xml" />
     <None Include="PackageRoot\ServiceManifest.xml" />
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

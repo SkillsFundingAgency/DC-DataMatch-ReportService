@@ -15,6 +15,24 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 {
     public class DataMatchMonthEndModelBuilder : IDataMatchModelBuilder
     {
+        readonly string[] _rulesWithBlankILRValues =
+        {
+            DataLockValidationMessages.DLOCK_08,
+            DataLockValidationMessages.DLOCK_10,
+            DataLockValidationMessages.DLOCK_11,
+            DataLockValidationMessages.DLOCK_12,
+        };
+
+        readonly string[] _rulesWithBlankApprenticeshipValues =
+        {
+            DataLockValidationMessages.DLOCK_02,
+            DataLockValidationMessages.DLOCK_08,
+            DataLockValidationMessages.DLOCK_09,
+            DataLockValidationMessages.DLOCK_11,
+        };
+
+        readonly string _dLockErrorRuleNamePrefix = "DLOCK_";
+
         public IEnumerable<DataMatchModel> BuildModels(
             DataMatchILRInfo dataMatchILRInfo,
             DataMatchRulebaseInfo dataMatchRulebaseInfo,
@@ -28,14 +46,15 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                     x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber.ToString()) ||
                          x.Uln == dataLockValidationError.LearnerUln);
 
-                var matchedRulebaseInfo = dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.LastOrDefault(x =>
-                    x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber));
-
-                var matchedDasPriceInfo = dasApprenticeshipPriceInfo.DasApprenticeshipPriceInfos.FirstOrDefault(x => x.LearnerUln == dataLockValidationError.LearnerUln);
-
-                var ruleName = PopulateRuleName(dataLockValidationError.RuleId);
                 if (learner != null)
                 {
+                    var matchedRulebaseInfo = dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.LastOrDefault(x =>
+                        x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber));
+
+                    var matchedDasPriceInfo = dasApprenticeshipPriceInfo.DasApprenticeshipPriceInfos.FirstOrDefault(x => x.LearnerUln == dataLockValidationError.LearnerUln);
+
+                    var ruleName = PopulateRuleName(dataLockValidationError.RuleId);
+
                     var dataMatchModel = new DataMatchModel()
                     {
                         LearnRefNumber = dataLockValidationError.LearnerReferenceNumber,
@@ -60,15 +79,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
         private string GetILRValue(string ruleName, DataMatchLearner learner)
         {
-            var rulesWithBlankILRValues = new[]
-            {
-                DataLockValidationMessages.DLOCK_08,
-                DataLockValidationMessages.DLOCK_10,
-                DataLockValidationMessages.DLOCK_11,
-                DataLockValidationMessages.DLOCK_12,
-            };
-
-            if (rulesWithBlankILRValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
+            if (_rulesWithBlankILRValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
             {
                 return string.Empty;
             }
@@ -136,7 +147,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
         private string PopulateRuleName(int ruleId)
         {
-            return "DLOCK_" + ruleId.ToString("00");
+            return _dLockErrorRuleNamePrefix + ruleId.ToString("00");
         }
 
         private string PopulateRuleDescription(string ruleName)
@@ -146,8 +157,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
         private string GetApprenticeshipServiceValue(string ruleName, DataLockValidationError dataLockValidationError, DasApprenticeshipPriceInfo dasApprenticeshipPriceInfo)
         {
-            var rulesWithBlankILRValues = new string[] { "DLOCK_02", "DLOCK_08", "DLOCK_09", "DLOCK_11" };
-            if (rulesWithBlankILRValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
+            if (_rulesWithBlankApprenticeshipValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
             {
                 return string.Empty;
             }
