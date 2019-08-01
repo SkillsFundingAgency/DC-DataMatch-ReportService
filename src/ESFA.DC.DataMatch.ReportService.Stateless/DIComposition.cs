@@ -168,6 +168,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
 
             RegisterServices(containerBuilder);
             RegisterBuilders(containerBuilder);
+            RegisterReports(containerBuilder);
 
             return containerBuilder;
         }
@@ -192,8 +193,6 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
                     .WithAttributeFiltering()
                     .InstancePerLifetimeScope();
             }
-
-            RegisterReports(containerBuilder);
         }
 
         private static void RegisterReports(ContainerBuilder containerBuilder)
