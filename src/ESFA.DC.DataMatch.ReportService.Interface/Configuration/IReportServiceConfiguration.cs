@@ -8,8 +8,12 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Configuration
     {
         string DASPaymentsConnectionString { get; set; }
 
-        string ILRDataStoreConnectionString { get; set; }
+        string ILR1819DataStoreConnectionString { get; set; }
 
-        string ILRDataStoreValidConnectionString { get; set; }
+        string ILR1920DataStoreConnectionString { get; set; }
+
+        string ILR1819DataStoreValidConnectionString { get; set; }
+
+        string ILR1920DataStoreValidConnectionString { get; set; }
     }
 }

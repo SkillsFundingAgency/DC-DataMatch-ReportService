@@ -82,7 +82,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                 //else
                 //{
                 var validLearnersList = new List<string>();
-                DbContextOptions<ILR1819_DataStoreEntitiesValid> validContextOptions = new DbContextOptionsBuilder<ILR1819_DataStoreEntitiesValid>().UseSqlServer(_reportServiceConfiguration.ILRDataStoreValidConnectionString).Options;
+                DbContextOptions<ILR1819_DataStoreEntitiesValid> validContextOptions = new DbContextOptionsBuilder<ILR1819_DataStoreEntitiesValid>().UseSqlServer(_reportServiceConfiguration.ILR1819DataStoreValidConnectionString).Options;
                 using (var ilrValidContext = new ILR1819_DataStoreEntitiesValid(validContextOptions))
                 {
                     validLearnersList = ilrValidContext.Learners.Where(x => x.UKPRN == ukPrn).Select(x => x.LearnRefNumber).ToList();

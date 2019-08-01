@@ -22,8 +22,10 @@
   <Section Name="ReportServiceConfiguration">
     <Parameter Name="DASPaymentsConnectionString" Value="" />
     <Parameter Name="IlrValidationErrorsConnectionString" Value="" />
-    <Parameter Name="ILRDataStoreConnectionString" Value="" />
-    <Parameter Name="ILRDataStoreValidConnectionString" Value="" />
+    <Parameter Name="ILR1819DataStoreConnectionString" Value="" />
+    <Parameter Name="ILR1819DataStoreValidConnectionString" Value="" />
+    <Parameter Name="ILR1920DataStoreConnectionString" Value="" />
+    <Parameter Name="ILR1920DataStoreValidConnectionString" Value="" />
     <Parameter Name="JobStatusConnectionString" Value="" />
   </Section>
 

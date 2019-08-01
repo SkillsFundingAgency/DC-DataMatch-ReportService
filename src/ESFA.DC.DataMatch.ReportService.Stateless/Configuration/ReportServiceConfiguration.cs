@@ -6,8 +6,12 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless.Configuration
     {
         public string DASPaymentsConnectionString { get; set; }
 
-        public string ILRDataStoreConnectionString { get; set; }
+        public string ILR1819DataStoreConnectionString { get; set; }
 
-        public string ILRDataStoreValidConnectionString { get; set; }
+        public string ILR1920DataStoreConnectionString { get; set; }
+
+        public string ILR1819DataStoreValidConnectionString { get; set; }
+
+        public string ILR1920DataStoreValidConnectionString { get; set; }
     }
 }

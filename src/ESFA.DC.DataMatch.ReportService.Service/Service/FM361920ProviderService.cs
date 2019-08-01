@@ -7,15 +7,16 @@ using System.Threading.Tasks;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.ILR1819.DataStore.EF.Interface;
+using ESFA.DC.ILR1920.DataStore.EF.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Service
 {
-    public class FM36ProviderService : IFM36ProviderService
+    public class FM361920ProviderService : IFM36ProviderService
     {
-        private readonly Func<IIlr1819RulebaseContext> _ilrRulebaseContextFactory;
+        private readonly Func<IIlr1920RulebaseContext> _ilrRulebaseContextFactory;
 
-        public FM36ProviderService(Func<IIlr1819RulebaseContext> ilrRulebaseContextFactory)
+        public FM361920ProviderService(Func<IIlr1920RulebaseContext> ilrRulebaseContextFactory)
         {
             _ilrRulebaseContextFactory = ilrRulebaseContextFactory;
         }

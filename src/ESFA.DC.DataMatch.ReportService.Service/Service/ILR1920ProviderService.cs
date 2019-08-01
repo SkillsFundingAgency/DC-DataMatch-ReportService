@@ -5,21 +5,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
-using ESFA.DC.ILR1819.DataStore.EF.Valid;
-using ESFA.DC.ILR1819.DataStore.EF.Valid.Interface;
+using ESFA.DC.ILR1920.DataStore.EF.Valid;
+using ESFA.DC.ILR1920.DataStore.EF.Valid.Interface;
 using ESFA.DC.Logging.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Service
 {
-    public class ILRProviderService : IILRProviderService
+    public class ILR1920ProviderService : IILRProviderService
     {
         private const int ApprentishipsFundModel = 36;
-        private readonly Func<IIlr1819ValidContext> _ilrValidContextFactory;
+        private readonly Func<IIlr1920ValidContext> _ilrValidContextFactory;
 
-        public ILRProviderService(
+        public ILR1920ProviderService(
             ILogger logger,
-            Func<IIlr1819ValidContext> ilrValidContextFactory)
+            Func<IIlr1920ValidContext> ilrValidContextFactory)
         {
             _ilrValidContextFactory = ilrValidContextFactory;
         }
