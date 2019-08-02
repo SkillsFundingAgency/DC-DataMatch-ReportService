@@ -72,7 +72,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
             dasPaymentProviderMock.Setup(x => x.GetDasApprenticeshipInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dasApprenticeshipInfoForDataMatchReport);
 
-            dasPaymentProviderMock.Setup(x => x.GetDataLockValidationErrorInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            dasPaymentProviderMock.Setup(x => x.GetDataLockValidationErrorInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string[]>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dataLockValidationErrorInfoForDataMatchReport);
 
             dateTimeProviderMock.Setup(x => x.GetNowUtc()).Returns(dateTime);

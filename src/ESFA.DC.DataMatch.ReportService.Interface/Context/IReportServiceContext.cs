@@ -16,5 +16,9 @@ namespace ESFA.DC.DataMatch.ReportService.Interface
         int ReturnPeriod { get; }
 
         DateTime SubmissionDateTimeUtc { get; }
+
+        string CollectionName { get; }
+
+        string CollectionYear { get; }
     }
 }

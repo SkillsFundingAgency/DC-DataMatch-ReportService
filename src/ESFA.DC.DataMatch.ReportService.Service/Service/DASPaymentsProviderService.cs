@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ESFA.DC.DASPayments.EF.Interfaces;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
+using ESFA.DC.DataMatch.ReportService.Service.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Service
@@ -19,12 +20,15 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             _dasPaymentsContextFactory = dasPaymentsContextFactory;
         }
 
-        public async Task<DataMatchDataLockValidationErrorInfo> GetDataLockValidationErrorInfoForDataMatchReport(int collectionPeriod, int ukPrn, CancellationToken cancellationToken)
+        public async Task<DataMatchDataLockValidationErrorInfo> GetDataLockValidationErrorInfoForDataMatchReport(int collectionPeriod, int ukPrn, string[] learnRefNumbers, string collectionName, long? jobId, CancellationToken cancellationToken)
         {
             var dataMatchDataLockValidationErrorInfo = new DataMatchDataLockValidationErrorInfo()
             {
                 DataLockValidationErrors = new List<DataLockValidationError>(),
             };
+
+            bool IsILRSubmission = collectionName.CaseInsensitiveContains("ILR");
+            var dataLockSourceId = IsILRSubmission ? 1 : 2;
 
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
@@ -33,7 +37,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                     await (from dle in dasPaymentsContext.DataLockEvents
                            join dlenpp in dasPaymentsContext.DataLockEventNonPayablePeriods on dle.EventId equals dlenpp.DataLockEventId
                            join dlenpf in dasPaymentsContext.DataLockEventNonPayablePeriodFailures on dlenpp.DataLockEventNonPayablePeriodId equals dlenpf.DataLockEventNonPayablePeriodId
-                           where dle.Ukprn == ukPrn && dle.CollectionPeriod == collectionPeriod
+                           where dle.Ukprn == ukPrn && dle.CollectionPeriod == collectionPeriod &&
+                                 dlenpp.DeliveryPeriod == collectionPeriod &&
+                                 dle.DataLockSourceId == dataLockSourceId &&
+                                 dle.IsPayable == false // && learnRefNumbers.Any(x => x.CaseInsensitiveEquals(dle.LearnerReferenceNumber))
                            select new
                             {
                                 dle.Ukprn,
@@ -44,7 +51,13 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                                 dle.LearningAimPathwayCode,
                                 dle.LearnerUln,
                                 dlenpf.DataLockFailureId,
+                                dle.JobId,
                             }).Distinct().ToListAsync(cancellationToken);
+
+                if (IsILRSubmission && jobId.HasValue)
+                {
+                    dataLockValidationErrors = dataLockValidationErrors.Where(x => x.JobId == jobId.Value).ToList();
+                }
 
                 foreach (var dataLockValidationError in dataLockValidationErrors)
                 {

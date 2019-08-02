@@ -43,8 +43,8 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             foreach (var dataLockValidationError in dataLockValidationErrorInfo.DataLockValidationErrors)
             {
                 var learner = dataMatchILRInfo.DataMatchLearners.SingleOrDefault(
-                    x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber.ToString()) ||
-                         x.Uln == dataLockValidationError.LearnerUln);
+                    x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber.ToString())); // ||
+                //x.Uln == dataLockValidationError.LearnerUln);
 
                 if (learner != null)
                 {
@@ -53,24 +53,27 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
                     var matchedDasPriceInfo = dasApprenticeshipPriceInfo.DasApprenticeshipPriceInfos.FirstOrDefault(x => x.LearnerUln == dataLockValidationError.LearnerUln);
 
-                    var ruleName = PopulateRuleName(dataLockValidationError.RuleId);
-
-                    var dataMatchModel = new DataMatchModel()
+                    if (matchedDasPriceInfo != null)
                     {
-                        LearnRefNumber = dataLockValidationError.LearnerReferenceNumber,
-                        Uln = learner.Uln,
-                        AimSeqNumber = dataLockValidationError.AimSeqNumber,
-                        RuleName = ruleName,
-                        Description = PopulateRuleDescription(ruleName),
-                        ILRValue = GetILRValue(ruleName, learner),
-                        ApprenticeshipServiceValue = GetApprenticeshipServiceValue(ruleName, dataLockValidationError, matchedDasPriceInfo),
-                        PriceEpisodeStartDate = matchedRulebaseInfo?.EpisodeStartDate,
-                        PriceEpisodeActualEndDate = matchedRulebaseInfo?.PriceEpisodeActualEndDate,
-                        PriceEpisodeIdentifier = matchedRulebaseInfo?.PriceEpisodeAgreeId,
-                        LegalEntityName = GetLegalEntityName(ruleName, matchedDasPriceInfo),
-                    };
+                        var ruleName = PopulateRuleName(dataLockValidationError.RuleId);
 
-                    dataMatchModels.Add(dataMatchModel);
+                        var dataMatchModel = new DataMatchModel()
+                        {
+                            LearnRefNumber = dataLockValidationError.LearnerReferenceNumber,
+                            Uln = learner.Uln,
+                            AimSeqNumber = dataLockValidationError.AimSeqNumber,
+                            RuleName = ruleName,
+                            Description = PopulateRuleDescription(ruleName),
+                            ILRValue = GetILRValue(ruleName, learner),
+                            ApprenticeshipServiceValue = GetApprenticeshipServiceValue(ruleName, dataLockValidationError, matchedDasPriceInfo),
+                            PriceEpisodeStartDate = matchedRulebaseInfo?.EpisodeStartDate,
+                            PriceEpisodeActualEndDate = matchedRulebaseInfo?.PriceEpisodeActualEndDate,
+                            PriceEpisodeIdentifier = matchedRulebaseInfo?.PriceEpisodeAgreeId,
+                            LegalEntityName = GetLegalEntityName(ruleName, matchedDasPriceInfo),
+                        };
+
+                        dataMatchModels.Add(dataMatchModel);
+                    }
                 }
             }
 
