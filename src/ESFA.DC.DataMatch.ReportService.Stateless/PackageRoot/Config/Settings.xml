@@ -11,7 +11,7 @@
     <Parameter Name="AuditQueueName" Value="" />
     <Parameter Name="AuditMaxConcurrentCalls" Value="" />
     <Parameter Name="LoggerConnectionString" Value="" />
-    <Parameter Name="ReportingSubscriptionName" Value="" />
+    <Parameter Name="DataMatchReportingSubscriptionName" Value="" />
   </Section>
 
   <Section  Name="AzureStorageSection">

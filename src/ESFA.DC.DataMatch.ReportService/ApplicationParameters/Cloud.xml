@@ -12,7 +12,7 @@
     <Parameter Name="AzureBlobContainerName" Value="__AzureBlobContainerName__" />
     <Parameter Name="JobStatusQueueName" Value="__JobStatusQueueName__" />
     <Parameter Name="ServiceReleaseVersion" Value="__ServiceReleaseVersion__" />
-    <Parameter Name="ReportingSubscriptionName" Value="__ReportingSubscriptionName__" />
+    <Parameter Name="DataMatchReportingSubscriptionName" Value="__DataMatchReportingSubscriptionName__" />
     <Parameter Name="TopicReports" Value="__TopicReports__" />
     <Parameter Name="DASPaymentsConnectionString" Value="__DASPaymentsConnectionString__" />
     <Parameter Name="ProcessingServicePlacementConstraints" Value="__ProcessingServicePlacementConstraints__" />
