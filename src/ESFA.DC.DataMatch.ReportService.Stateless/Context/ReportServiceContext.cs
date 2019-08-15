@@ -27,5 +27,9 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless.Context
         public long JobId => _jobContextMessage.JobId;
 
         public DateTime SubmissionDateTimeUtc => _jobContextMessage.SubmissionDateTimeUtc;
+
+        public string CollectionName => _jobContextMessage.KeyValuePairs[JobContextMessageKey.CollectionName].ToString();
+
+        public string CollectionYear => _jobContextMessage.KeyValuePairs[JobContextMessageKey.CollectionYear].ToString();
     }
 }

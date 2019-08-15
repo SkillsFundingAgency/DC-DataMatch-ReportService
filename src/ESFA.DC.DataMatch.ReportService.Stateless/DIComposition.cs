@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using Autofac;
 using Autofac.Features.AttributeFilters;
+using ESFA.DC.DASPayments.EF;
+using ESFA.DC.DASPayments.EF.Interfaces;
+using ESFA.DC.DataMatch.ReportService.Interface.Builders;
 using ESFA.DC.DataMatch.ReportService.Interface.Configuration;
 using ESFA.DC.DataMatch.ReportService.Interface.Provider;
 using ESFA.DC.DataMatch.ReportService.Interface.Reports;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Service;
+using ESFA.DC.DataMatch.ReportService.Service.Builders;
+using ESFA.DC.DataMatch.ReportService.Service.Extensions;
 using ESFA.DC.DataMatch.ReportService.Service.Service;
 using ESFA.DC.DataMatch.ReportService.Stateless.Configuration;
 using ESFA.DC.DataMatch.ReportService.Stateless.Handlers;
 using ESFA.DC.DateTimeProvider.Interface;
-using ESFA.DC.DASPayments.EF;
-using ESFA.DC.DASPayments.EF.Interfaces;
 using ESFA.DC.FileService;
 using ESFA.DC.FileService.Config;
 using ESFA.DC.FileService.Config.Interface;
@@ -21,6 +24,10 @@ using ESFA.DC.ILR1819.DataStore.EF;
 using ESFA.DC.ILR1819.DataStore.EF.Interface;
 using ESFA.DC.ILR1819.DataStore.EF.Valid;
 using ESFA.DC.ILR1819.DataStore.EF.Valid.Interface;
+using ESFA.DC.ILR1920.DataStore.EF;
+using ESFA.DC.ILR1920.DataStore.EF.Interface;
+using ESFA.DC.ILR1920.DataStore.EF.Valid;
+using ESFA.DC.ILR1920.DataStore.EF.Valid.Interface;
 using ESFA.DC.IO.AzureStorage;
 using ESFA.DC.IO.AzureStorage.Config.Interfaces;
 using ESFA.DC.IO.Interfaces;
@@ -37,6 +44,9 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
 {
     public static class DIComposition
     {
+        private static readonly string YEAR_1819 = "1819";
+        private static readonly string YEAR_1920 = "1920";
+
         public static ContainerBuilder BuildContainer(ServiceFabric.Common.Config.Interface.IServiceFabricConfigurationService serviceFabricConfigurationService)
         {
             var containerBuilder = new ContainerBuilder();
@@ -94,7 +104,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
             {
                 var optionsBuilder = new DbContextOptionsBuilder<ILR1819_DataStoreEntitiesValid>();
                 optionsBuilder.UseSqlServer(
-                    reportServiceConfiguration.ILRDataStoreValidConnectionString,
+                    reportServiceConfiguration.ILR1819DataStoreConnectionString,
                     options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
 
                 return optionsBuilder.Options;
@@ -102,17 +112,43 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
                 .As<DbContextOptions<ILR1819_DataStoreEntitiesValid>>()
                 .SingleInstance();
 
+            containerBuilder.RegisterType<ILR1920_DataStoreEntitiesValid>().As<IIlr1920ValidContext>();
+            containerBuilder.Register(context =>
+                {
+                    var optionsBuilder = new DbContextOptionsBuilder<ILR1920_DataStoreEntitiesValid>();
+                    optionsBuilder.UseSqlServer(
+                        reportServiceConfiguration.ILR1920DataStoreConnectionString,
+                        options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
+
+                    return optionsBuilder.Options;
+                })
+                .As<DbContextOptions<ILR1920_DataStoreEntitiesValid>>()
+                .SingleInstance();
+
             containerBuilder.RegisterType<ILR1819_DataStoreEntities>().As<IIlr1819RulebaseContext>();
             containerBuilder.Register(context =>
             {
                 var optionsBuilder = new DbContextOptionsBuilder<ILR1819_DataStoreEntities>();
                 optionsBuilder.UseSqlServer(
-                    reportServiceConfiguration.ILRDataStoreConnectionString,
+                    reportServiceConfiguration.ILR1819DataStoreConnectionString,
                     options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
 
                 return optionsBuilder.Options;
             })
                 .As<DbContextOptions<ILR1819_DataStoreEntities>>()
+                .SingleInstance();
+
+            containerBuilder.RegisterType<ILR1920_DataStoreEntities>().As<IIlr1920RulebaseContext>();
+            containerBuilder.Register(context =>
+                {
+                    var optionsBuilder = new DbContextOptionsBuilder<ILR1920_DataStoreEntities>();
+                    optionsBuilder.UseSqlServer(
+                        reportServiceConfiguration.ILR1920DataStoreConnectionString,
+                        options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
+
+                    return optionsBuilder.Options;
+                })
+                .As<DbContextOptions<ILR1920_DataStoreEntities>>()
                 .SingleInstance();
 
             containerBuilder.RegisterType<DASPaymentsContext>().As<IDASPaymentsContext>();
@@ -130,25 +166,55 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
 
             containerBuilder.RegisterType<DateTimeProvider.DateTimeProvider>().As<IDateTimeProvider>().InstancePerLifetimeScope();
 
-            RegisterReports(containerBuilder);
             RegisterServices(containerBuilder);
             RegisterBuilders(containerBuilder);
+            RegisterReports(containerBuilder);
 
             return containerBuilder;
         }
 
+        public static void RegisterServicesByYear(string year, ContainerBuilder containerBuilder)
+        {
+            if (year.CaseInsensitiveEquals(YEAR_1819))
+            {
+                containerBuilder.RegisterType<ILR1819ProviderService>().As<IILRProviderService>()
+                    .WithAttributeFiltering()
+                    .InstancePerLifetimeScope();
+                containerBuilder.RegisterType<FM361819ProviderService>().As<IFM36ProviderService>()
+                    .WithAttributeFiltering()
+                    .InstancePerLifetimeScope();
+            }
+            else if (year.CaseInsensitiveEquals(YEAR_1920))
+            {
+                containerBuilder.RegisterType<ILR1920ProviderService>().As<IILRProviderService>()
+                    .WithAttributeFiltering()
+                    .InstancePerLifetimeScope();
+                containerBuilder.RegisterType<FM361920ProviderService>().As<IFM36ProviderService>()
+                    .WithAttributeFiltering()
+                    .InstancePerLifetimeScope();
+            }
+        }
+
         private static void RegisterReports(ContainerBuilder containerBuilder)
         {
-            containerBuilder.Register(c => new List<IReport>(c.Resolve<IEnumerable<IReport>>()))
-                .As<IList<IReport>>();
+            containerBuilder.RegisterType<DataMatchReport>().As<IReport>()
+                .WithAttributeFiltering()
+                .InstancePerLifetimeScope();
         }
 
         private static void RegisterServices(ContainerBuilder containerBuilder)
         {
+            containerBuilder.RegisterType<ValidLearnerService>().As<IValidLearnersService>()
+                .WithAttributeFiltering()
+                .InstancePerLifetimeScope();
+            containerBuilder.RegisterType<DASPaymentsProviderService>().As<IDASPaymentsProviderService>()
+                .InstancePerLifetimeScope();
         }
 
         private static void RegisterBuilders(ContainerBuilder containerBuilder)
         {
+            containerBuilder.RegisterType<DataMatchMonthEndModelBuilder>().As<IDataMatchModelBuilder>()
+                .InstancePerLifetimeScope();
         }
     }
 }

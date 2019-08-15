@@ -78,6 +78,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless.Handlers
                         azureBlobStorageOptions.AzureBlobConnectionString,
                         jobContextMessage.KeyValuePairs[JobContextMessageKey.Container].ToString()))
                     .As<IAzureStorageKeyValuePersistenceServiceConfig>();
+                DIComposition.RegisterServicesByYear(jobContextMessage.KeyValuePairs[JobContextMessageKey.CollectionYear].ToString(), c);
             });
         }
     }

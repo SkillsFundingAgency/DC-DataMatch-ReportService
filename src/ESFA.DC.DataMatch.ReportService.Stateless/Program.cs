@@ -47,8 +47,6 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
 
                 using (var container = builder.Build())
                 {
-                    container.Resolve<EntryPoint>();
-
                     ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(ServiceFabric.Common.Stateless).Name);
 
                     // Prevents this host process from terminating so services keep running.

@@ -6,8 +6,8 @@
     <Parameter Name="AuditQueueName" DefaultValue="audit-queue" />
     <Parameter Name="TopicName" DefaultValue="ilr1920submissiontopic" />
     <Parameter Name="ServiceBusConnectionString" DefaultValue="" />
-    <Parameter Name="ILRDataStoreConnectionString" DefaultValue="data source=(local);initial catalog=ILR1819_DataStore;integrated security=True;multipleactiveresultsets=True;Connect Timeout=90" />
-    <Parameter Name="ILRDataStoreValidConnectionString" DefaultValue="data source=(local);initial catalog=ILR1819_DataStore;integrated security=True;multipleactiveresultsets=True;Connect Timeout=90" />
+    <Parameter Name="ILR1819DataStoreConnectionString" DefaultValue="data source=(local);initial catalog=ILR1819_DataStore;integrated security=True;multipleactiveresultsets=True;Connect Timeout=90" />
+    <Parameter Name="ILR1920DataStoreConnectionString" DefaultValue="data source=(local);initial catalog=ILR1920_DataStore;integrated security=True;multipleactiveresultsets=True;Connect Timeout=90" />
     <Parameter Name="LoggerConnectionstring" DefaultValue="data source=(local);initial catalog=logs;integrated security=True;multipleactiveresultsets=True;Connect Timeout=90;" />
     <Parameter Name="MaxMessageSize" DefaultValue="1073741824" />
     <Parameter Name="AzureBlobConnectionString" DefaultValue="UseDevelopmentStorage=true" />
@@ -16,21 +16,15 @@
     <Parameter Name="DataServicePlacementConstraints" DefaultValue="" />
     <Parameter Name="ServiceReleaseVersion" DefaultValue="" />
     <Parameter Name="JobStatusQueueName" DefaultValue="" />
-    <Parameter Name="JobStatusConnectionString" DefaultValue="" />
-    <Parameter Name="ReportingSubscriptionName" DefaultValue="Reports" />
+    <Parameter Name="DataMatchReportingSubscriptionName" DefaultValue="Reports" />
     <Parameter Name="TopicMaxConcurrentCalls" DefaultValue="1" />
     <Parameter Name="TopicMaxCallbackTimeSpanMinutes" DefaultValue="30" />
     <Parameter Name="JobStatusMaxConcurrentCalls" DefaultValue="1" />
     <Parameter Name="AuditMaxConcurrentCalls" DefaultValue="1" />
     <!-- Topic Names -->
     <Parameter Name="TopicReports" DefaultValue="Reports" />
-    <Parameter Name="TopicReports_TaskGenerateDataMatchReport" DefaultValue="GenerateDataMatchReport" />
     <!-- DASPayments -->
     <Parameter Name="DASPaymentsConnectionString" DefaultValue="" />
-    <!-- CollectionsManagement -->
-    <Parameter Name="CollectionsManagementConnectionString" DefaultValue="" />
-    <!-- ILR Validation Errors -->
-    <Parameter Name="IlrValidationErrorsConnectionString" DefaultValue="" />
   </Parameters>
   <!-- Import the ServiceManifest from the ServicePackage. The ServiceManifestName and ServiceManifestVersion 
        should match the Name and Version attributes of the ServiceManifest element defined in the 
@@ -43,7 +37,7 @@
           <Section Name="StatelessServiceConfiguration">
             <Parameter Name="ServiceBusConnectionString" Value="[ServiceBusConnectionString]" />
             <Parameter Name="TopicName" Value="[TopicName]" />
-            <Parameter Name="SubscriptionName" Value="[ReportingSubscriptionName]" />
+            <Parameter Name="DataMatchReportingSubscriptionName" Value="[DataMatchReportingSubscriptionName]" />
             <Parameter Name="TopicMaxConcurrentCalls" Value="[TopicMaxConcurrentCalls]" />
             <Parameter Name="TopicMaxCallbackTimeSpanMinutes" Value="[TopicMaxCallbackTimeSpanMinutes]" />
             <Parameter Name="JobStatusQueueName" Value="[JobStatusQueueName]" />
@@ -54,10 +48,8 @@
           </Section>
           <Section Name="ReportServiceConfiguration">
             <Parameter Name="DASPaymentsConnectionString" Value="[DASPaymentsConnectionString]" />
-            <Parameter Name="IlrValidationErrorsConnectionString" Value="[IlrValidationErrorsConnectionString]" />
-            <Parameter Name="ILRDataStoreConnectionString" Value="[ILRDataStoreConnectionString]" />
-            <Parameter Name="ILRDataStoreValidConnectionString" Value="[ILRDataStoreValidConnectionString]" />
-            <Parameter Name="JobStatusConnectionString" Value="[JobStatusConnectionString]" />
+            <Parameter Name="ILR1819DataStoreConnectionString" Value="[ILR1819DataStoreConnectionString]" />
+            <Parameter Name="ILR1920DataStoreConnectionString" Value="[ILR1920DataStoreConnectionString]" />
           </Section>
           <Section Name="AzureStorageSection">
             <Parameter Name="AzureBlobConnectionString" Value="[AzureBlobConnectionString]" />
@@ -71,7 +63,6 @@
           </Section>
           <Section Name="TopicAndTaskSection">
             <Parameter Name="TopicReports" Value="[TopicReports]" />
-            <Parameter Name="TopicReports_TaskGenerateDataMatchReport" Value="[TopicReports_TaskGenerateDataMatchReport]" />
           </Section>
         </Settings>
       </ConfigOverride>

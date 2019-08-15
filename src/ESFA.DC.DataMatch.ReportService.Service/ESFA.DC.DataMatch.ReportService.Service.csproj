@@ -4,16 +4,25 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet>ESFA.DC.DataMatch.ReportService.Service.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet>ESFA.DC.DataMatch.ReportService.Service.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Aspose.Cells" Version="19.6.0" />
     <PackageReference Include="CsvHelper" Version="12.1.2" />
     <PackageReference Include="ESFA.DC.Auditing.Interface" Version="0.2.0-beta0001" />
-    <PackageReference Include="ESFA.DC.DASPayments.EF" Version="0.1.70" />
+    <PackageReference Include="ESFA.DC.DASPayments.EF" Version="0.1.77" />
     <PackageReference Include="ESFA.DC.DateTimeProvider" Version="0.1.6-beta0001" />
     <PackageReference Include="ESFA.DC.DateTimeProvider.Interface" Version="0.1.6-beta0001" />
     <PackageReference Include="ESFA.DC.FileService" Version="0.1.19-beta0001" />
     <PackageReference Include="ESFA.DC.FileService.Interface" Version="0.1.18-beta0001" />
     <PackageReference Include="ESFA.DC.ILR1819.Database.EF" Version="0.1.381" />
+    <PackageReference Include="ESFA.DC.ILR1920.Database.EF" Version="0.0.273" />
     <PackageReference Include="ESFA.DC.IO.AzureStorage" Version="0.1.19-beta0001" />
     <PackageReference Include="ESFA.DC.IO.Interfaces" Version="0.1.18-beta0001" />
     <PackageReference Include="ESFA.DC.JobContext.Interface" Version="0.2.8-beta0001" />
@@ -29,6 +38,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="2.2.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="2.2.3" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +50,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="ESFA.DC.ILR1920.DataStore.EF.Valid">
+      <HintPath>..\packages\ESFA.DC.ILR1920.Database.EF.0.0.273\lib\netstandard2.0\ESFA.DC.ILR1920.DataStore.EF.Valid.dll</HintPath>
+    </Reference>
     <Reference Include="ESFA.DC.IO.Interfaces">
       <HintPath>..\..\..\..\Users\Gayatri\.nuget\packages\esfa.dc.io.interfaces\0.1.11-beta0001\lib\netstandard2.0\ESFA.DC.IO.Interfaces.dll</HintPath>
     </Reference>
