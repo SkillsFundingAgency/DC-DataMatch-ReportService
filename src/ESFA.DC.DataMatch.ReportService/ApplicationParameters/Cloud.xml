@@ -1,6 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/ESFA.DC.DataMatch.ReportService" xmlns="http://schemas.microsoft.com/2011/01/fabric">
   <Parameters>
-    <Parameter Name="ESFA.DC.DataMatch.ReportService.Stateless_InstanceCount" Value="-1" />
+    <Parameter Name="ESFA.DC.DataMatch.ReportService.Stateless_InstanceCount" Value="1" />
+    <Parameter Name="AzureBlobConnectionString" Value="__AzureBlobConnectionString__" />
+    <Parameter Name="ServiceBusConnectionString" Value="__ServiceBusConnectionString__" />
+    <Parameter Name="ILR1819DataStoreConnectionString" Value="__ILR1819DataStoreConnectionString__" />
+    <Parameter Name="ILR1920DataStoreConnectionString" Value="__ILR1920DataStoreConnectionString__" />
+    <Parameter Name="AuditQueueName" Value="__AuditQueueName__" />
+    <Parameter Name="TopicName" Value="__TopicName__" />
+    <Parameter Name="LoggerConnectionstring" Value="__LoggerConnectionstring__" />
+    <Parameter Name="AzureBlobContainerName" Value="__AzureBlobContainerName__" />
+    <Parameter Name="JobStatusQueueName" Value="__JobStatusQueueName__" />
+    <Parameter Name="ServiceReleaseVersion" Value="__ServiceReleaseVersion__" />
+    <Parameter Name="ReportingSubscriptionName" Value="__ReportingSubscriptionName__" />
+    <Parameter Name="TopicReports" Value="__TopicReports__" />
+    <Parameter Name="DASPaymentsConnectionString" Value="__DASPaymentsConnectionString__" />
+    <Parameter Name="ProcessingServicePlacementConstraints" Value="__ProcessingServicePlacementConstraints__" />
   </Parameters>
 </Application>

@@ -104,7 +104,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
             {
                 var optionsBuilder = new DbContextOptionsBuilder<ILR1819_DataStoreEntitiesValid>();
                 optionsBuilder.UseSqlServer(
-                    reportServiceConfiguration.ILR1819DataStoreValidConnectionString,
+                    reportServiceConfiguration.ILR1819DataStoreConnectionString,
                     options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
 
                 return optionsBuilder.Options;
@@ -117,7 +117,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
                 {
                     var optionsBuilder = new DbContextOptionsBuilder<ILR1920_DataStoreEntitiesValid>();
                     optionsBuilder.UseSqlServer(
-                        reportServiceConfiguration.ILR1920DataStoreValidConnectionString,
+                        reportServiceConfiguration.ILR1920DataStoreConnectionString,
                         options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
 
                     return optionsBuilder.Options;

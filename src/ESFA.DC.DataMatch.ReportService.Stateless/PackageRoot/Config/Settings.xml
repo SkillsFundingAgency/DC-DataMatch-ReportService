@@ -21,12 +21,8 @@
 
   <Section Name="ReportServiceConfiguration">
     <Parameter Name="DASPaymentsConnectionString" Value="" />
-    <Parameter Name="IlrValidationErrorsConnectionString" Value="" />
     <Parameter Name="ILR1819DataStoreConnectionString" Value="" />
-    <Parameter Name="ILR1819DataStoreValidConnectionString" Value="" />
     <Parameter Name="ILR1920DataStoreConnectionString" Value="" />
-    <Parameter Name="ILR1920DataStoreValidConnectionString" Value="" />
-    <Parameter Name="JobStatusConnectionString" Value="" />
   </Section>
 
   <Section Name="SoftwareLicenceSection">
@@ -39,6 +35,5 @@
 
   <Section Name="TopicAndTaskSection">
     <Parameter Name="TopicReports" Value="" />
-    <Parameter Name="TopicReports_TaskGenerateDataMatchReport" Value="" />
   </Section>
 </Settings>
