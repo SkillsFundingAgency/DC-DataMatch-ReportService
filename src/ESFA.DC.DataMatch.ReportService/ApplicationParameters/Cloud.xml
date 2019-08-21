@@ -7,12 +7,12 @@
     <Parameter Name="ILR1819DataStoreConnectionString" Value="__ILR1819DataStoreConnectionString__" />
     <Parameter Name="ILR1920DataStoreConnectionString" Value="__ILR1920DataStoreConnectionString__" />
     <Parameter Name="AuditQueueName" Value="__AuditQueueName__" />
-    <Parameter Name="TopicName" Value="__TopicName__" />
+    <Parameter Name="TopicName" Value="__DataMatchReportingTopicName__" />
     <Parameter Name="LoggerConnectionstring" Value="__LoggerConnectionstring__" />
     <Parameter Name="AzureBlobContainerName" Value="__AzureBlobContainerName__" />
     <Parameter Name="JobStatusQueueName" Value="__JobStatusQueueName__" />
     <Parameter Name="ServiceReleaseVersion" Value="__ServiceReleaseVersion__" />
-    <Parameter Name="DataMatchReportingSubscriptionName" Value="__DataMatchReportingSubscriptionName__" />
+    <Parameter Name="SubscriptionName" Value="__DataMatchReportingSubscriptionName__" />
     <Parameter Name="TopicReports" Value="__TopicReports__" />
     <Parameter Name="DASPaymentsConnectionString" Value="__DASPaymentsConnectionString__" />
     <Parameter Name="ProcessingServicePlacementConstraints" Value="__ProcessingServicePlacementConstraints__" />

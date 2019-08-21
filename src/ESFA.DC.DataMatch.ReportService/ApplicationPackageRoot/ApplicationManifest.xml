@@ -4,7 +4,7 @@
     <Parameter Name="ESFA.DC.DataMatch.ReportService.Stateless_InstanceCount" DefaultValue="-1" />
     <Parameter Name="ProcessingServicePlacementConstraints" DefaultValue="" />
     <Parameter Name="AuditQueueName" DefaultValue="audit-queue" />
-    <Parameter Name="TopicName" DefaultValue="ilr1920submissiontopic" />
+    <Parameter Name="TopicName" DefaultValue="datamatchtopic" />
     <Parameter Name="ServiceBusConnectionString" DefaultValue="" />
     <Parameter Name="ILR1819DataStoreConnectionString" DefaultValue="data source=(local);initial catalog=ILR1819_DataStore;integrated security=True;multipleactiveresultsets=True;Connect Timeout=90" />
     <Parameter Name="ILR1920DataStoreConnectionString" DefaultValue="data source=(local);initial catalog=ILR1920_DataStore;integrated security=True;multipleactiveresultsets=True;Connect Timeout=90" />
@@ -16,7 +16,7 @@
     <Parameter Name="DataServicePlacementConstraints" DefaultValue="" />
     <Parameter Name="ServiceReleaseVersion" DefaultValue="" />
     <Parameter Name="JobStatusQueueName" DefaultValue="" />
-    <Parameter Name="DataMatchReportingSubscriptionName" DefaultValue="Reports" />
+    <Parameter Name="SubscriptionName" DefaultValue="Reports" />
     <Parameter Name="TopicMaxConcurrentCalls" DefaultValue="1" />
     <Parameter Name="TopicMaxCallbackTimeSpanMinutes" DefaultValue="30" />
     <Parameter Name="JobStatusMaxConcurrentCalls" DefaultValue="1" />
@@ -37,7 +37,7 @@
           <Section Name="StatelessServiceConfiguration">
             <Parameter Name="ServiceBusConnectionString" Value="[ServiceBusConnectionString]" />
             <Parameter Name="TopicName" Value="[TopicName]" />
-            <Parameter Name="DataMatchReportingSubscriptionName" Value="[DataMatchReportingSubscriptionName]" />
+            <Parameter Name="SubscriptionName" Value="[SubscriptionName]" />
             <Parameter Name="TopicMaxConcurrentCalls" Value="[TopicMaxConcurrentCalls]" />
             <Parameter Name="TopicMaxCallbackTimeSpanMinutes" Value="[TopicMaxCallbackTimeSpanMinutes]" />
             <Parameter Name="JobStatusQueueName" Value="[JobStatusQueueName]" />
