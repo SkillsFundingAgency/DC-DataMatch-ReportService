@@ -19,9 +19,9 @@ namespace ESFA.DC.DataMatch.ReportService.Model.ReportModels
 
         public string ApprenticeshipServiceValue { get; set; }
 
-        public DateTime? PriceEpisodeStartDate { get; set; }
+        public string PriceEpisodeStartDate { get; set; }
 
-        public DateTime? PriceEpisodeActualEndDate { get; set; }
+        public string PriceEpisodeActualEndDate { get; set; }
 
         public string OfficialSensitive { get; set; }
 

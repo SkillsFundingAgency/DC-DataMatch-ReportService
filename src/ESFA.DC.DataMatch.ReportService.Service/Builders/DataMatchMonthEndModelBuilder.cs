@@ -66,8 +66,8 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                             Description = PopulateRuleDescription(ruleName),
                             ILRValue = GetILRValue(ruleName, learner),
                             ApprenticeshipServiceValue = GetApprenticeshipServiceValue(ruleName, dataLockValidationError, matchedDasPriceInfo),
-                            PriceEpisodeStartDate = matchedRulebaseInfo?.EpisodeStartDate,
-                            PriceEpisodeActualEndDate = matchedRulebaseInfo?.PriceEpisodeActualEndDate,
+                            PriceEpisodeStartDate = matchedRulebaseInfo?.EpisodeStartDate?.ToString("dd/MM/yyyy"),
+                            PriceEpisodeActualEndDate = matchedRulebaseInfo?.PriceEpisodeActualEndDate?.ToString("dd/MM/yyyy"),
                             PriceEpisodeIdentifier = matchedRulebaseInfo?.PriceEpisodeAgreeId,
                             LegalEntityName = GetLegalEntityName(ruleName, matchedDasPriceInfo),
                         };
@@ -197,12 +197,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_10))
             {
-                return dasApprenticeshipPriceInfo.WithdrawnOnDate?.ToString();
+                return dasApprenticeshipPriceInfo.WithdrawnOnDate?.ToString("dd/MM/yyyy");
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_12))
             {
-                return dasApprenticeshipPriceInfo.PausedOnDate?.ToString();
+                return dasApprenticeshipPriceInfo.PausedOnDate?.ToString("dd/MM/yyyy");
             }
 
             return string.Empty;

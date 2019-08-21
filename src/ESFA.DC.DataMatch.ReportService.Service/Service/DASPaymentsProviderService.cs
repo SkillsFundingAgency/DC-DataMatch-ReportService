@@ -40,7 +40,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                            where dle.Ukprn == ukPrn && dle.CollectionPeriod == collectionPeriod &&
                                  dlenpp.DeliveryPeriod == collectionPeriod &&
                                  dle.DataLockSourceId == dataLockSourceId &&
-                                 dle.IsPayable == false // && learnRefNumbers.Any(x => x.CaseInsensitiveEquals(dle.LearnerReferenceNumber))
+                                 dle.IsPayable == false
                            select new
                             {
                                 dle.Ukprn,
@@ -51,13 +51,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                                 dle.LearningAimPathwayCode,
                                 dle.LearnerUln,
                                 dlenpf.DataLockFailureId,
-                                dle.JobId,
                             }).Distinct().ToListAsync(cancellationToken);
-
-                if (IsILRSubmission && jobId.HasValue)
-                {
-                    dataLockValidationErrors = dataLockValidationErrors.Where(x => x.JobId == jobId.Value).ToList();
-                }
 
                 foreach (var dataLockValidationError in dataLockValidationErrors)
                 {
