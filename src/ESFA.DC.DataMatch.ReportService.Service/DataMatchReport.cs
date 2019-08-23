@@ -54,6 +54,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
         public override async Task GenerateReport(IReportServiceContext reportServiceContext, ZipArchive archive, bool isFis, CancellationToken cancellationToken)
         {
+            _logger.LogInfo("GenerateReport started");
             var validLearnersTask = _validLearnersService.GetLearnersAsync(reportServiceContext, cancellationToken);
             var dataMatchILRInfoTask = _ilrProviderService.GetILRInfoForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
             var dataMatchRulebaseInfoTask = _fm36ProviderService.GetFM36DataForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
@@ -69,7 +70,15 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             var dataLockValidationErrorInfo = dataLockValidationErrorInfoTask.Result;
             var dasApprenticeshipPriceInfo = dasApprenticeshipPriceInfoTask.Result;
 
+            _logger.LogInfo($"ValidLearner count {validLearners.Count()}");
+            _logger.LogInfo($"dataMatchILRInfo (learners with ACT1 and FM36 in ILR) count {dataMatchILRInfo.DataMatchLearners?.Count}");
+            _logger.LogInfo($"dataMatchRulebaseInfo. (AEC_ApprenticeshipPriceEpisodes) count {dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.Count}");
+            _logger.LogInfo($"dataLockValidationErrorInfo (DataLockEvents + joins) count {dataLockValidationErrorInfo.DataLockValidationErrors?.Count}");
+            _logger.LogInfo($"dasApprenticeshipPriceInfo (Payments.ApprenticeshipPriceEpisodes) count {dasApprenticeshipPriceInfo.DasApprenticeshipPriceInfos.Count}");
+
+            _logger.LogInfo($"using the above to build the model...");
             var dataMatchModels = _dataMatchModelBuilder.BuildModels(dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dasApprenticeshipPriceInfo)?.ToList();
+            _logger.LogInfo($"dataMatchModels count (lines to go in the report) {dataMatchModels.Count}");
             dataMatchModels?.Sort(DataMatchModelComparer);
 
             var externalFileName = GetFilename(reportServiceContext);
