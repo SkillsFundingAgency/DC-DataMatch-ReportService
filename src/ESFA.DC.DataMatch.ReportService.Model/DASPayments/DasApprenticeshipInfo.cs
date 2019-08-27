@@ -7,7 +7,7 @@ namespace ESFA.DC.DataMatch.ReportService.Model.DASPayments
         public long ApprenticeshipId { get; set; }
         public string AgreementId { get; set; }
         public DateTime AgreedOnDate { get; set; }
-        public long Uln { get; set; }
+        public long LearnerUln { get; set; }
         public long UkPrn { get; set; }
         public DateTime EstimatedStartDate { get; set; }
         public DateTime EstimatedEndDate { get; set; }
@@ -20,11 +20,13 @@ namespace ESFA.DC.DataMatch.ReportService.Model.DASPayments
         public long? AimSequenceNumber { get; set; }
         public int RuleId { get; set; }
         public decimal Cost { get; set; }
-        public DateTime PauseDate { get; set; }
+        public DateTime? PausedOnDate { get; set; }
         public string LegalEntityName { get; set; }
         public string AppreticeshipServiceValue { get; set; }
 
         public DateTime? EffectiveFromDate { get; set; }
         public int PaymentStatus { get; set; }
+
+        public DateTime? WithdrawnOnDate { get; set; }
     }
 }

@@ -45,9 +45,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             var dataMatchILRInfo = BuildILRModelForDataMatchReportBuilderTests(ilrukPrn, learnRefNumber, ilrUln, "50117889", 1, ilrFworkCode, ilrProgType, ilrPwayCode, ilrStdCode, "ACT", "1", new DateTime(2019, 10, 10));
             var dataMatchRulebaseInfo = BuildILRRulebaseModelForDataMatchReportBuilderTests(ilrukPrn, learnRefNumber, 1);
             var dataLockValidationErrorInfo =
-                BuildDataLockValidationErrorInfoForDataMatchReportBuildTests(dasUkPrn, learnRefNumber, 1, dasUln, dasFworkCode, dasProgType, dasPwayCode, dasStdCode, ruleId, 12345);
+                BuildDataLockValidationErrorInfoForDataMatchReportBuildTests(dasUkPrn, learnRefNumber, 1, dasUln, ruleId, 12345);
             var dataMatchDasApprenticeshiPriceInfo =
-                BuildDasApprenticeshipInfoForDataMatchReportBuilderTests(ilrukPrn, 9900000111, null, null, 100, "TestLegalEntityName");
+                BuildDasApprenticeshipInfoForDataMatchReportBuilderTests(ilrukPrn, 9900000111, null, null, dasFworkCode, dasProgType, dasPwayCode, dasStdCode, 100, "TestLegalEntityName");
 
             var result = dataMatchModelBuilder.BuildModels(dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dataMatchDasApprenticeshiPriceInfo);
 
@@ -63,21 +63,29 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             long uln,
             DateTime? pausedOnDate,
             DateTime? withdrawnOnDate,
+            int frameworkCode,
+            int programmeType,
+            int pathwayCode,
+            int standardCode,
             decimal cost,
             string legalEntityName)
         {
             return new DataMatchDasApprenticeshipInfo()
             {
                 UkPrn = ukPrn,
-                DasApprenticeshipPriceInfos = new List<DasApprenticeshipPriceInfo>()
+                DasApprenticeshipInfos = new List<DasApprenticeshipInfo>()
                 {
-                    new DasApprenticeshipPriceInfo()
+                    new DasApprenticeshipInfo()
                     {
                         LearnerUln = uln,
                         PausedOnDate = pausedOnDate,
                         WithdrawnOnDate = withdrawnOnDate,
                         LegalEntityName = legalEntityName,
                         Cost = cost,
+                        FrameworkCode = frameworkCode,
+                        ProgrammeType = programmeType,
+                        PathwayCode = pathwayCode,
+                        StandardCode = standardCode,
                     },
                 },
             };
@@ -88,10 +96,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             string learnerReferenceNumber,
             int aimSeqNumber,
             long uln,
-            int frameworkCode,
-            int programmeType,
-            int pathwayCode,
-            int standardCode,
             int ruleId,
             long priceEpisodeMatchAppId)
         {
@@ -105,10 +109,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
                         LearnerReferenceNumber = learnerReferenceNumber,
                         AimSeqNumber = aimSeqNumber,
                         LearnerUln = uln,
-                        FrameworkCode = frameworkCode,
-                        ProgrammeType = programmeType,
-                        PathwayCode = pathwayCode,
-                        StandardCode = standardCode,
                         RuleId = ruleId,
                         PriceEpisodeMatchAppId = priceEpisodeMatchAppId,
                     },

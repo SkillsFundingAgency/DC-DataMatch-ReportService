@@ -119,10 +119,6 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                         LearnerReferenceNumber = "9900000306",
                         AimSeqNumber = 1,
                         LearnerUln = 9900000111,
-                        FrameworkCode = 1,
-                        ProgrammeType = 2,
-                        PathwayCode = 3,
-                        StandardCode = 4,
                         RuleId = 1,
                         PriceEpisodeMatchAppId = 12345,
                     },
@@ -135,15 +131,19 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
             return new DataMatchDasApprenticeshipInfo()
             {
                 UkPrn = ukPrn,
-                DasApprenticeshipPriceInfos = new List<DasApprenticeshipPriceInfo>()
+                DasApprenticeshipInfos = new List<DasApprenticeshipInfo>()
                 {
-                    new DasApprenticeshipPriceInfo()
+                    new DasApprenticeshipInfo()
                     {
                         LearnerUln = 9900000111,
                         PausedOnDate = null,
                         WithdrawnOnDate = null,
                         LegalEntityName = "LegalEntityName",
                         Cost = 100,
+                        FrameworkCode = 1,
+                        ProgrammeType = 2,
+                        PathwayCode = 3,
+                        StandardCode = 4,
                     },
                 },
             };
@@ -267,7 +267,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                 {
                     UkPrn = ukPrn,
                     LearnerReferenceNumber = "9900000306",
-                    Uln = 9900000111,
+                    LearnerUln = 9900000111,
                     ApprenticeshipId = 114656,
                     AgreementId = "YZ2V7Y",
                     AimSequenceNumber = 1,
@@ -281,7 +281,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                     Cost = 1.80M,
                     StopDate = new DateTime(2018, 05, 30),
                     RuleId = 3,
-                    PauseDate = new DateTime(2018, 04, 30),
+                    PausedOnDate = new DateTime(2018, 04, 30),
                     LegalEntityName = "LegalEntityName",
                     AppreticeshipServiceValue = "3",
                 },
