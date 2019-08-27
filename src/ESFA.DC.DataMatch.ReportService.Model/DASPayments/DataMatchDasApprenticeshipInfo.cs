@@ -8,6 +8,6 @@ namespace ESFA.DC.DataMatch.ReportService.Model.DASPayments
     {
         public int UkPrn { get; set; }
 
-        public List<DasApprenticeshipPriceInfo> DasApprenticeshipPriceInfos { get; set; }
+        public List<DasApprenticeshipInfo> DasApprenticeshipInfos { get; set; }
     }
 }

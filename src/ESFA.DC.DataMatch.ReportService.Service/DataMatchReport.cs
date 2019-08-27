@@ -74,7 +74,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             _logger.LogInfo($"dataMatchILRInfo (learners with ACT1 and FM36 in ILR) count {dataMatchILRInfo.DataMatchLearners?.Count}");
             _logger.LogInfo($"dataMatchRulebaseInfo. (AEC_ApprenticeshipPriceEpisodes) count {dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.Count}");
             _logger.LogInfo($"dataLockValidationErrorInfo (DataLockEvents + joins) count {dataLockValidationErrorInfo.DataLockValidationErrors?.Count}");
-            _logger.LogInfo($"dasApprenticeshipPriceInfo (Payments.ApprenticeshipPriceEpisodes) count {dasApprenticeshipPriceInfo.DasApprenticeshipPriceInfos.Count}");
+            _logger.LogInfo($"dasApprenticeshipPriceInfo (Payments.ApprenticeshipPriceEpisodes) count {dasApprenticeshipPriceInfo.DasApprenticeshipInfos.Count}");
 
             _logger.LogInfo($"using the above to build the model...");
             var dataMatchModels = _dataMatchModelBuilder.BuildModels(dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dasApprenticeshipPriceInfo)?.ToList();

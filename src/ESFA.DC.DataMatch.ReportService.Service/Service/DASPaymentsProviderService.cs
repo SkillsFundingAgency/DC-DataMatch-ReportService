@@ -13,6 +13,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
 {
     public sealed class DASPaymentsProviderService : IDASPaymentsProviderService
     {
+        private readonly string _ZPROG001 = "ZPROG001";
         private readonly Func<IDASPaymentsContext> _dasPaymentsContextFactory;
 
         public DASPaymentsProviderService(Func<IDASPaymentsContext> dasPaymentsContextFactory)
@@ -35,23 +36,22 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             {
                 var dataLockValidationErrors =
                     await (from dle in dasPaymentsContext.DataLockEvents
+                           join ee in dasPaymentsContext.EarningEvents on dle.EarningEventId equals ee.EventId
                            join dlenpp in dasPaymentsContext.DataLockEventNonPayablePeriods on dle.EventId equals dlenpp.DataLockEventId
                            join dlenpf in dasPaymentsContext.DataLockEventNonPayablePeriodFailures on dlenpp.DataLockEventNonPayablePeriodId equals dlenpf.DataLockEventNonPayablePeriodId
                            where dle.Ukprn == ukPrn && dle.CollectionPeriod == collectionPeriod &&
                                  dlenpp.DeliveryPeriod == collectionPeriod &&
                                  dle.DataLockSourceId == dataLockSourceId &&
+                                 dle.LearningAimReference.CaseInsensitiveEquals(_ZPROG001) &&
                                  dle.IsPayable == false
                            select new
-                            {
-                                dle.Ukprn,
-                                dle.LearnerReferenceNumber,
-                                dle.LearningAimStandardCode,
-                                dle.LearningAimFrameworkCode,
-                                dle.LearningAimProgrammeType,
-                                dle.LearningAimPathwayCode,
-                                dle.LearnerUln,
-                                dlenpf.DataLockFailureId,
-                            }).Distinct().ToListAsync(cancellationToken);
+                           {
+                               dle.Ukprn,
+                               dle.LearnerReferenceNumber,
+                               dle.LearnerUln,
+                               dlenpf.DataLockFailureId,
+                               ee.LearningAimSequenceNumber,
+                           }).Distinct().ToListAsync(cancellationToken);
 
                 foreach (var dataLockValidationError in dataLockValidationErrors)
                 {
@@ -59,10 +59,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                     {
                         UkPrn = dataLockValidationError.Ukprn,
                         LearnerReferenceNumber = dataLockValidationError.LearnerReferenceNumber,
-                        StandardCode = dataLockValidationError.LearningAimStandardCode,
-                        FrameworkCode = dataLockValidationError.LearningAimFrameworkCode,
-                        ProgrammeType = dataLockValidationError.LearningAimProgrammeType,
-                        PathwayCode = dataLockValidationError.LearningAimPathwayCode,
+                        AimSeqNumber = dataLockValidationError.LearningAimSequenceNumber,
                         LearnerUln = dataLockValidationError.LearnerUln,
                         RuleId = dataLockValidationError.DataLockFailureId,
                     });
@@ -77,7 +74,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             var dataMatchDasApprenticeshipInfo = new DataMatchDasApprenticeshipInfo()
             {
                 UkPrn = ukPrn,
-                DasApprenticeshipPriceInfos = new List<DasApprenticeshipPriceInfo>(),
+                DasApprenticeshipInfos = new List<DasApprenticeshipInfo>(),
             };
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -92,16 +89,21 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                                 into appPriceEpisodePausesJoin
                             from apepj in appPriceEpisodePausesJoin.DefaultIfEmpty()
                             where a.Ukprn == ukPrn
-                            select new DasApprenticeshipPriceInfo()
+                            select new DasApprenticeshipInfo()
                             {
+                                UkPrn = ukPrn,
                                 LearnerUln = a.Uln,
                                 WithdrawnOnDate = a.StopDate,
                                 PausedOnDate = apepj.PauseDate,
                                 Cost = apej.Cost,
                                 LegalEntityName = a.LegalEntityName,
+                                ProgrammeType = a.ProgrammeType,
+                                StandardCode = a.StandardCode,
+                                FrameworkCode = a.FrameworkCode,
+                                PathwayCode = a.PathwayCode,
                             }).Distinct().ToListAsync(cancellationToken);
 
-                dataMatchDasApprenticeshipInfo.DasApprenticeshipPriceInfos = dataMatchDasApprenticeshipPrices;
+                dataMatchDasApprenticeshipInfo.DasApprenticeshipInfos = dataMatchDasApprenticeshipPrices;
             }
 
             return dataMatchDasApprenticeshipInfo;

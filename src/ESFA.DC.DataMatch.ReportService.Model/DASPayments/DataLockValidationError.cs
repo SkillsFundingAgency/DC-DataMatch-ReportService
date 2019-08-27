@@ -12,14 +12,6 @@ namespace ESFA.DC.DataMatch.ReportService.Model.DASPayments
 
         public long PriceEpisodeMatchAppId { get; set; }
 
-        public int StandardCode { get; set; }
-
-        public int FrameworkCode { get; set; }
-
-        public int ProgrammeType { get; set; }
-
-        public int PathwayCode { get; set; }
-
         public long LearnerUln { get; set; }
 
         public long UkPrn { get; set; }
