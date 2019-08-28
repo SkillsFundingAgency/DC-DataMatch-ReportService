@@ -78,7 +78,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
             _logger.LogInfo($"using the above to build the model...");
             var dataMatchModels = _dataMatchModelBuilder.BuildModels(_logger, dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dasApprenticeshipPriceInfo)?.ToList();
-            _logger.LogInfo($"dataMatchModels count (lines to go in the report) {dataMatchModels.Count}");
+            _logger.LogInfo($"dataMatchModels count (lines to go in the report) {dataMatchModels?.Count}");
             dataMatchModels?.Sort(DataMatchModelComparer);
 
             var externalFileName = GetFilename(reportServiceContext);
