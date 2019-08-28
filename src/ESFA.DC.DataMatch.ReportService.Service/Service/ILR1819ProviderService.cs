@@ -37,6 +37,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             using (var ilrContext = _ilrValidContextFactory())
             {
                 learnersList = await ilrContext.Learners
+                    .Include(x => x.LearningDeliveries).ThenInclude(y => y.AppFinRecords)
                     .Include(x => x.LearningDeliveries).ThenInclude(y => y.LearningDeliveryFAMs)
                     .Where(x => x.UKPRN == ukPrn && x.LearningDeliveries.Any(y => y.FundModel == ApprentishipsFundModel
                                                  && y.LearningDeliveryFAMs.Any(ldf => ldf.LearnDelFAMCode == "1" && ldf.LearnDelFAMType == "ACT")))

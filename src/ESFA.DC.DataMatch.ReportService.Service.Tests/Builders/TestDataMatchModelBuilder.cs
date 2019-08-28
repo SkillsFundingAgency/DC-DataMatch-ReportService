@@ -4,9 +4,9 @@ using System.Linq;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Service.Builders;
-using ESFA.DC.DataMatch.ReportService.Service.ReferenceData;
-using ESFA.DC.ILR1819.DataStore.EF.Valid;
+using ESFA.DC.Logging.Interfaces;
 using FluentAssertions;
+using Moq;
 using Xunit;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
@@ -41,6 +41,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             string expectedIlrValue = "",
             string expectedApprenticeshipValue = "")
         {
+            Mock<ILogger> logger = new Mock<ILogger>();
             var dataMatchModelBuilder = new DataMatchMonthEndModelBuilder();
             var dataMatchILRInfo = BuildILRModelForDataMatchReportBuilderTests(ilrukPrn, learnRefNumber, ilrUln, "50117889", 1, ilrFworkCode, ilrProgType, ilrPwayCode, ilrStdCode, "ACT", "1", new DateTime(2019, 10, 10));
             var dataMatchRulebaseInfo = BuildILRRulebaseModelForDataMatchReportBuilderTests(ilrukPrn, learnRefNumber, 1);
@@ -49,7 +50,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             var dataMatchDasApprenticeshiPriceInfo =
                 BuildDasApprenticeshipInfoForDataMatchReportBuilderTests(ilrukPrn, 9900000111, null, null, dasFworkCode, dasProgType, dasPwayCode, dasStdCode, 100, "TestLegalEntityName");
 
-            var result = dataMatchModelBuilder.BuildModels(dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dataMatchDasApprenticeshiPriceInfo);
+            var result = dataMatchModelBuilder.BuildModels(logger.Object, dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dataMatchDasApprenticeshiPriceInfo);
 
             result.Should().NotBeNullOrEmpty();
             result.Count().Should().Be(1);
