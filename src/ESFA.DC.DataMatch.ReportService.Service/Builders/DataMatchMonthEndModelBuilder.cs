@@ -119,7 +119,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_07))
             {
-                var appFinRecords = learner.DataMatchLearningDeliveries.SingleOrDefault(x => x.AimSeqNumber == dasAimSeqNumber)?.AppFinRecords;
+                var appFinRecords = learner.DataMatchLearningDeliveries.FirstOrDefault(x => x.AimSeqNumber == dasAimSeqNumber)?.AppFinRecords;
                 if (appFinRecords == null || !appFinRecords.Any())
                 {
                     logger.LogInfo("DLOCK_07 - Empty ILR Value(Negotiated Cost) due to no appfinrecords");
