@@ -97,29 +97,45 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                 return learner.Uln.ToString();
             }
 
+            var validLearningDeliveries = learner.DataMatchLearningDeliveries.Where(x => x.AimSeqNumber == dasAimSeqNumber);
+
+            var dataMatchLearningDeliveries = validLearningDeliveries.ToList();
+
+            if (dataMatchLearningDeliveries.Count() > 1)
+            {
+                logger.LogInfo($"Multiple matching learning deliveries found for leaner {learner.LearnRefNumber}");
+                foreach (var ld in dataMatchLearningDeliveries)
+                {
+                    logger.LogInfo(
+                        $"AimSeq-{ld.AimSeqNumber}_FworkCode-{ld.FworkCode}_StdCode-{ld.StdCode}_PwayCode-{ld.PwayCode}_ProgType{ld.ProgType}_LearnStartDate-{ld.LearnStartDate}");
+                }
+            }
+
+            var validLearningDelivery = dataMatchLearningDeliveries.FirstOrDefault();
+
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_03))
             {
-                return learner.DataMatchLearningDeliveries.FirstOrDefault(x => x.AimSeqNumber == dasAimSeqNumber)?.StdCode.ToString();
+                return validLearningDelivery?.StdCode.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_04))
             {
-                return learner.DataMatchLearningDeliveries.FirstOrDefault(x => x.AimSeqNumber == dasAimSeqNumber)?.FworkCode.ToString();
+                return validLearningDelivery?.FworkCode.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_05))
             {
-                return learner.DataMatchLearningDeliveries.FirstOrDefault(x => x.AimSeqNumber == dasAimSeqNumber)?.ProgType.ToString();
+                return validLearningDelivery?.ProgType.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_06))
             {
-                return learner.DataMatchLearningDeliveries.FirstOrDefault(x => x.AimSeqNumber == dasAimSeqNumber)?.PwayCode.ToString();
+                return validLearningDelivery?.PwayCode.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_07))
             {
-                var appFinRecords = learner.DataMatchLearningDeliveries.FirstOrDefault(x => x.AimSeqNumber == dasAimSeqNumber)?.AppFinRecords;
+                var appFinRecords = validLearningDelivery?.AppFinRecords;
                 if (appFinRecords == null || !appFinRecords.Any())
                 {
                     logger.LogInfo("DLOCK_07 - Empty ILR Value(Negotiated Cost) due to no appfinrecords");
@@ -140,7 +156,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_09))
             {
-                return learner.DataMatchLearningDeliveries.FirstOrDefault(x => x.AimSeqNumber == dasAimSeqNumber)?.LearnStartDate.ToString("dd/MM/yyyy");
+                return validLearningDelivery?.LearnStartDate.ToString("dd/MM/yyyy");
             }
 
             return string.Empty;
