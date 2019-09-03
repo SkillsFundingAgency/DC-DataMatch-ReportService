@@ -11,6 +11,7 @@ using ESFA.DC.DataMatch.ReportService.Interface.Reports;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Service;
 using ESFA.DC.DataMatch.ReportService.Service.Builders;
+using ESFA.DC.DataMatch.ReportService.Service.Comparer;
 using ESFA.DC.DataMatch.ReportService.Service.Extensions;
 using ESFA.DC.DataMatch.ReportService.Service.Service;
 using ESFA.DC.DataMatch.ReportService.Stateless.Configuration;
@@ -44,9 +45,6 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
 {
     public static class DIComposition
     {
-        private static readonly string YEAR_1819 = "1819";
-        private static readonly string YEAR_1920 = "1920";
-
         public static ContainerBuilder BuildContainer(ServiceFabric.Common.Config.Interface.IServiceFabricConfigurationService serviceFabricConfigurationService)
         {
             var containerBuilder = new ContainerBuilder();
@@ -166,6 +164,8 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
 
             containerBuilder.RegisterType<DateTimeProvider.DateTimeProvider>().As<IDateTimeProvider>().InstancePerLifetimeScope();
 
+            containerBuilder.RegisterType<DataMatchModelComparer>();
+
             RegisterServices(containerBuilder);
             RegisterBuilders(containerBuilder);
             RegisterReports(containerBuilder);
@@ -175,7 +175,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
 
         public static void RegisterServicesByYear(string year, ContainerBuilder containerBuilder)
         {
-            if (year.CaseInsensitiveEquals(YEAR_1819))
+            if (year.CaseInsensitiveEquals(Constants.YEAR_1819))
             {
                 containerBuilder.RegisterType<ILR1819ProviderService>().As<IILRProviderService>()
                     .WithAttributeFiltering()
@@ -184,7 +184,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
                     .WithAttributeFiltering()
                     .InstancePerLifetimeScope();
             }
-            else if (year.CaseInsensitiveEquals(YEAR_1920))
+            else if (year.CaseInsensitiveEquals(Constants.YEAR_1920))
             {
                 containerBuilder.RegisterType<ILR1920ProviderService>().As<IILRProviderService>()
                     .WithAttributeFiltering()

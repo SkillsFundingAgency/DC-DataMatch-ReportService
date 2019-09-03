@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
@@ -11,9 +12,15 @@ using ESFA.DC.Logging.Interfaces;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 {
-    public class DataMatchMonthEndModelBuilder : IDataMatchModelBuilder
+    public sealed class DataMatchMonthEndModelBuilder : IDataMatchModelBuilder
     {
-        readonly string[] _rulesWithBlankILRValues =
+        private const string DLockErrorRuleNamePrefix = "DLOCK_";
+
+        private const string TNP = "TNP";
+
+        private readonly ILogger _logger;
+
+        private readonly string[] _rulesWithBlankILRValues =
         {
             DataLockValidationMessages.DLOCK_08,
             DataLockValidationMessages.DLOCK_10,
@@ -21,7 +28,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             DataLockValidationMessages.DLOCK_12,
         };
 
-        readonly string[] _rulesWithBlankApprenticeshipValues =
+        private readonly string[] _rulesWithBlankApprenticeshipValues =
         {
             DataLockValidationMessages.DLOCK_02,
             DataLockValidationMessages.DLOCK_08,
@@ -29,12 +36,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             DataLockValidationMessages.DLOCK_11,
         };
 
-        readonly string _dLockErrorRuleNamePrefix = "DLOCK_";
-
-        private readonly string _tnp = "TNP";
+        public DataMatchMonthEndModelBuilder(ILogger logger)
+        {
+            _logger = logger;
+        }
 
         public IEnumerable<DataMatchModel> BuildModels(
-            ILogger logger,
             DataMatchILRInfo dataMatchILRInfo,
             DataMatchRulebaseInfo dataMatchRulebaseInfo,
             DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
@@ -44,7 +51,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             foreach (var dataLockValidationError in dataLockValidationErrorInfo.DataLockValidationErrors)
             {
                 var learner = dataMatchILRInfo.DataMatchLearners.SingleOrDefault(
-                    x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber.ToString()) &&
+                    x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber) &&
                          x.DataMatchLearningDeliveries.Any(ld => ld.AimSeqNumber == dataLockValidationError.AimSeqNumber));
 
                 if (learner == null)
@@ -66,8 +73,8 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                     AimSeqNumber = dataLockValidationError.AimSeqNumber,
                     RuleName = ruleName,
                     Description = PopulateRuleDescription(ruleName),
-                    ILRValue = GetILRValue(ruleName, learner, dataLockValidationError.AimSeqNumber, logger),
-                    ApprenticeshipServiceValue = GetApprenticeshipServiceValue(ruleName, matchedDasPriceInfo, logger),
+                    ILRValue = GetILRValue(ruleName, learner, dataLockValidationError.AimSeqNumber),
+                    ApprenticeshipServiceValue = GetApprenticeshipServiceValue(ruleName, matchedDasPriceInfo),
                     PriceEpisodeStartDate = matchedRulebaseInfo?.EpisodeStartDate?.ToString("dd/MM/yyyy"),
                     PriceEpisodeActualEndDate = matchedRulebaseInfo?.PriceEpisodeActualEndDate?.ToString("dd/MM/yyyy"),
                     PriceEpisodeIdentifier = matchedRulebaseInfo?.PriceEpisodeAgreeId,
@@ -80,7 +87,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             return dataMatchModels;
         }
 
-        private string GetILRValue(string ruleName, DataMatchLearner learner, long? dasAimSeqNumber, ILogger logger)
+        private string GetILRValue(string ruleName, DataMatchLearner learner, long? dasAimSeqNumber)
         {
             if (_rulesWithBlankILRValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
             {
@@ -103,10 +110,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
             if (dataMatchLearningDeliveries.Count() > 1)
             {
-                logger.LogInfo($"Multiple matching learning deliveries found for leaner {learner.LearnRefNumber}");
+                _logger.LogInfo($"Multiple matching learning deliveries found for leaner {learner.LearnRefNumber}");
                 foreach (var ld in dataMatchLearningDeliveries)
                 {
-                    logger.LogInfo(
+                    _logger.LogInfo(
                         $"AimSeq-{ld.AimSeqNumber}_FworkCode-{ld.FworkCode}_StdCode-{ld.StdCode}_PwayCode-{ld.PwayCode}_ProgType{ld.ProgType}_LearnStartDate-{ld.LearnStartDate}");
                 }
             }
@@ -138,15 +145,15 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                 var appFinRecords = validLearningDelivery?.AppFinRecords;
                 if (appFinRecords == null || !appFinRecords.Any())
                 {
-                    logger.LogInfo("DLOCK_07 - Empty ILR Value(Negotiated Cost) due to no appfinrecords");
+                    _logger.LogInfo("DLOCK_07 - Empty ILR Value(Negotiated Cost) due to no appfinrecords");
                     return string.Empty;
                 }
 
                 var tnp1 = appFinRecords.Where(x =>
-                    string.Equals(x.AFinType, _tnp, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(x.AFinType, TNP, StringComparison.OrdinalIgnoreCase) &&
                     x.AFinCode == 1).OrderByDescending(x => x.AFinDate).SingleOrDefault();
 
-                var tnp2 = appFinRecords.Where(x => string.Equals(x.AFinType, _tnp, StringComparison.OrdinalIgnoreCase) &&
+                var tnp2 = appFinRecords.Where(x => string.Equals(x.AFinType, TNP, StringComparison.OrdinalIgnoreCase) &&
                                                     x.AFinCode == 2).OrderByDescending(x => x.AFinDate).SingleOrDefault();
 
                 var negotiatedCostOfTraining = (tnp1 == null ? 0 : tnp1.AFinAmount) + (tnp2 == null ? 0 : tnp2.AFinAmount);
@@ -175,7 +182,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
         private string PopulateRuleName(int ruleId)
         {
-            return _dLockErrorRuleNamePrefix + ruleId.ToString("00");
+            return DLockErrorRuleNamePrefix + ruleId.ToString("00");
         }
 
         private string PopulateRuleDescription(string ruleName)
@@ -183,7 +190,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             return DataLockValidationMessages.Validations.FirstOrDefault(x => x.RuleId.CaseInsensitiveEquals(ruleName))?.ErrorMessage;
         }
 
-        private string GetApprenticeshipServiceValue(string ruleName, DasApprenticeshipInfo dasApprenticeshipInfo, ILogger loggger)
+        private string GetApprenticeshipServiceValue(string ruleName, DasApprenticeshipInfo dasApprenticeshipInfo)
         {
             if (_rulesWithBlankApprenticeshipValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
             {
@@ -217,7 +224,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_07))
             {
-                return dasApprenticeshipInfo?.Cost.ToString();
+                return dasApprenticeshipInfo?.Cost.ToString(CultureInfo.InvariantCulture);
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_10))

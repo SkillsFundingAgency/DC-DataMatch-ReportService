@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Castle.Components.DictionaryAdapter;
 using CsvHelper;
 using ESFA.DC.DataMatch.ReportService.Interface;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
@@ -12,8 +11,8 @@ using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
-using ESFA.DC.DataMatch.ReportService.Service;
 using ESFA.DC.DataMatch.ReportService.Service.Builders;
+using ESFA.DC.DataMatch.ReportService.Service.Comparer;
 using ESFA.DC.DataMatch.ReportService.Service.Mapper;
 using ESFA.DC.DataMatch.ReportService.Service.Tests.Helpers;
 using ESFA.DC.DataMatch.ReportService.Tests.Models;
@@ -25,7 +24,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
+namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
 {
     public sealed class TestDataMatchReport
     {
@@ -49,7 +48,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
             Mock<IValidLearnersService> validLearnersService = new Mock<IValidLearnersService>();
             Mock<IFM36ProviderService> fm36ProviderServiceMock = new Mock<IFM36ProviderService>();
             Mock<IILRProviderService> iIlrProviderService = new Mock<IILRProviderService>();
-            IDataMatchModelBuilder dataMatchModelBuilder = new DataMatchMonthEndModelBuilder();
+            IDataMatchModelBuilder dataMatchModelBuilder = new DataMatchMonthEndModelBuilder(logger.Object);
 
             storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>())).Callback<string, string, CancellationToken>((key, value, ct) => csv = value).Returns(Task.CompletedTask);
 
@@ -72,7 +71,7 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
             dasPaymentProviderMock.Setup(x => x.GetDasApprenticeshipInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dasApprenticeshipInfoForDataMatchReport);
 
-            dasPaymentProviderMock.Setup(x => x.GetDataLockValidationErrorInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string[]>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<CancellationToken>()))
+            dasPaymentProviderMock.Setup(x => x.GetDataLockValidationErrorInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dataLockValidationErrorInfoForDataMatchReport);
 
             dateTimeProviderMock.Setup(x => x.GetNowUtc()).Returns(dateTime);
@@ -86,7 +85,8 @@ namespace ESFA.DC.DataMatch.ReportService.Tests.Reports
                 iIlrProviderService.Object,
                 storage.Object,
                 dataMatchModelBuilder,
-                dateTimeProviderMock.Object);
+                dateTimeProviderMock.Object,
+                new DataMatchModelComparer());
 
             await report.GenerateReport(reportServiceContextMock.Object, null, false, CancellationToken.None);
 

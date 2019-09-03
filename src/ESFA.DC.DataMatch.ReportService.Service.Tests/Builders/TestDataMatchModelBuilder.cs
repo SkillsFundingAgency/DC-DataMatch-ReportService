@@ -17,7 +17,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
     public class TestDataMatchModelBuilder
     {
         [Theory]
-        [InlineData(11111, 1111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 3, 4, 4, 1, "11111", "1111")]
+        [InlineData(11111, 1111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 3, 4, 4, 1, "11111", "11111")]
         [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 2, 3, 3, 4, 4, 2, "9900000111", "")]
         [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 0, 2, 2, 3, 3, 4, 4, 3, "1", "0")]
         [InlineData(11111, 11111, "9900000306", 9900000111, 9900000111, 1, 1, 2, 0, 3, 3, 4, 4, 4, "2", "0")]
@@ -42,7 +42,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             string expectedApprenticeshipValue = "")
         {
             Mock<ILogger> logger = new Mock<ILogger>();
-            var dataMatchModelBuilder = new DataMatchMonthEndModelBuilder();
+            var dataMatchModelBuilder = new DataMatchMonthEndModelBuilder(logger.Object);
             var dataMatchILRInfo = BuildILRModelForDataMatchReportBuilderTests(ilrukPrn, learnRefNumber, ilrUln, "50117889", 1, ilrFworkCode, ilrProgType, ilrPwayCode, ilrStdCode, "ACT", "1", new DateTime(2019, 10, 10));
             var dataMatchRulebaseInfo = BuildILRRulebaseModelForDataMatchReportBuilderTests(ilrukPrn, learnRefNumber, 1);
             var dataLockValidationErrorInfo =
@@ -50,7 +50,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             var dataMatchDasApprenticeshiPriceInfo =
                 BuildDasApprenticeshipInfoForDataMatchReportBuilderTests(ilrukPrn, 9900000111, null, null, dasFworkCode, dasProgType, dasPwayCode, dasStdCode, 100, "TestLegalEntityName");
 
-            var result = dataMatchModelBuilder.BuildModels(logger.Object, dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dataMatchDasApprenticeshiPriceInfo);
+            var result = dataMatchModelBuilder.BuildModels(dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dataMatchDasApprenticeshiPriceInfo);
 
             result.Should().NotBeNullOrEmpty();
             result.Count().Should().Be(1);
@@ -87,6 +87,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
                         ProgrammeType = programmeType,
                         PathwayCode = pathwayCode,
                         StandardCode = standardCode,
+                        UkPrn = ukPrn,
                     },
                 },
             };

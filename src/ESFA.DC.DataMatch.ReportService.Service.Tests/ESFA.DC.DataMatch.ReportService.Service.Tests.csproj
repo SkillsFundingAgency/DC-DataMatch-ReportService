@@ -13,9 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="ESFA.DC.FileService.Interface" Version="0.1.18-beta0001" />
     <PackageReference Include="ESFA.DC.Logging.Interfaces" Version="0.1.4-beta0001" />
+    <PackageReference Include="ESFA.DC.ServiceFabric.Common" Version="0.1.1-beta0001" />
     <PackageReference Include="FluentAssertions" Version="5.7.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
     <PackageReference Include="Moq" Version="4.11.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">

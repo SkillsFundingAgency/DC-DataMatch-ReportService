@@ -27,8 +27,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
         private readonly IFM36ProviderService _fm36ProviderService;
         private readonly IILRProviderService _ilrProviderService;
         private readonly IDataMatchModelBuilder _dataMatchModelBuilder;
-
-        private static readonly DataMatchModelComparer DataMatchModelComparer = new DataMatchModelComparer();
+        private readonly DataMatchModelComparer _dataMatchModelComparer;
 
         public DataMatchReport(
             ILogger logger,
@@ -38,7 +37,8 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             IILRProviderService iIlrProviderService,
             IStreamableKeyValuePersistenceService streamableKeyValuePersistenceService,
             IDataMatchModelBuilder dataMatchModelBuilder,
-            IDateTimeProvider dateTimeProvider)
+            IDateTimeProvider dateTimeProvider,
+            DataMatchModelComparer dataMatchModelComparer)
             : base(dateTimeProvider, streamableKeyValuePersistenceService, logger)
         {
             _dasPaymentsProviderService = dasPaymentsProviderService;
@@ -46,6 +46,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             _fm36ProviderService = fm36ProviderService;
             _ilrProviderService = iIlrProviderService;
             _dataMatchModelBuilder = dataMatchModelBuilder;
+            _dataMatchModelComparer = dataMatchModelComparer;
         }
 
         public override string ReportFileName => "Apprenticeship Data Match Report";
@@ -62,7 +63,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             await Task.WhenAll(dataMatchILRInfoTask, dataMatchRulebaseInfoTask);
 
             var validLearners = validLearnersTask.Result;
-            var dataLockValidationErrorInfoTask = _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, reportServiceContext.Ukprn, validLearners.ToArray(), reportServiceContext.CollectionName, reportServiceContext.JobId, cancellationToken);
+            var dataLockValidationErrorInfoTask = _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, reportServiceContext.Ukprn, reportServiceContext.CollectionName, cancellationToken);
             var dasApprenticeshipPriceInfoTask = _dasPaymentsProviderService.GetDasApprenticeshipInfoForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
 
             var dataMatchILRInfo = dataMatchILRInfoTask.Result;
@@ -77,9 +78,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             _logger.LogInfo($"dasApprenticeshipPriceInfo (Payments.ApprenticeshipPriceEpisodes) count {dasApprenticeshipPriceInfo.DasApprenticeshipInfos.Count}");
 
             _logger.LogInfo($"using the above to build the model...");
-            var dataMatchModels = _dataMatchModelBuilder.BuildModels(_logger, dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dasApprenticeshipPriceInfo)?.ToList();
+            var dataMatchModels = _dataMatchModelBuilder.BuildModels(dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dasApprenticeshipPriceInfo)?.ToList();
             _logger.LogInfo($"dataMatchModels count (lines to go in the report) {dataMatchModels?.Count}");
-            dataMatchModels?.Sort(DataMatchModelComparer);
+            dataMatchModels?.Sort(_dataMatchModelComparer);
 
             var externalFileName = GetFilename(reportServiceContext);
             var fileName = GetZipFilename(reportServiceContext);

@@ -10,9 +10,7 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Service
         Task<DataMatchDataLockValidationErrorInfo> GetDataLockValidationErrorInfoForDataMatchReport(
             int collectionPeriod,
             int ukPrn,
-            string[] learnRefNumbers,
             string collectionYear,
-            long? jobId,
             CancellationToken cancellationToken);
 
         Task<DataMatchDasApprenticeshipInfo> GetDasApprenticeshipInfoForDataMatchReport(int ukPrn, CancellationToken cancellationToken);
