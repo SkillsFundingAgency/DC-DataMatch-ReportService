@@ -17,7 +17,6 @@ using ESFA.DC.DataMatch.ReportService.Service.Mapper;
 using ESFA.DC.DataMatch.ReportService.Service.Tests.Helpers;
 using ESFA.DC.DataMatch.ReportService.Tests.Models;
 using ESFA.DC.DateTimeProvider.Interface;
-using ESFA.DC.ILR1819.DataStore.EF.Valid;
 using ESFA.DC.IO.Interfaces;
 using ESFA.DC.Logging.Interfaces;
 using FluentAssertions;
@@ -45,30 +44,33 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             Mock<IDateTimeProvider> dateTimeProviderMock = new Mock<IDateTimeProvider>();
             Mock<IStreamableKeyValuePersistenceService> storage = new Mock<IStreamableKeyValuePersistenceService>();
             Mock<IDASPaymentsProviderService> dasPaymentProviderMock = new Mock<IDASPaymentsProviderService>();
-            Mock<IValidLearnersService> validLearnersService = new Mock<IValidLearnersService>();
             Mock<IFM36ProviderService> fm36ProviderServiceMock = new Mock<IFM36ProviderService>();
             Mock<IILRProviderService> iIlrProviderService = new Mock<IILRProviderService>();
             IDataMatchModelBuilder dataMatchModelBuilder = new DataMatchMonthEndModelBuilder(logger.Object);
 
-            storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>())).Callback<string, string, CancellationToken>((key, value, ct) => csv = value).Returns(Task.CompletedTask);
+            storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Callback<string, string, CancellationToken>((key, value, ct) => csv = value)
+                .Returns(Task.CompletedTask);
 
-            var ilrModel = BuildILRModel(ukPrn).Select(x => x.LearnRefNumber).ToArray();
             var ilrModelForDataMatchReport = BuildILRModelForDataMatchReport(ukPrn);
             var dataMatchRulebaseInfo = BuildFm36Model(ukPrn);
-            var dasApprenticeshipInfo = BuildDasApprenticeshipInfo(ukPrn);
 
             var dasApprenticeshipInfoForDataMatchReport = GetDasApprenticeshipInfoForDataMatchReport(ukPrn);
             var dataLockValidationErrorInfoForDataMatchReport = GetDataLockValidationErrorInfoForDataMatchReport(ukPrn);
 
             storage.Setup(x => x.ContainsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
-            storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>())).Callback<string, string, CancellationToken>((key, value, ct) => csv = value).Returns(Task.CompletedTask);
+            storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Callback<string, string, CancellationToken>((key, value, ct) => csv = value)
+                .Returns(Task.CompletedTask);
 
-            validLearnersService.Setup(x => x.GetLearnersAsync(reportServiceContextMock.Object, It.IsAny<CancellationToken>())).ReturnsAsync(ilrModel);
-            fm36ProviderServiceMock.Setup(x => x.GetFM36DataForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>())).ReturnsAsync(dataMatchRulebaseInfo);
+            fm36ProviderServiceMock
+                .Setup(x => x.GetFM36DataForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(dataMatchRulebaseInfo);
             iIlrProviderService
                 .Setup(x => x.GetILRInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ilrModelForDataMatchReport);
-            dasPaymentProviderMock.Setup(x => x.GetDasApprenticeshipInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            dasPaymentProviderMock.Setup(x =>
+                    x.GetDasApprenticeshipInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dasApprenticeshipInfoForDataMatchReport);
 
             dasPaymentProviderMock.Setup(x => x.GetDataLockValidationErrorInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -78,17 +80,16 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             dateTimeProviderMock.Setup(x => x.ConvertUtcToUk(It.IsAny<DateTime>())).Returns(dateTime);
 
             var report = new DataMatchReport(
-                logger.Object,
                 dasPaymentProviderMock.Object,
-                validLearnersService.Object,
                 fm36ProviderServiceMock.Object,
                 iIlrProviderService.Object,
                 storage.Object,
                 dataMatchModelBuilder,
                 dateTimeProviderMock.Object,
-                new DataMatchModelComparer());
+                new DataMatchModelComparer(),
+                logger.Object);
 
-            await report.GenerateReport(reportServiceContextMock.Object, null, false, CancellationToken.None);
+            await report.GenerateReport(reportServiceContextMock.Object, null, CancellationToken.None);
 
             csv.Should().NotBeNullOrEmpty();
             File.WriteAllText($"{filename}.csv", csv);
@@ -220,70 +221,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
                             },
                         },
                     },
-                },
-            };
-        }
-
-        private List<Learner> BuildILRModel(int ukPrn)
-        {
-            return new List<Learner>()
-            {
-                new Learner()
-                {
-                    UKPRN = ukPrn,
-                    LearnRefNumber = "9900000306",
-                    ULN = 9900000111,
-                    LearningDeliveries = new List<LearningDelivery>()
-                    {
-                        new LearningDelivery()
-                        {
-                            LearnRefNumber = "9900000306",
-                            LearnAimRef = "50117889",
-                            AimSeqNumber = 1,
-                            FundModel = 36,
-                            ProgType = 3,
-                            StdCode = 0,
-                            FworkCode = 421,
-                            PwayCode = 2,
-                            LearningDeliveryFAMs = new List<LearningDeliveryFAM>()
-                            {
-                                new LearningDeliveryFAM()
-                                {
-                                    LearnDelFAMType = "ACT",
-                                    LearnDelFAMCode = "1",
-                                },
-                            },
-                        },
-                    },
-                },
-            };
-        }
-
-        private List<DasApprenticeshipInfo> BuildDasApprenticeshipInfo(int ukPrn)
-        {
-            return new List<DasApprenticeshipInfo>()
-            {
-                new DasApprenticeshipInfo()
-                {
-                    UkPrn = ukPrn,
-                    LearnerReferenceNumber = "9900000306",
-                    LearnerUln = 9900000111,
-                    ApprenticeshipId = 114656,
-                    AgreementId = "YZ2V7Y",
-                    AimSequenceNumber = 1,
-                    AgreedOnDate = new DateTime(2017, 06, 28),
-                    EstimatedStartDate = new DateTime(2017, 06, 30),
-                    EstimatedEndDate = new DateTime(2018, 07, 30),
-                    StandardCode = 0,
-                    FrameworkCode = 420, // No match - 420
-                    PathwayCode = 2, // No match - 1
-                    ProgrammeType = 3, // No match - 2
-                    Cost = 1.80M,
-                    StopDate = new DateTime(2018, 05, 30),
-                    RuleId = 3,
-                    PausedOnDate = new DateTime(2018, 04, 30),
-                    LegalEntityName = "LegalEntityName",
-                    AppreticeshipServiceValue = "3",
                 },
             };
         }

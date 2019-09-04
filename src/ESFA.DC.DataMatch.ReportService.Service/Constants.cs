@@ -6,8 +6,10 @@
 
         public const string ILR = "ILR";
 
-        public static readonly string YEAR_1819 = "1819";
+        public const string YEAR_1819 = "1819";
 
-        public static readonly string YEAR_1920 = "1920";
+        public const string YEAR_1920 = "1920";
+
+        public const int ApprenticeshipsFundModel = 36;
     }
 }

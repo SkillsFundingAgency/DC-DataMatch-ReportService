@@ -204,9 +204,6 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
 
         private static void RegisterServices(ContainerBuilder containerBuilder)
         {
-            containerBuilder.RegisterType<ValidLearnerService>().As<IValidLearnersService>()
-                .WithAttributeFiltering()
-                .InstancePerLifetimeScope();
             containerBuilder.RegisterType<DASPaymentsProviderService>().As<IDASPaymentsProviderService>()
                 .InstancePerLifetimeScope();
         }

@@ -14,7 +14,7 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Reports
 
         string GetZipFilename(IReportServiceContext reportServiceContext);
 
-        Task GenerateReport(IReportServiceContext reportServiceContext, ZipArchive archive, bool isFis, CancellationToken cancellationToken);
+        Task GenerateReport(IReportServiceContext reportServiceContext, ZipArchive archive, CancellationToken cancellationToken);
 
         bool IsMatch(string reportTaskName);
     }

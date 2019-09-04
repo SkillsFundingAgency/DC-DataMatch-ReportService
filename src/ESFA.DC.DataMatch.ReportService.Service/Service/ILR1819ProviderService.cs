@@ -14,7 +14,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
 {
     public class ILR1819ProviderService : IILRProviderService
     {
-        private const int ApprentishipsFundModel = 36;
         private readonly Func<IIlr1819ValidContext> _ilrValidContextFactory;
 
         public ILR1819ProviderService(
@@ -39,7 +38,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                 learnersList = await ilrContext.Learners
                     .Include(x => x.LearningDeliveries).ThenInclude(y => y.AppFinRecords)
                     .Include(x => x.LearningDeliveries).ThenInclude(y => y.LearningDeliveryFAMs)
-                    .Where(x => x.UKPRN == ukPrn && x.LearningDeliveries.Any(y => y.FundModel == ApprentishipsFundModel
+                    .Where(x => x.UKPRN == ukPrn && x.LearningDeliveries.Any(y => y.FundModel == Constants.ApprenticeshipsFundModel
                                                  && y.LearningDeliveryFAMs.Any(ldf => ldf.LearnDelFAMCode == "1" && ldf.LearnDelFAMType == "ACT")))
                     .Distinct().ToListAsync(cancellationToken);
             }

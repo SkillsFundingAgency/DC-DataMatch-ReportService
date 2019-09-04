@@ -45,7 +45,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Abstract
             return $"{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
         }
 
-        public abstract Task GenerateReport(IReportServiceContext reportServiceContext, ZipArchive archive, bool isFis, CancellationToken cancellationToken);
+        public abstract Task GenerateReport(IReportServiceContext reportServiceContext, ZipArchive archive, CancellationToken cancellationToken);
 
         public bool IsMatch(string reportTaskName)
         {
