@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
-using ESFA.DC.ILR1819.DataStore.EF.Interface;
 using ESFA.DC.ILR1920.DataStore.EF.Interface;
 using Microsoft.EntityFrameworkCore;
 

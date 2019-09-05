@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CsvHelper;
 using CsvHelper.Configuration;
 using ESFA.DC.DataMatch.ReportService.Interface;
 using ESFA.DC.DataMatch.ReportService.Interface.Reports;
+using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
+using ESFA.DC.DataMatch.ReportService.Service.Mapper;
 using ESFA.DC.DateTimeProvider.Interface;
 using ESFA.DC.IO.Interfaces;
 using ESFA.DC.Logging.Interfaces;
@@ -17,8 +19,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Abstract
 {
     public abstract class AbstractReport : IReport
     {
-        protected readonly IStreamableKeyValuePersistenceService _streamableKeyValuePersistenceService;
         protected readonly ILogger _logger;
+
+        protected readonly IStreamableKeyValuePersistenceService _streamableKeyValuePersistenceService;
 
         private readonly IDateTimeProvider _dateTimeProvider;
 
@@ -45,26 +48,32 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Abstract
             return $"{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
         }
 
-        public abstract Task GenerateReport(IReportServiceContext reportServiceContext, ZipArchive archive, CancellationToken cancellationToken);
+        public abstract Task<bool> GenerateReport(
+            IReportServiceContext reportServiceContext,
+            ZipArchive archive,
+            CancellationToken cancellationToken);
 
         public bool IsMatch(string reportTaskName)
         {
             return string.Equals(reportTaskName, ReportTaskName, StringComparison.OrdinalIgnoreCase);
         }
 
-        protected Stream WriteModelsToCsv<TMapper, TModel>(Stream stream, IEnumerable<TModel> models)
-            where TMapper : ClassMap
-            where TModel : class
+        protected string WriteResults(IReadOnlyCollection<DataMatchModel> models)
         {
-            using (TextWriter textWriter = new StreamWriter(stream))
+            using (var ms = new MemoryStream())
             {
-                using (CsvWriter csvWriter = new CsvWriter(textWriter))
+                UTF8Encoding utF8Encoding = new UTF8Encoding(false, true);
+                using (TextWriter textWriter = new StreamWriter(ms, utF8Encoding))
                 {
-                    WriteCsvRecords<TMapper, TModel>(csvWriter, models);
+                    using (CsvWriter csvWriter = new CsvWriter(textWriter))
+                    {
+                        WriteCsvRecords<DataMatchMapper, DataMatchModel>(csvWriter, models);
+                        csvWriter.Flush();
+                        textWriter.Flush();
+                        return Encoding.UTF8.GetString(ms.ToArray());
+                    }
                 }
             }
-
-            return stream;
         }
 
         protected void WriteCsvRecords<TMapper, TModel>(CsvWriter csvWriter, IEnumerable<TModel> records)
@@ -79,81 +88,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Abstract
             csvWriter.WriteRecords(records);
 
             csvWriter.Configuration.UnregisterClassMap();
-        }
-
-        protected void WriteCsvRecords<TMapper>(CsvWriter csvWriter, TMapper mapper)
-            where TMapper : ClassMap
-        {
-            object[] names = mapper.MemberMaps.OrderBy(x => x.Data.Index).SelectMany(x => x.Data.Names.Names).Select(x => (object)x).ToArray();
-            WriteCsvRecords(csvWriter, names);
-        }
-
-        /// <summary>
-        /// Builds a CSV report using the specified mapper as the list of column names.
-        /// </summary>
-        /// <typeparam name="TMapper">The mapper.</typeparam>
-        /// <typeparam name="TModel">The model.</typeparam>
-        /// <param name="writer">The memory stream to write to.</param>
-        /// <param name="record">The record to persist.</param>
-        protected void WriteCsvRecords<TMapper, TModel>(CsvWriter writer, TModel record)
-            where TMapper : ClassMap
-            where TModel : class
-        {
-            WriteCsvRecords<TMapper, TModel>(writer, new[] { record });
-        }
-
-        /// <summary>
-        /// Writes a blank row to the csv file.
-        /// </summary>
-        /// <param name="writer">The memory stream to write to.</param>
-        /// <param name="numberOfBlankRows">The optional number of blank rows to create.</param>
-        protected void WriteCsvRecords(CsvWriter writer, int numberOfBlankRows = 1)
-        {
-            for (int i = 0; i < numberOfBlankRows; i++)
-            {
-                writer.NextRecord();
-            }
-        }
-
-        /// <summary>
-        /// Writes the items as individual tokens to the CSV.
-        /// </summary>
-        /// <param name="writer">The writer target.</param>
-        /// <param name="items">The strings to write.</param>
-        protected void WriteCsvRecords(CsvWriter writer, params object[] items)
-        {
-            foreach (object item in items)
-            {
-                writer.WriteField(item);
-            }
-
-            writer.NextRecord();
-        }
-
-        /// <summary>
-        /// Writes the stream to the zip file with the specified filename.
-        /// </summary>
-        /// <param name="archive">Archive to write to.</param>
-        /// <param name="filename">Filename to use in zip file.</param>
-        /// <param name="data">Data to write.</param>
-        /// <param name="cancellationToken">Cancellation token for cancelling copy operation.</param>
-        /// <returns>Awaitable task.</returns>
-        protected async Task WriteZipEntry(ZipArchive archive, string filename, Stream data, CancellationToken cancellationToken)
-        {
-            if (archive == null)
-            {
-                return;
-            }
-
-            ZipArchiveEntry entry = archive.GetEntry(filename);
-            entry?.Delete();
-
-            ZipArchiveEntry archivedFile = archive.CreateEntry(filename, CompressionLevel.Optimal);
-            using (Stream sw = archivedFile.Open())
-            {
-                data.Position = 0;
-                await data.CopyToAsync(sw, 81920, cancellationToken);
-            }
         }
 
         /// <summary>

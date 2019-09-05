@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CsvHelper;
 using ESFA.DC.DataMatch.ReportService.Interface;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
 using ESFA.DC.DataMatch.ReportService.Interface.Reports;
@@ -15,7 +12,6 @@ using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 using ESFA.DC.DataMatch.ReportService.Service.Abstract;
 using ESFA.DC.DataMatch.ReportService.Service.Comparer;
-using ESFA.DC.DataMatch.ReportService.Service.Mapper;
 using ESFA.DC.DateTimeProvider.Interface;
 using ESFA.DC.IO.Interfaces;
 using ESFA.DC.Logging.Interfaces;
@@ -52,7 +48,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
         public override string ReportTaskName => ReportTaskNameConstants.DataMatchReport;
 
-        public override async Task GenerateReport(IReportServiceContext reportServiceContext, ZipArchive archive, CancellationToken cancellationToken)
+        public override async Task<bool> GenerateReport(
+            IReportServiceContext reportServiceContext,
+            ZipArchive archive,
+            CancellationToken cancellationToken)
         {
             _logger.LogInfo("Generate Data Match Report started");
             Task<DataMatchILRInfo> dataMatchILRInfoTask = _ilrProviderService.GetILRInfoForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
@@ -63,17 +62,17 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
             await Task.WhenAll(dataMatchILRInfoTask, dataMatchRulebaseInfoTask, dataLockValidationErrorInfoTask, dasApprenticeshipPriceInfoTask);
 
-            var dataMatchILRInfo = dataMatchILRInfoTask.Result;
-            var dataMatchRulebaseInfo = dataMatchRulebaseInfoTask.Result;
-            var dataLockValidationErrorInfo = dataLockValidationErrorInfoTask.Result;
-            var dasApprenticeshipPriceInfo = dasApprenticeshipPriceInfoTask.Result;
+            DataMatchILRInfo dataMatchILRInfo = dataMatchILRInfoTask.Result;
+            DataMatchRulebaseInfo dataMatchRulebaseInfo = dataMatchRulebaseInfoTask.Result;
+            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo = dataLockValidationErrorInfoTask.Result;
+            DataMatchDasApprenticeshipInfo dasApprenticeshipPriceInfo = dasApprenticeshipPriceInfoTask.Result;
 
             _logger.LogInfo($"dataMatchILRInfo (learners with ACT1 and FM36 in ILR) count {dataMatchILRInfo.DataMatchLearners.Count}");
             _logger.LogInfo($"dataMatchRulebaseInfo (AEC_ApprenticeshipPriceEpisodes) count {dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.Count}");
             _logger.LogInfo($"dataLockValidationErrorInfo (DataLockEvents + joins) count {dataLockValidationErrorInfo.DataLockValidationErrors.Count}");
             _logger.LogInfo($"dasApprenticeshipPriceInfo (Payments.ApprenticeshipPriceEpisodes) count {dasApprenticeshipPriceInfo.DasApprenticeshipInfos.Count}");
 
-            _logger.LogInfo($"using the above to build the model...");
+            _logger.LogInfo("using the above to build the model...");
             List<DataMatchModel> dataMatchModels = _dataMatchModelBuilder.BuildModels(dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dasApprenticeshipPriceInfo).ToList();
             _logger.LogInfo($"dataMatchModels count (lines to go in the report) {dataMatchModels.Count}");
             dataMatchModels.Sort(_dataMatchModelComparer);
@@ -85,24 +84,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
             await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
             await WriteZipEntry(archive, $"{fileName}.csv", csv);
-        }
-
-        private string WriteResults(IReadOnlyCollection<DataMatchModel> models)
-        {
-            using (var ms = new MemoryStream())
-            {
-                UTF8Encoding utF8Encoding = new UTF8Encoding(false, true);
-                using (TextWriter textWriter = new StreamWriter(ms, utF8Encoding))
-                {
-                    using (CsvWriter csvWriter = new CsvWriter(textWriter))
-                    {
-                        WriteCsvRecords<DataMatchMapper, DataMatchModel>(csvWriter, models);
-                        csvWriter.Flush();
-                        textWriter.Flush();
-                        return Encoding.UTF8.GetString(ms.ToArray());
-                    }
-                }
-            }
+            return true;
         }
     }
 }

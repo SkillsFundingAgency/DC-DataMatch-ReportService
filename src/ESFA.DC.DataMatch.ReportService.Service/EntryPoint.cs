@@ -31,7 +31,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
         public async Task<bool> Callback(IReportServiceContext reportServiceContext, CancellationToken cancellationToken)
         {
-            _logger.LogInfo("Reporting callback invoked");
+            _logger.LogInfo("Data Match Reporting callback invoked");
 
             var reportZipFileKey = $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_Reports.zip";
             cancellationToken.ThrowIfCancellationRequested();
@@ -45,19 +45,24 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
             using (memoryStream)
             {
+                bool needZip;
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Update, true))
                 {
-                    await ExecuteTasks(reportServiceContext, archive, cancellationToken);
+                    needZip = await ExecuteTasks(reportServiceContext, archive, cancellationToken);
                 }
 
-                await _streamableKeyValuePersistenceService.SaveAsync(reportZipFileKey, memoryStream, cancellationToken);
+                if (needZip)
+                {
+                    await _streamableKeyValuePersistenceService.SaveAsync(reportZipFileKey, memoryStream, cancellationToken);
+                }
             }
 
             return true;
         }
 
-        private async Task ExecuteTasks(IReportServiceContext reportServiceContext, ZipArchive archive, CancellationToken cancellationToken)
+        private async Task<bool> ExecuteTasks(IReportServiceContext reportServiceContext, ZipArchive archive, CancellationToken cancellationToken)
         {
+            bool needZip = false;
             foreach (string taskItem in reportServiceContext.Tasks)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -65,13 +70,20 @@ namespace ESFA.DC.DataMatch.ReportService.Service
                     break;
                 }
 
-                await GenerateReportAsync(taskItem, reportServiceContext, archive, cancellationToken);
+                if (await GenerateReportAsync(taskItem, reportServiceContext, archive, cancellationToken))
+                {
+                    needZip = true;
+                }
             }
+
+            return needZip;
         }
 
-        private async Task GenerateReportAsync(string task, IReportServiceContext reportServiceContext, ZipArchive archive, CancellationToken cancellationToken)
+        private async Task<bool> GenerateReportAsync(string task, IReportServiceContext reportServiceContext, ZipArchive archive, CancellationToken cancellationToken)
         {
-            var foundReport = false;
+            bool needZip = false;
+            bool foundReport = false;
+
             foreach (var report in _reports)
             {
                 if (!report.IsMatch(task))
@@ -79,10 +91,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service
                     continue;
                 }
 
-                var stopWatch = new Stopwatch();
+                Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
                 _logger.LogDebug($"Attempting to generate {report.GetType().Name}");
-                await report.GenerateReport(reportServiceContext, archive, cancellationToken);
+                needZip = await report.GenerateReport(reportServiceContext, archive, cancellationToken);
                 stopWatch.Stop();
                 _logger.LogDebug($"Persisted {report.GetType().Name} to csv/json in: {stopWatch.ElapsedMilliseconds}");
 
@@ -92,8 +104,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
             if (!foundReport)
             {
-                _logger.LogDebug($"Unable to find report '{task}'");
+                _logger.LogDebug($"Unable to find Data Match report '{task}'");
             }
+
+            return needZip;
         }
     }
 }
