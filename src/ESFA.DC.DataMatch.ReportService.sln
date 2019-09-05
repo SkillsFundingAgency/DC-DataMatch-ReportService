@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.106
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ESFA.DC.DataMatch.ReportService.Interface", "ESFA.DC.DataMatch.ReportService.Interface\ESFA.DC.DataMatch.ReportService.Interface.csproj", "{85AD48F3-7163-4E85-B9C4-FE5F7C418A72}"
 EndProject
@@ -61,17 +61,21 @@ Global
 		{FD029E57-C79C-4D57-884E-A15220AE22DE}.Release|x64.ActiveCfg = Release|Any CPU
 		{FD029E57-C79C-4D57-884E-A15220AE22DE}.Release|x64.Build.0 = Release|Any CPU
 		{F69560BB-BD49-41C2-9EB0-B7334005CF2D}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{F69560BB-BD49-41C2-9EB0-B7334005CF2D}.Debug|Any CPU.Build.0 = Debug|x64
 		{F69560BB-BD49-41C2-9EB0-B7334005CF2D}.Debug|x64.ActiveCfg = Debug|x64
 		{F69560BB-BD49-41C2-9EB0-B7334005CF2D}.Debug|x64.Build.0 = Debug|x64
 		{F69560BB-BD49-41C2-9EB0-B7334005CF2D}.Debug|x64.Deploy.0 = Debug|x64
 		{F69560BB-BD49-41C2-9EB0-B7334005CF2D}.Release|Any CPU.ActiveCfg = Release|x64
+		{F69560BB-BD49-41C2-9EB0-B7334005CF2D}.Release|Any CPU.Build.0 = Release|x64
 		{F69560BB-BD49-41C2-9EB0-B7334005CF2D}.Release|x64.ActiveCfg = Release|x64
 		{F69560BB-BD49-41C2-9EB0-B7334005CF2D}.Release|x64.Build.0 = Release|x64
 		{F69560BB-BD49-41C2-9EB0-B7334005CF2D}.Release|x64.Deploy.0 = Release|x64
 		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Debug|Any CPU.Build.0 = Debug|x64
 		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Debug|x64.ActiveCfg = Debug|x64
 		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Debug|x64.Build.0 = Debug|x64
 		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Release|Any CPU.ActiveCfg = Release|x64
+		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Release|Any CPU.Build.0 = Release|x64
 		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Release|x64.ActiveCfg = Release|x64
 		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
