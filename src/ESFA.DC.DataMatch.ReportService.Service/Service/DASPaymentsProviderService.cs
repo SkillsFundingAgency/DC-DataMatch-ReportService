@@ -26,7 +26,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                 DataLockValidationErrors = new List<DataLockValidationError>()
             };
 
-            int dataLockSourceId = collectionName.StartsWith(Constants.ILR, StringComparison.OrdinalIgnoreCase) ? 1 : 2;
+            int dataLockSourceId = collectionName.StartsWith(Constants.ILR, StringComparison.OrdinalIgnoreCase) ? Constants.SubmissionInMonth : Constants.SubmissionPeriodEnd;
 
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
@@ -38,7 +38,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                            join dlenpf in dasPaymentsContext.DataLockEventNonPayablePeriodFailures on dlenpp.DataLockEventNonPayablePeriodId equals dlenpf.DataLockEventNonPayablePeriodId
                            where (ukPrn == -1 || dle.Ukprn == ukPrn)
                                  && (collectionPeriod == -1 || (dle.CollectionPeriod == collectionPeriod && dlenpp.DeliveryPeriod == collectionPeriod))
-                                 && dle.DataLockSourceId == dataLockSourceId
+                                 && ((dataLockSourceId == Constants.SubmissionInMonth && dle.DataLockSourceId == dataLockSourceId) || dataLockSourceId == Constants.SubmissionPeriodEnd)
                                  && dle.LearningAimReference == Constants.ZPROG001
                                  && dle.IsPayable == false
                            select new DataLockValidationError
@@ -48,6 +48,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                                LearnerUln = dle.LearnerUln,
                                RuleId = dlenpf.DataLockFailureId,
                                AimSeqNumber = ee.LearningAimSequenceNumber,
+                               Collection = dle.DataLockSourceId == Constants.SubmissionInMonth ? Constants.ILR : Constants.PeriodEnd,
+                               CollectionPeriod = ee.CollectionPeriod,
+                               LastSubmission = ee.IlrSubmissionDateTime
                            })
                         .Distinct()
                         .ToListAsync(cancellationToken);

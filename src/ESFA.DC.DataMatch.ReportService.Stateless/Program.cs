@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Fabric;
 using System.IO;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Autofac;
 using Autofac.Integration.ServiceFabric;
-using ESFA.DC.DataMatch.ReportService.Service;
 using ESFA.DC.DataMatch.ReportService.Stateless.Configuration;
 using ESFA.DC.ServiceFabric.Common.Config;
 using ESFA.DC.ServiceFabric.Common.Config.Interface;
-using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace ESFA.DC.DataMatch.ReportService.Stateless
 {

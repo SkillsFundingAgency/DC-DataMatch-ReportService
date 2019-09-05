@@ -3,9 +3,9 @@ using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Mapper
 {
-    public sealed class DataMatchMapper : ClassMap<DataMatchModel>
+    public sealed class ExternalDataMatchMapper : ClassMap<DataMatchModel>
     {
-        public DataMatchMapper()
+        public ExternalDataMatchMapper()
         {
             Map(m => m.LearnRefNumber).Index(0).Name("Learner reference number");
             Map(m => m.Uln).Index(1).Name("Unique learner number");

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ESFA.DC.DataMatch.ReportService.Interface;
+using ESFA.DC.CollectionsManagement.Models;
+using ESFA.DC.DataMatch.ReportService.Interface.Context;
+using ESFA.DC.DataMatch.ReportService.Service;
 using ESFA.DC.JobContext.Interface;
 using ESFA.DC.JobContextManager.Model;
 
@@ -31,5 +33,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless.Context
         public string CollectionName => _jobContextMessage.KeyValuePairs[JobContextMessageKey.CollectionName].ToString();
 
         public string CollectionYear => _jobContextMessage.KeyValuePairs[JobContextMessageKey.CollectionYear].ToString();
+
+        public IEnumerable<ReturnPeriod> ILRPeriods => (IEnumerable<ReturnPeriod>)_jobContextMessage.KeyValuePairs[Constants.ILRPeriods];
     }
 }

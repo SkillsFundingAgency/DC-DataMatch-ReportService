@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using ESFA.DC.CollectionsManagement.Models;
 
-namespace ESFA.DC.DataMatch.ReportService.Interface
+namespace ESFA.DC.DataMatch.ReportService.Interface.Context
 {
     public interface IReportServiceContext
     {
@@ -20,5 +21,7 @@ namespace ESFA.DC.DataMatch.ReportService.Interface
         string CollectionName { get; }
 
         string CollectionYear { get; }
+
+        IEnumerable<ReturnPeriod> ILRPeriods { get; }
     }
 }

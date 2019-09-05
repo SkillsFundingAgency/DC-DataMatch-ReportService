@@ -24,7 +24,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless.Handlers
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageHandler"/> class.
-        /// Simple constructor for use by AutoFac testing, don't want to have to fake a @see StatelessServiceContext
+        /// Simple constructor for use by AutoFac testing, don't want to have to fake a @see StatelessServiceContext.
         /// </summary>
         /// <param name="parentLifeTimeScope">AutoFac scope</param>
         public MessageHandler(ILifetimeScope parentLifeTimeScope)
@@ -48,16 +48,16 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless.Handlers
                     var executionContext = (ExecutionContext)childLifeTimeScope.Resolve<IExecutionContext>();
                     executionContext.JobId = jobContextMessage.JobId.ToString();
                     var logger = childLifeTimeScope.Resolve<ILogger>();
-                    logger.LogDebug("Started Report Service");
+                    logger.LogDebug("Started Data Match Report Service", jobIdOverride: jobContextMessage.JobId);
                     var entryPoint = childLifeTimeScope.Resolve<EntryPoint>();
                     var result = await entryPoint.Callback(new ReportServiceContext(jobContextMessage), cancellationToken);
-                    logger.LogDebug($"Completed Report Service with result-{result}");
+                    logger.LogDebug($"Completed Data Match Report Service with result-{result}", jobIdOverride: jobContextMessage.JobId);
                     return result;
                 }
             }
             catch (OutOfMemoryException oom)
             {
-                Environment.FailFast("Report Service Out Of Memory", oom);
+                Environment.FailFast("Data Match Report Service Out Of Memory", oom);
                 throw;
             }
             catch (Exception ex)

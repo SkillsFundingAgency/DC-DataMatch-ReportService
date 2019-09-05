@@ -3,7 +3,7 @@ using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Comparer
 {
-    public sealed class DataMatchModelComparer : IComparer<DataMatchModel>
+    public sealed class ExternalDataMatchModelComparer : IComparer<DataMatchModel>
     {
         public int Compare(DataMatchModel x, DataMatchModel y)
         {
@@ -33,14 +33,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Comparer
                 return cmp;
             }
 
-            if (x.AimSeqNumber > y.AimSeqNumber)
+            cmp = x.AimSeqNumber.GetValueOrDefault(0).CompareTo(y.AimSeqNumber.GetValueOrDefault(0));
+            if (cmp != 0)
             {
-                return 1;
-            }
-
-            if (x.AimSeqNumber < y.AimSeqNumber)
-            {
-                return -1;
+                return cmp;
             }
 
             return string.CompareOrdinal(x.RuleName, y.RuleName);

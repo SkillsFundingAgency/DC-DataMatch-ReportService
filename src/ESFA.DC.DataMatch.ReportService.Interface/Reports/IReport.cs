@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
+using ESFA.DC.DataMatch.ReportService.Interface.Context;
 
 namespace ESFA.DC.DataMatch.ReportService.Interface.Reports
 {

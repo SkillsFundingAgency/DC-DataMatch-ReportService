@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CsvHelper;
-using ESFA.DC.DataMatch.ReportService.Interface;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
+using ESFA.DC.DataMatch.ReportService.Interface.Context;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
@@ -14,6 +14,7 @@ using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 using ESFA.DC.DataMatch.ReportService.Service.Builders;
 using ESFA.DC.DataMatch.ReportService.Service.Comparer;
 using ESFA.DC.DataMatch.ReportService.Service.Mapper;
+using ESFA.DC.DataMatch.ReportService.Service.Reports;
 using ESFA.DC.DataMatch.ReportService.Service.Tests.Helpers;
 using ESFA.DC.DataMatch.ReportService.Tests.Models;
 using ESFA.DC.DateTimeProvider.Interface;
@@ -79,14 +80,14 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             dateTimeProviderMock.Setup(x => x.GetNowUtc()).Returns(dateTime);
             dateTimeProviderMock.Setup(x => x.ConvertUtcToUk(It.IsAny<DateTime>())).Returns(dateTime);
 
-            var report = new DataMatchReport(
+            var report = new ExternalDataMatchReport(
                 dasPaymentProviderMock.Object,
                 fm36ProviderServiceMock.Object,
                 iIlrProviderService.Object,
                 storage.Object,
                 dataMatchModelBuilder,
                 dateTimeProviderMock.Object,
-                new DataMatchModelComparer(),
+                new ExternalDataMatchModelComparer(),
                 logger.Object);
 
             await report.GenerateReport(reportServiceContextMock.Object, null, CancellationToken.None);
@@ -94,12 +95,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             csv.Should().NotBeNullOrEmpty();
             File.WriteAllText($"{filename}.csv", csv);
             IEnumerable<DataMatchModel> result;
-            TestCsvHelper.CheckCsv(csv, new CsvEntry(new DataMatchMapper(), 1));
+            TestCsvHelper.CheckCsv(csv, new CsvEntry(new ExternalDataMatchMapper(), 1));
             using (var reader = new StreamReader($"{filename}.csv"))
             {
                 using (var csvReader = new CsvReader(reader))
                 {
-                    csvReader.Configuration.RegisterClassMap<DataMatchMapper>();
+                    csvReader.Configuration.RegisterClassMap<ExternalDataMatchMapper>();
                     result = csvReader.GetRecords<DataMatchModel>().ToList();
                 }
             }

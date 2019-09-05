@@ -25,10 +25,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
 
         public async Task<DataMatchILRInfo> GetILRInfoForDataMatchReport(int ukPrn, CancellationToken cancellationToken)
         {
-            var dataMatchILRInfo = new DataMatchILRInfo()
+            var dataMatchILRInfo = new DataMatchILRInfo
             {
                 UkPrn = ukPrn,
-                DataMatchLearners = new List<DataMatchLearner>(),
+                DataMatchLearners = new List<DataMatchLearner>()
             };
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -39,13 +39,13 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                     .Include(x => x.LearningDeliveries).ThenInclude(y => y.AppFinRecords)
                     .Include(x => x.LearningDeliveries).ThenInclude(y => y.LearningDeliveryFAMs)
                     .Where(x => x.UKPRN == ukPrn && x.LearningDeliveries.Any(y => y.FundModel == Constants.ApprenticeshipsFundModel
-                                                 && y.LearningDeliveryFAMs.Any(ldf => ldf.LearnDelFAMCode == "1" && ldf.LearnDelFAMType == "ACT")))
+                                                 && y.LearningDeliveryFAMs.Any(ldf => ldf.LearnDelFAMCode == Constants.LearnDelFAMCode && ldf.LearnDelFAMType == Constants.LearnDelFAMType)))
                     .Distinct().ToListAsync(cancellationToken);
             }
 
             foreach (var learner in learnersList)
             {
-                var dataMatchLearner = new DataMatchLearner()
+                var dataMatchLearner = new DataMatchLearner
                 {
                     UkPrn = learner.UKPRN,
                     LearnRefNumber = learner.LearnRefNumber,

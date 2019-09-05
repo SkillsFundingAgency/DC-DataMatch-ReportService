@@ -50,7 +50,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             var dataMatchDasApprenticeshiPriceInfo =
                 BuildDasApprenticeshipInfoForDataMatchReportBuilderTests(ilrukPrn, 9900000111, null, null, dasFworkCode, dasProgType, dasPwayCode, dasStdCode, 100, "TestLegalEntityName");
 
-            var result = dataMatchModelBuilder.BuildModels(dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dataMatchDasApprenticeshiPriceInfo);
+            var result = dataMatchModelBuilder.BuildExternalModels(dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dataMatchDasApprenticeshiPriceInfo, -1);
 
             result.Should().NotBeNullOrEmpty();
             result.Count().Should().Be(1);

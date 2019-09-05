@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 using CsvHelper;
 using CsvHelper.Configuration;
 using ESFA.DC.DataMatch.ReportService.Interface;
+using ESFA.DC.DataMatch.ReportService.Interface.Context;
 using ESFA.DC.DataMatch.ReportService.Interface.Reports;
-using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
-using ESFA.DC.DataMatch.ReportService.Service.Mapper;
 using ESFA.DC.DateTimeProvider.Interface;
 using ESFA.DC.IO.Interfaces;
 using ESFA.DC.Logging.Interfaces;
@@ -58,7 +57,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Abstract
             return string.Equals(reportTaskName, ReportTaskName, StringComparison.OrdinalIgnoreCase);
         }
 
-        protected string WriteResults(IReadOnlyCollection<DataMatchModel> models)
+        protected string WriteResults<TMapper, TModel>(IReadOnlyCollection<TModel> models)
+            where TMapper : ClassMap
+            where TModel : class
         {
             using (var ms = new MemoryStream())
             {
@@ -67,7 +68,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Abstract
                 {
                     using (CsvWriter csvWriter = new CsvWriter(textWriter))
                     {
-                        WriteCsvRecords<DataMatchMapper, DataMatchModel>(csvWriter, models);
+                        WriteCsvRecords<TMapper, TModel>(csvWriter, models);
                         csvWriter.Flush();
                         textWriter.Flush();
                         return Encoding.UTF8.GetString(ms.ToArray());

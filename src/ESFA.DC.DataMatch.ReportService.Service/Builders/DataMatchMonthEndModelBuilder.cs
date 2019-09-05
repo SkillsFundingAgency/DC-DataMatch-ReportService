@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using ESFA.DC.CollectionsManagement.Models;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
@@ -41,16 +42,17 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             _logger = logger;
         }
 
-        public IEnumerable<DataMatchModel> BuildModels(
+        public IEnumerable<DataMatchModel> BuildExternalModels(
             DataMatchILRInfo dataMatchILRInfo,
             DataMatchRulebaseInfo dataMatchRulebaseInfo,
             DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
-            DataMatchDasApprenticeshipInfo dasApprenticeshipInfo)
+            DataMatchDasApprenticeshipInfo dasApprenticeshipInfo,
+            long jobId)
         {
-            var dataMatchModels = new List<DataMatchModel>();
+            List<DataMatchModel> dataMatchModels = new List<DataMatchModel>();
             foreach (var dataLockValidationError in dataLockValidationErrorInfo.DataLockValidationErrors)
             {
-                var learner = dataMatchILRInfo.DataMatchLearners.SingleOrDefault(
+                DataMatchLearner learner = dataMatchILRInfo.DataMatchLearners.SingleOrDefault(
                     x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber) &&
                          x.DataMatchLearningDeliveries.Any(ld => ld.AimSeqNumber == dataLockValidationError.AimSeqNumber));
 
@@ -59,21 +61,21 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                     continue;
                 }
 
-                var matchedRulebaseInfo = dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.LastOrDefault(x =>
+                AECApprenticeshipPriceEpisodeInfo matchedRulebaseInfo = dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.LastOrDefault(x =>
                     x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber));
 
-                var matchedDasPriceInfo = dasApprenticeshipInfo.DasApprenticeshipInfos.FirstOrDefault(x => x.LearnerUln == dataLockValidationError.LearnerUln);
+                DasApprenticeshipInfo matchedDasPriceInfo = dasApprenticeshipInfo.DasApprenticeshipInfos.FirstOrDefault(x => x.LearnerUln == dataLockValidationError.LearnerUln);
 
-                var ruleName = PopulateRuleName(dataLockValidationError.RuleId);
+                string ruleName = PopulateRuleName(dataLockValidationError.RuleId);
 
-                var dataMatchModel = new DataMatchModel()
+                DataMatchModel dataMatchModel = new DataMatchModel
                 {
                     LearnRefNumber = dataLockValidationError.LearnerReferenceNumber,
                     Uln = learner.Uln,
                     AimSeqNumber = dataLockValidationError.AimSeqNumber,
                     RuleName = ruleName,
                     Description = PopulateRuleDescription(ruleName),
-                    ILRValue = GetILRValue(ruleName, learner, dataLockValidationError.AimSeqNumber),
+                    ILRValue = GetILRValue(ruleName, learner, dataLockValidationError.AimSeqNumber, jobId),
                     ApprenticeshipServiceValue = GetApprenticeshipServiceValue(ruleName, matchedDasPriceInfo),
                     PriceEpisodeStartDate = matchedRulebaseInfo?.EpisodeStartDate?.ToString("dd/MM/yyyy"),
                     PriceEpisodeActualEndDate = matchedRulebaseInfo?.PriceEpisodeActualEndDate?.ToString("dd/MM/yyyy"),
@@ -87,7 +89,49 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             return dataMatchModels;
         }
 
-        private string GetILRValue(string ruleName, DataMatchLearner learner, long? dasAimSeqNumber)
+        public IEnumerable<InternalDataMatchModel> BuildInternalModels(
+            DataMatchILRInfo dataMatchILRInfo,
+            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
+            List<ReturnPeriod> returnPeriods,
+            long jobId)
+        {
+            List<InternalDataMatchModel> dataMatchModels = new List<InternalDataMatchModel>();
+            foreach (var dataLockValidationError in dataLockValidationErrorInfo.DataLockValidationErrors)
+            {
+                DataMatchLearner learner = dataMatchILRInfo.DataMatchLearners.SingleOrDefault(
+                    x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber) &&
+                         x.DataMatchLearningDeliveries.Any(ld => ld.AimSeqNumber == dataLockValidationError.AimSeqNumber));
+
+                if (learner == null)
+                {
+                    continue;
+                }
+
+                string ruleName = PopulateRuleName(dataLockValidationError.RuleId);
+
+                ReturnPeriod period = returnPeriods.Single(x => x.PeriodNumber == dataLockValidationError.CollectionPeriod);
+
+                InternalDataMatchModel dataMatchModel = new InternalDataMatchModel
+                {
+                    Collection = dataLockValidationError.Collection,
+                    Ukprn = (int)dataLockValidationError.UkPrn,
+                    LearnRefNumber = dataLockValidationError.LearnerReferenceNumber,
+                    Uln = learner.Uln,
+                    AimSeqNumber = dataLockValidationError.AimSeqNumber,
+                    RuleName = ruleName,
+                    CollectionPeriodName = $"{period.CollectionName}-R{dataLockValidationError.CollectionPeriod:D2}",
+                    CollectionPeriodMonth = period.CalendarMonth,
+                    CollectionPeriodYear = period.CalendarYear,
+                    LastSubmission = dataLockValidationError.LastSubmission
+                };
+
+                dataMatchModels.Add(dataMatchModel);
+            }
+
+            return dataMatchModels;
+        }
+
+        private string GetILRValue(string ruleName, DataMatchLearner learner, long? dasAimSeqNumber, long jobId)
         {
             if (_rulesWithBlankILRValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
             {
@@ -108,17 +152,17 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
             var dataMatchLearningDeliveries = validLearningDeliveries.ToList();
 
-            if (dataMatchLearningDeliveries.Count() > 1)
+            if (dataMatchLearningDeliveries.Count > 1)
             {
-                _logger.LogInfo($"Multiple matching learning deliveries found for leaner {learner.LearnRefNumber}");
+                _logger.LogInfo($"Multiple matching learning deliveries found for leaner {learner.LearnRefNumber}", jobIdOverride: jobId);
                 foreach (var ld in dataMatchLearningDeliveries)
                 {
                     _logger.LogInfo(
-                        $"AimSeq-{ld.AimSeqNumber}_FworkCode-{ld.FworkCode}_StdCode-{ld.StdCode}_PwayCode-{ld.PwayCode}_ProgType{ld.ProgType}_LearnStartDate-{ld.LearnStartDate}");
+                        $"AimSeq-{ld.AimSeqNumber}_FworkCode-{ld.FworkCode}_StdCode-{ld.StdCode}_PwayCode-{ld.PwayCode}_ProgType{ld.ProgType}_LearnStartDate-{ld.LearnStartDate}", jobIdOverride: jobId);
                 }
             }
 
-            var validLearningDelivery = dataMatchLearningDeliveries.FirstOrDefault();
+            DataMatchLearningDelivery validLearningDelivery = dataMatchLearningDeliveries.FirstOrDefault();
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_03))
             {
@@ -145,7 +189,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                 var appFinRecords = validLearningDelivery?.AppFinRecords;
                 if (appFinRecords == null || !appFinRecords.Any())
                 {
-                    _logger.LogInfo("DLOCK_07 - Empty ILR Value(Negotiated Cost) due to no appfinrecords");
+                    _logger.LogInfo("DLOCK_07 - Empty ILR Value(Negotiated Cost) due to no appfinrecords", jobIdOverride: jobId);
                     return string.Empty;
                 }
 
@@ -156,7 +200,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                 var tnp2 = appFinRecords.Where(x => string.Equals(x.AFinType, TNP, StringComparison.OrdinalIgnoreCase) &&
                                                     x.AFinCode == 2).OrderByDescending(x => x.AFinDate).SingleOrDefault();
 
-                var negotiatedCostOfTraining = (tnp1 == null ? 0 : tnp1.AFinAmount) + (tnp2 == null ? 0 : tnp2.AFinAmount);
+                var negotiatedCostOfTraining = (tnp1?.AFinAmount ?? 0) + (tnp2?.AFinAmount ?? 0);
 
                 return negotiatedCostOfTraining.ToString();
             }

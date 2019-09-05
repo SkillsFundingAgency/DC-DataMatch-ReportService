@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
-using ESFA.DC.DataMatch.ReportService.Interface;
+using ESFA.DC.DataMatch.ReportService.Interface.Context;
 using ESFA.DC.DataMatch.ReportService.Interface.Reports;
 using ESFA.DC.IO.Interfaces;
 using ESFA.DC.Logging.Interfaces;
@@ -31,7 +31,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
         public async Task<bool> Callback(IReportServiceContext reportServiceContext, CancellationToken cancellationToken)
         {
-            _logger.LogInfo("Data Match Reporting callback invoked");
+            _logger.LogInfo("Data Match Reporting callback invoked", jobIdOverride: reportServiceContext.JobId);
 
             var reportZipFileKey = $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_Reports.zip";
             cancellationToken.ThrowIfCancellationRequested();
@@ -93,10 +93,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
-                _logger.LogDebug($"Attempting to generate {report.GetType().Name}");
+                _logger.LogDebug($"Attempting to generate {report.GetType().Name}", jobIdOverride: reportServiceContext.JobId);
                 needZip = await report.GenerateReport(reportServiceContext, archive, cancellationToken);
                 stopWatch.Stop();
-                _logger.LogDebug($"Persisted {report.GetType().Name} to csv/json in: {stopWatch.ElapsedMilliseconds}");
+                _logger.LogDebug($"Persisted {report.GetType().Name} to csv/json in: {stopWatch.ElapsedMilliseconds}", jobIdOverride: reportServiceContext.JobId);
 
                 foundReport = true;
                 break;
@@ -104,7 +104,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
             if (!foundReport)
             {
-                _logger.LogDebug($"Unable to find Data Match report '{task}'");
+                _logger.LogDebug($"Unable to find Data Match report '{task}'", jobIdOverride: reportServiceContext.JobId);
             }
 
             return needZip;
