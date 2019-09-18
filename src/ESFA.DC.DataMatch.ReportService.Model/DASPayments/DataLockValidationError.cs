@@ -18,7 +18,7 @@ namespace ESFA.DC.DataMatch.ReportService.Model.DASPayments
 
         public string Collection { get; set; }
 
-        public byte CollectionPeriod { get; set; }
+        public int CollectionPeriod { get; set; }
 
         public DateTime LastSubmission { get; set; }
     }

@@ -26,34 +26,25 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                 DataLockValidationErrors = new List<DataLockValidationError>()
             };
 
-            int dataLockSourceId = collectionName.StartsWith(Constants.ILR, StringComparison.OrdinalIgnoreCase) ? Constants.SubmissionInMonth : Constants.SubmissionPeriodEnd;
-
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
             {
-                List<DataLockValidationError> dataLockValidationErrors =
-                    await (from dle in dasPaymentsContext.DataLockEvents
-                           join ee in dasPaymentsContext.EarningEvents on dle.EarningEventId equals ee.EventId
-                           join dlenpp in dasPaymentsContext.DataLockEventNonPayablePeriods on dle.EventId equals dlenpp.DataLockEventId
-                           join dlenpf in dasPaymentsContext.DataLockEventNonPayablePeriodFailures on dlenpp.DataLockEventNonPayablePeriodId equals dlenpf.DataLockEventNonPayablePeriodId
-                           where (ukPrn == -1 || dle.Ukprn == ukPrn)
-                                 && (collectionPeriod == -1 || (dle.CollectionPeriod == collectionPeriod && dlenpp.DeliveryPeriod == collectionPeriod))
-                                 && ((dataLockSourceId == Constants.SubmissionInMonth && dle.DataLockSourceId == dataLockSourceId) || dataLockSourceId == Constants.SubmissionPeriodEnd)
-                                 && dle.LearningAimReference == Constants.ZPROG001
-                                 && dle.IsPayable == false
-                           select new DataLockValidationError
-                           {
-                               UkPrn = dle.Ukprn,
-                               LearnerReferenceNumber = dle.LearnerReferenceNumber,
-                               LearnerUln = dle.LearnerUln,
-                               RuleId = dlenpf.DataLockFailureId,
-                               AimSeqNumber = ee.LearningAimSequenceNumber,
-                               Collection = dle.DataLockSourceId == Constants.SubmissionInMonth ? Constants.ILR : Constants.PeriodEnd,
-                               CollectionPeriod = ee.CollectionPeriod,
-                               LastSubmission = ee.IlrSubmissionDateTime
-                           })
-                        .Distinct()
-                        .ToListAsync(cancellationToken);
+                var dataLockValidationErrors = await dasPaymentsContext.DataLocks
+                    .Where(x => (ukPrn == -1 || x.UkPrn == ukPrn) &&
+                                (collectionPeriod == -1 || (x.CollectionPeriod == collectionPeriod && x.DeliveryPeriod == collectionPeriod)))
+                    .Distinct()
+                    .Select(x => new DataLockValidationError()
+                    {
+                        UkPrn = x.UkPrn,
+                        LearnerReferenceNumber = x.LearnerReferenceNumber,
+                        LearnerUln = x.LearnerUln,
+                        RuleId = x.DataLockFailureId,
+                        AimSeqNumber = x.LearningAimSequenceNumber,
+                        Collection = x.DataLockSourceId == Constants.SubmissionInMonth ? Constants.ILR : Constants.PeriodEnd,
+                        CollectionPeriod = x.CollectionPeriod,
+                        LastSubmission = x.IlrSubmissionDateTime
+                    })
+                    .ToListAsync(cancellationToken);
 
                 dataMatchDataLockValidationErrorInfo.DataLockValidationErrors.AddRange(dataLockValidationErrors);
             }
