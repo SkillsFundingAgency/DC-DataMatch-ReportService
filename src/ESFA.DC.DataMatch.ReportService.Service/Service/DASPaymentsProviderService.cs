@@ -29,23 +29,22 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
             {
-                var dataLocks = await dasPaymentsContext.DataLocks
+                var dataLockValidationErrors = await dasPaymentsContext.DataLocks
                     .Where(x => (ukPrn == -1 || x.UkPrn == ukPrn) &&
                                 (collectionPeriod == -1 || (x.CollectionPeriod == collectionPeriod && x.DeliveryPeriod == collectionPeriod)))
                     .Distinct()
+                    .Select(x => new DataLockValidationError()
+                    {
+                        UkPrn = x.UkPrn,
+                        LearnerReferenceNumber = x.LearnerReferenceNumber,
+                        LearnerUln = x.LearnerUln,
+                        RuleId = x.DataLockFailureId,
+                        AimSeqNumber = x.LearningAimSequenceNumber,
+                        Collection = x.DataLockSourceId == Constants.SubmissionInMonth ? Constants.ILR : Constants.PeriodEnd,
+                        CollectionPeriod = x.CollectionPeriod,
+                        LastSubmission = x.IlrSubmissionDateTime
+                    })
                     .ToListAsync(cancellationToken);
-
-                var dataLockValidationErrors = dataLocks.Select(x => new DataLockValidationError()
-                {
-                    UkPrn = x.UkPrn,
-                    LearnerReferenceNumber = x.LearnerReferenceNumber,
-                    LearnerUln = x.LearnerUln,
-                    RuleId = x.DataLockFailureId,
-                    AimSeqNumber = x.LearningAimSequenceNumber,
-                    Collection = x.DataLockSourceId == Constants.SubmissionInMonth ? Constants.ILR : Constants.PeriodEnd,
-                    CollectionPeriod = x.CollectionPeriod,
-                    LastSubmission = x.IlrSubmissionDateTime
-                }).ToList();
 
                 dataMatchDataLockValidationErrorInfo.DataLockValidationErrors.AddRange(dataLockValidationErrors);
             }
