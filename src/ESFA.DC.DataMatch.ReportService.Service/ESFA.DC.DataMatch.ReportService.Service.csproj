@@ -17,7 +17,7 @@
     <PackageReference Include="CsvHelper" Version="12.1.2" />
     <PackageReference Include="ESFA.DC.Auditing.Interface" Version="0.2.0-beta0001" />
     <PackageReference Include="ESFA.DC.CollectionsManagement.Models" Version="0.2.10-beta0001" />
-    <PackageReference Include="ESFA.DC.DASPayments.EF" Version="0.1.88" />
+    <PackageReference Include="ESFA.DC.DASPayments.EF" Version="0.1.93" />
     <PackageReference Include="ESFA.DC.DateTimeProvider" Version="0.1.6-beta0001" />
     <PackageReference Include="ESFA.DC.DateTimeProvider.Interface" Version="0.1.6-beta0001" />
     <PackageReference Include="ESFA.DC.FileService" Version="0.1.21-beta0001" />
