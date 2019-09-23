@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CsvHelper;
 using CsvHelper.Configuration;
-using ESFA.DC.DataMatch.ReportService.Interface;
 using ESFA.DC.DataMatch.ReportService.Interface.Context;
 using ESFA.DC.DataMatch.ReportService.Interface.Reports;
 using ESFA.DC.DateTimeProvider.Interface;
