@@ -195,12 +195,36 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
                 var tnp1 = appFinRecords.Where(x =>
                     string.Equals(x.AFinType, TNP, StringComparison.OrdinalIgnoreCase) &&
-                    x.AFinCode == 1).OrderByDescending(x => x.AFinDate).SingleOrDefault();
+                    x.AFinCode == 1).OrderByDescending(x => x.AFinDate).ToList();
+
+                if (tnp1.Count > 1)
+                {
+                    _logger.LogInfo($"Multiple tnp1 AppFinRecords found for leaner {learner.LearnRefNumber}", jobIdOverride: jobId);
+                    foreach (var tnp in tnp1)
+                    {
+                        _logger.LogInfo(
+                            $"TNP1_AFinAmount-{tnp.AFinAmount}_AFinDate-{tnp.AFinDate}_AimSeqNumber-{tnp.AimSeqNumber}", jobIdOverride: jobId);
+                    }
+                }
+
+                var tnp1Value = tnp1.FirstOrDefault();
 
                 var tnp2 = appFinRecords.Where(x => string.Equals(x.AFinType, TNP, StringComparison.OrdinalIgnoreCase) &&
-                                                    x.AFinCode == 2).OrderByDescending(x => x.AFinDate).SingleOrDefault();
+                                                    x.AFinCode == 2).OrderByDescending(x => x.AFinDate).ToList();
 
-                var negotiatedCostOfTraining = (tnp1?.AFinAmount ?? 0) + (tnp2?.AFinAmount ?? 0);
+                if (tnp2.Count > 1)
+                {
+                    _logger.LogInfo($"Multiple tnp2 AppFinRecords found for leaner {learner.LearnRefNumber}", jobIdOverride: jobId);
+                    foreach (var tnp in tnp2)
+                    {
+                        _logger.LogInfo(
+                            $"TNP2_AFinAmount-{tnp.AFinAmount}_AFinDate-{tnp.AFinDate}_AimSeqNumber-{tnp.AimSeqNumber}", jobIdOverride: jobId);
+                    }
+                }
+
+                var tnp2Value = tnp2.FirstOrDefault();
+
+                var negotiatedCostOfTraining = (tnp1Value?.AFinAmount ?? 0) + (tnp2Value?.AFinAmount ?? 0);
 
                 return negotiatedCostOfTraining.ToString();
             }
@@ -243,27 +267,27 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_01))
             {
-                return dasApprenticeshipInfo.UkPrn.ToString();
+                return dasApprenticeshipInfo?.UkPrn.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_03))
             {
-                return dasApprenticeshipInfo.StandardCode.ToString();
+                return dasApprenticeshipInfo?.StandardCode?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_04))
             {
-                return dasApprenticeshipInfo.FrameworkCode.ToString();
+                return dasApprenticeshipInfo?.FrameworkCode?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_05))
             {
-                return dasApprenticeshipInfo.ProgrammeType.ToString();
+                return dasApprenticeshipInfo?.ProgrammeType?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_06))
             {
-                return dasApprenticeshipInfo.PathwayCode.ToString();
+                return dasApprenticeshipInfo?.PathwayCode?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_07))
