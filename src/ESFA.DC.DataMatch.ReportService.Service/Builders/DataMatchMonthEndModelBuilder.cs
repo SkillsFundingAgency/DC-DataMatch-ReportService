@@ -267,27 +267,27 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_01))
             {
-                return dasApprenticeshipInfo.UkPrn.ToString();
+                return dasApprenticeshipInfo?.UkPrn.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_03))
             {
-                return dasApprenticeshipInfo.StandardCode.ToString();
+                return dasApprenticeshipInfo?.StandardCode?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_04))
             {
-                return dasApprenticeshipInfo.FrameworkCode.ToString();
+                return dasApprenticeshipInfo?.FrameworkCode?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_05))
             {
-                return dasApprenticeshipInfo.ProgrammeType.ToString();
+                return dasApprenticeshipInfo?.ProgrammeType?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_06))
             {
-                return dasApprenticeshipInfo.PathwayCode.ToString();
+                return dasApprenticeshipInfo?.PathwayCode?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_07))
