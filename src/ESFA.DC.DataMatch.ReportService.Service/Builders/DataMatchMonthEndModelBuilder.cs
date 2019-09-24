@@ -37,6 +37,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             DataLockValidationMessages.DLOCK_11,
         };
 
+        private readonly string[] _rulesWithBlankLegalEntityValues =
+        {
+            DataLockValidationMessages.DLOCK_01,
+            DataLockValidationMessages.DLOCK_02
+        };
+
         public DataMatchMonthEndModelBuilder(ILogger logger)
         {
             _logger = logger;
@@ -148,40 +154,38 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                 return learner.Uln.ToString();
             }
 
-            var validLearningDeliveries = learner.DataMatchLearningDeliveries.Where(x => x.AimSeqNumber == dasAimSeqNumber);
+            var validLearningDeliveries = learner.DataMatchLearningDeliveries.Where(x => x.AimSeqNumber == dasAimSeqNumber).ToList();
 
-            var dataMatchLearningDeliveries = validLearningDeliveries.ToList();
-
-            if (dataMatchLearningDeliveries.Count > 1)
+            if (validLearningDeliveries.Count > 1)
             {
                 _logger.LogInfo($"Multiple matching learning deliveries found for leaner {learner.LearnRefNumber}", jobIdOverride: jobId);
-                foreach (var ld in dataMatchLearningDeliveries)
+                foreach (var ld in validLearningDeliveries)
                 {
                     _logger.LogInfo(
                         $"AimSeq-{ld.AimSeqNumber}_FworkCode-{ld.FworkCode}_StdCode-{ld.StdCode}_PwayCode-{ld.PwayCode}_ProgType{ld.ProgType}_LearnStartDate-{ld.LearnStartDate}", jobIdOverride: jobId);
                 }
             }
 
-            DataMatchLearningDelivery validLearningDelivery = dataMatchLearningDeliveries.FirstOrDefault();
+            DataMatchLearningDelivery validLearningDelivery = validLearningDeliveries.FirstOrDefault();
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_03))
             {
-                return validLearningDelivery?.StdCode.ToString();
+                return validLearningDelivery?.StdCode?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_04))
             {
-                return validLearningDelivery?.FworkCode.ToString();
+                return validLearningDelivery?.FworkCode?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_05))
             {
-                return validLearningDelivery?.ProgType.ToString();
+                return validLearningDelivery?.ProgType?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_06))
             {
-                return validLearningDelivery?.PwayCode.ToString();
+                return validLearningDelivery?.PwayCode?.ToString();
             }
 
             if (ruleName.CaseInsensitiveEquals(DataLockValidationMessages.DLOCK_07))
@@ -239,13 +243,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
         private string GetLegalEntityName(string ruleName, DasApprenticeshipInfo dasApprenticeshipInfo)
         {
-            var rulesWithBlankLegalEntityValues = new[] { DataLockValidationMessages.DLOCK_01, DataLockValidationMessages.DLOCK_02 };
-            if (rulesWithBlankLegalEntityValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
+            if (_rulesWithBlankLegalEntityValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
             {
                 return string.Empty;
             }
 
-            return dasApprenticeshipInfo.LegalEntityName ?? string.Empty;
+            return dasApprenticeshipInfo?.LegalEntityName ?? string.Empty;
         }
 
         private string PopulateRuleName(int ruleId)
