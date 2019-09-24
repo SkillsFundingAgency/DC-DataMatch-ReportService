@@ -29,7 +29,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
             {
-                var dataLockValidationErrors = await dasPaymentsContext.DataLocks
+                var dataLockValidationErrors = await dasPaymentsContext.DataMatchReport
                     .Where(x => (ukPrn == -1 || x.UkPrn == ukPrn) &&
                                 (collectionPeriod == -1 || (x.CollectionPeriod == collectionPeriod && x.DeliveryPeriod == collectionPeriod)))
                     .Distinct()
