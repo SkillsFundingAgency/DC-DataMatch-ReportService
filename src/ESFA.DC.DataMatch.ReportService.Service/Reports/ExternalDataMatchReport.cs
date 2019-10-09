@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
@@ -26,6 +27,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
         private readonly IFM36ProviderService _fm36ProviderService;
         private readonly IILRProviderService _ilrProviderService;
         private readonly IDataMatchModelBuilder _dataMatchModelBuilder;
+        private readonly IDateTimeProvider _dateTimeProvider;
         private readonly ExternalDataMatchModelComparer _dataMatchModelComparer;
 
         public ExternalDataMatchReport(
@@ -43,6 +45,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             _fm36ProviderService = fm36ProviderService;
             _ilrProviderService = iIlrProviderService;
             _dataMatchModelBuilder = dataMatchModelBuilder;
+            _dateTimeProvider = dateTimeProvider;
             _dataMatchModelComparer = dataMatchModelComparer;
         }
 
@@ -87,6 +90,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
             await WriteZipEntry(archive, $"{fileName}.csv", csv);
             return true;
+        }
+
+        private string GetFilename(IReportServiceContext reportServiceContext)
+        {
+            DateTime dateTime = _dateTimeProvider.ConvertUtcToUk(reportServiceContext.SubmissionDateTimeUtc);
+            return $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
         }
     }
 }

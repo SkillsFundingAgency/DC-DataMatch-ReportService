@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
@@ -74,6 +75,11 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
 
             await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
             return false;
+        }
+
+        private string GetFilename(IReportServiceContext reportServiceContext)
+        {
+            return $"R{reportServiceContext.ReturnPeriod:00}_{ReportFileName}";
         }
     }
 }

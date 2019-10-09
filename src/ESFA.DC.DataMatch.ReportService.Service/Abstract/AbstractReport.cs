@@ -34,12 +34,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Abstract
 
         public abstract string ReportTaskName { get; }
 
-        public string GetFilename(IReportServiceContext reportServiceContext)
-        {
-            DateTime dateTime = _dateTimeProvider.ConvertUtcToUk(reportServiceContext.SubmissionDateTimeUtc);
-            return $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
-        }
-
         public string GetZipFilename(IReportServiceContext reportServiceContext)
         {
             DateTime dateTime = _dateTimeProvider.ConvertUtcToUk(reportServiceContext.SubmissionDateTimeUtc);
