@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -33,8 +34,17 @@ namespace ESFA.DC.DataMatch.ReportService.Service
         {
             _logger.LogInfo("Data Match Reporting callback invoked", jobIdOverride: reportServiceContext.JobId);
 
-            var reportZipFileKey = $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_Reports.zip";
             cancellationToken.ThrowIfCancellationRequested();
+
+            string reportZipFileKey;
+            if (reportServiceContext.CollectionName.StartsWith("ILR", StringComparison.OrdinalIgnoreCase))
+            {
+                reportZipFileKey = $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_Reports.zip";
+            }
+            else
+            {
+                reportZipFileKey = $"R{reportServiceContext.ReturnPeriod:00}_{reportServiceContext.Ukprn}_Reports.zip";
+            }
 
             MemoryStream memoryStream = new MemoryStream();
             var zipFileExists = await _streamableKeyValuePersistenceService.ContainsAsync(reportZipFileKey, cancellationToken);
