@@ -23,5 +23,7 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Context
         string CollectionYear { get; }
 
         IEnumerable<ReturnPeriod> ILRPeriods { get; }
+
+        bool IsIlrSubmission { get; }
     }
 }

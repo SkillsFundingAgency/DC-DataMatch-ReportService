@@ -35,5 +35,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless.Context
         public string CollectionYear => _jobContextMessage.KeyValuePairs[JobContextMessageKey.CollectionYear].ToString();
 
         public IEnumerable<ReturnPeriod> ILRPeriods => (IEnumerable<ReturnPeriod>)_jobContextMessage.KeyValuePairs[Constants.ILRPeriods];
+
+        public bool IsIlrSubmission => CollectionName.StartsWith("ILR", StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -87,7 +87,11 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
 
             string csv = WriteResults<ExternalDataMatchMapper, DataMatchModel>(dataMatchModels);
 
-            await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
+            if (reportServiceContext.IsIlrSubmission)
+            {
+                await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
+            }
+
             await WriteZipEntry(archive, $"{fileName}.csv", csv);
             return true;
         }

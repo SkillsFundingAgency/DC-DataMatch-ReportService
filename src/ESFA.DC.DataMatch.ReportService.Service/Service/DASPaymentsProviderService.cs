@@ -31,9 +31,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             {
                 var dataLockValidationErrors = await dasPaymentsContext.DataMatchReport
                     .Where(x => (ukPrn == -1 || x.UkPrn == ukPrn) &&
-                                (collectionPeriod == -1 || (x.CollectionPeriod == collectionPeriod && x.DeliveryPeriod == collectionPeriod)))
+                                (x.CollectionPeriod == collectionPeriod && x.DeliveryPeriod == collectionPeriod))
                     .Distinct()
-                    .Select(x => new DataLockValidationError()
+                    .Select(x => new DataLockValidationError
                     {
                         UkPrn = x.UkPrn,
                         LearnerReferenceNumber = x.LearnerReferenceNumber,
