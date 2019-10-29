@@ -95,7 +95,13 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
         private string GetFilename(IReportServiceContext reportServiceContext)
         {
             DateTime dateTime = _dateTimeProvider.ConvertUtcToUk(reportServiceContext.SubmissionDateTimeUtc);
-            return $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
+
+            if (reportServiceContext.CollectionName.StartsWith("ILR", StringComparison.OrdinalIgnoreCase))
+            {
+                return $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
+            }
+
+            return $"{reportServiceContext.Ukprn}_R{reportServiceContext.ReturnPeriod:00}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
         }
     }
 }
