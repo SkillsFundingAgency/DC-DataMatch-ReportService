@@ -100,7 +100,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
         {
             DateTime dateTime = _dateTimeProvider.ConvertUtcToUk(reportServiceContext.SubmissionDateTimeUtc);
 
-            if (reportServiceContext.CollectionName.StartsWith("ILR", StringComparison.OrdinalIgnoreCase))
+            if (reportServiceContext.IsIlrSubmission)
             {
                 return $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
             }

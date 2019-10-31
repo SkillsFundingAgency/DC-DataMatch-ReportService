@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspose.Cells" Version="19.8.0" />
+    <PackageReference Include="Aspose.Cells" Version="19.10.0" />
     <PackageReference Include="CsvHelper" Version="12.1.2" />
     <PackageReference Include="ESFA.DC.Auditing.Interface" Version="0.2.0-beta0001" />
     <PackageReference Include="ESFA.DC.CollectionsManagement.Models" Version="0.2.10-beta0001" />
@@ -23,7 +23,7 @@
     <PackageReference Include="ESFA.DC.FileService" Version="0.1.21-beta0001" />
     <PackageReference Include="ESFA.DC.FileService.Interface" Version="0.1.20-beta0001" />
     <PackageReference Include="ESFA.DC.ILR1819.Database.EF" Version="0.1.381" />
-    <PackageReference Include="ESFA.DC.ILR1920.Database.EF" Version="0.0.349" />
+    <PackageReference Include="ESFA.DC.ILR1920.Database.EF" Version="0.0.415" />
     <PackageReference Include="ESFA.DC.IO.AzureStorage" Version="0.1.21-beta0001" />
     <PackageReference Include="ESFA.DC.IO.Interfaces" Version="0.1.20-beta0001" />
     <PackageReference Include="ESFA.DC.JobContext.Interface" Version="0.2.8-beta0001" />
@@ -37,7 +37,7 @@
     <PackageReference Include="ESFA.DC.Serialization.Interfaces" Version="0.1.6-beta0001" />
     <PackageReference Include="ESFA.DC.Serialization.Xml" Version="0.1.6-beta0001" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="2.2.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="2.2.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="2.2.3" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>

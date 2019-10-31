@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ESFA.DC.DataMatch.ReportService.Interface.Configuration
+﻿namespace ESFA.DC.DataMatch.ReportService.Core.Configuration
 {
     public interface IReportServiceConfiguration
     {

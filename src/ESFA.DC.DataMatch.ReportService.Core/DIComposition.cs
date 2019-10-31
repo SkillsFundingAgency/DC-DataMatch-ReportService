@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using Autofac;
 using ESFA.DC.DASPayments.EF;
 using ESFA.DC.DASPayments.EF.Interfaces;
+using ESFA.DC.DataMatch.ReportService.Core.Configuration;
+using ESFA.DC.DataMatch.ReportService.Interface;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
 using ESFA.DC.DataMatch.ReportService.Interface.Configuration;
 using ESFA.DC.DataMatch.ReportService.Interface.Reports;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
+using ESFA.DC.DataMatch.ReportService.Model.Configuration;
 using ESFA.DC.DataMatch.ReportService.Service;
 using ESFA.DC.DataMatch.ReportService.Service.Builders;
 using ESFA.DC.DataMatch.ReportService.Service.Comparer;
@@ -14,7 +17,6 @@ using ESFA.DC.DataMatch.ReportService.Service.Extensions;
 using ESFA.DC.DataMatch.ReportService.Service.Reports;
 using ESFA.DC.DataMatch.ReportService.Service.Service;
 using ESFA.DC.DataMatch.ReportService.Stateless.Configuration;
-using ESFA.DC.DataMatch.ReportService.Stateless.Handlers;
 using ESFA.DC.DateTimeProvider.Interface;
 using ESFA.DC.FileService;
 using ESFA.DC.FileService.Config;
@@ -31,75 +33,75 @@ using ESFA.DC.ILR1920.DataStore.EF.Valid.Interface;
 using ESFA.DC.IO.AzureStorage;
 using ESFA.DC.IO.AzureStorage.Config.Interfaces;
 using ESFA.DC.IO.Interfaces;
-using ESFA.DC.JobContextManager;
-using ESFA.DC.JobContextManager.Interface;
-using ESFA.DC.JobContextManager.Model;
-using ESFA.DC.JobContextManager.Model.Interface;
-using ESFA.DC.Mapping.Interface;
-using ESFA.DC.ServiceFabric.Common.Modules;
+using ESFA.DC.Serialization.Interfaces;
+using ESFA.DC.Serialization.Json;
+using ESFA.DC.Serialization.Xml;
 using Microsoft.EntityFrameworkCore;
-using VersionInfo = ESFA.DC.DataMatch.ReportService.Stateless.Configuration.VersionInfo;
 
-namespace ESFA.DC.DataMatch.ReportService.Stateless
+namespace ESFA.DC.DataMatch.ReportService.Core
 {
     public static class DIComposition
     {
-        public static ContainerBuilder BuildContainer(ServiceFabric.Common.Config.Interface.IServiceFabricConfigurationService serviceFabricConfigurationService)
+        public static ContainerBuilder BuildNewContainer()
         {
-            var containerBuilder = new ContainerBuilder();
+            ContainerBuilder containerBuilder = new ContainerBuilder();
+            return containerBuilder;
+        }
 
-            var statelessServiceConfiguration = serviceFabricConfigurationService.GetConfigSectionAsStatelessServiceConfiguration();
+        public static void BuildStorageFileSystem(
+            ContainerBuilder containerBuilder,
+            AzureStorageOptions azureBlobStorageOptions,
+            IStreamableKeyValuePersistenceService storagePersistenceService)
+        {
+            containerBuilder.RegisterInstance(azureBlobStorageOptions).As<IAzureStorageOptions>();
+            containerBuilder.RegisterType<FileSystemFileService>().As<IFileService>();
+            containerBuilder.RegisterInstance(storagePersistenceService)
+                .As<IStreamableKeyValuePersistenceService>()
+                .SingleInstance();
+        }
 
-            var reportServiceConfiguration = serviceFabricConfigurationService.GetConfigSectionAs<ReportServiceConfiguration>("ReportServiceConfiguration");
-            containerBuilder.RegisterInstance(reportServiceConfiguration).As<IReportServiceConfiguration>();
-
+        public static void BuildStorageContainerAzure(
+            ContainerBuilder containerBuilder,
+            AzureStorageOptions azureBlobStorageOptions)
+        {
             // register azure blob storage service
-            var azureBlobStorageOptions = serviceFabricConfigurationService.GetConfigSectionAs<AzureStorageOptions>("AzureStorageSection");
             containerBuilder.RegisterInstance(azureBlobStorageOptions).As<IAzureStorageOptions>();
             containerBuilder.Register(c =>
                     new AzureStorageKeyValuePersistenceConfig(
                         azureBlobStorageOptions.AzureBlobConnectionString,
                         azureBlobStorageOptions.AzureBlobContainerName))
-            .As<IAzureStorageKeyValuePersistenceServiceConfig>().SingleInstance();
+                .As<IAzureStorageKeyValuePersistenceServiceConfig>().SingleInstance();
 
             containerBuilder.RegisterType<AzureStorageKeyValuePersistenceService>()
                 .As<IStreamableKeyValuePersistenceService>()
                 .InstancePerLifetimeScope();
 
-            var azureStorageFileServiceConfiguration = new AzureStorageFileServiceConfiguration()
+            AzureStorageFileServiceConfiguration azureStorageFileServiceConfiguration = new AzureStorageFileServiceConfiguration()
             {
                 ConnectionString = azureBlobStorageOptions.AzureBlobConnectionString,
             };
 
             containerBuilder.RegisterInstance(azureStorageFileServiceConfiguration).As<IAzureStorageFileServiceConfiguration>();
             containerBuilder.RegisterType<AzureStorageFileService>().As<IFileService>();
+        }
 
-            containerBuilder.RegisterModule(new StatelessServiceModule(statelessServiceConfiguration));
-            containerBuilder.RegisterModule<SerializationModule>();
+        public static void BuildContainer(
+            ContainerBuilder containerBuilder,
+            ConfigurationRootModel configurationRoot)
+        {
+            containerBuilder.RegisterInstance(configurationRoot.reportServiceConfiguration).As<IReportServiceConfiguration>();
+            
+            containerBuilder.RegisterType<XmlSerializationService>().As<IXmlSerializationService>();
+            containerBuilder.RegisterType<JsonSerializationService>().As<IJsonSerializationService>().As<ISerializationService>();
 
-            var versionInfo = serviceFabricConfigurationService.GetConfigSectionAs<VersionInfo>("VersionSection");
-            containerBuilder.RegisterInstance(versionInfo).As<IVersionInfo>().SingleInstance();
-
-            // register message mapper
-            containerBuilder.RegisterType<DefaultJobContextMessageMapper<JobContextMessage>>().As<IMapper<JobContextMessage, JobContextMessage>>();
-
-            // register MessageHandler
-            containerBuilder.RegisterType<MessageHandler>().As<IMessageHandler<JobContextMessage>>().InstancePerLifetimeScope();
-
-            containerBuilder.RegisterType<JobContextManager<JobContextMessage>>().As<IJobContextManager<JobContextMessage>>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.RegisterType<JobContextMessage>().As<IJobContextMessage>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.RegisterType<EntryPoint>().InstancePerLifetimeScope();
+            containerBuilder.RegisterInstance(configurationRoot.versionInfo).As<IVersionInfo>().SingleInstance();
 
             containerBuilder.RegisterType<ILR1819_DataStoreEntitiesValid>().As<IIlr1819ValidContext>();
             containerBuilder.Register(context =>
             {
                 var optionsBuilder = new DbContextOptionsBuilder<ILR1819_DataStoreEntitiesValid>();
                 optionsBuilder.UseSqlServer(
-                    reportServiceConfiguration.ILR1819DataStoreConnectionString,
+                    configurationRoot.reportServiceConfiguration.ILR1819DataStoreConnectionString,
                     options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
 
                 return optionsBuilder.Options;
@@ -112,7 +114,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
             {
                 var optionsBuilder = new DbContextOptionsBuilder<ILR1920_DataStoreEntitiesValid>();
                 optionsBuilder.UseSqlServer(
-                    reportServiceConfiguration.ILR1920DataStoreConnectionString,
+                    configurationRoot.reportServiceConfiguration.ILR1920DataStoreConnectionString,
                     options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
 
                 return optionsBuilder.Options;
@@ -125,7 +127,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
             {
                 var optionsBuilder = new DbContextOptionsBuilder<ILR1819_DataStoreEntities>();
                 optionsBuilder.UseSqlServer(
-                    reportServiceConfiguration.ILR1819DataStoreConnectionString,
+                    configurationRoot.reportServiceConfiguration.ILR1819DataStoreConnectionString,
                     options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
 
                 return optionsBuilder.Options;
@@ -138,7 +140,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
             {
                 var optionsBuilder = new DbContextOptionsBuilder<ILR1920_DataStoreEntities>();
                 optionsBuilder.UseSqlServer(
-                    reportServiceConfiguration.ILR1920DataStoreConnectionString,
+                    configurationRoot.reportServiceConfiguration.ILR1920DataStoreConnectionString,
                     options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
 
                 return optionsBuilder.Options;
@@ -151,7 +153,7 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
             {
                 var optionsBuilder = new DbContextOptionsBuilder<DASPaymentsContext>();
                 optionsBuilder.UseSqlServer(
-                    reportServiceConfiguration.DASPaymentsConnectionString,
+                    configurationRoot.reportServiceConfiguration.DASPaymentsConnectionString,
                     options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
 
                 return optionsBuilder.Options;
@@ -164,11 +166,12 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
             containerBuilder.RegisterType<ExternalDataMatchModelComparer>();
             containerBuilder.RegisterType<InternalDataMatchModelComparer>();
 
+            containerBuilder.RegisterType<Handler>().As<IHandler>().InstancePerLifetimeScope();
+            containerBuilder.RegisterType<EntryPoint>().InstancePerLifetimeScope();
+
             RegisterServices(containerBuilder);
             RegisterBuilders(containerBuilder);
             RegisterReports(containerBuilder);
-
-            return containerBuilder;
         }
 
         public static void RegisterServicesByYear(string year, ContainerBuilder containerBuilder)

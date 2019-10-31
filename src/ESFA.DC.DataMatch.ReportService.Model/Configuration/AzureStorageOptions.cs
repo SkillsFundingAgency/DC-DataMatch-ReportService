@@ -1,6 +1,6 @@
-﻿using ESFA.DC.DataMatch.ReportService.Interface.Configuration;
+﻿using ESFA.DC.DataMatch.ReportService.Core.Configuration;
 
-namespace ESFA.DC.DataMatch.ReportService.Stateless.Configuration
+namespace ESFA.DC.DataMatch.ReportService.Model.Configuration
 {
     public class AzureStorageOptions : IAzureStorageOptions
     {

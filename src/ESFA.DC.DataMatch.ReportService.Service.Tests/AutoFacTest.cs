@@ -1,4 +1,6 @@
 ﻿using Autofac;
+using ESFA.DC.DataMatch.ReportService.Core;
+using ESFA.DC.DataMatch.ReportService.Model.Configuration;
 using ESFA.DC.DataMatch.ReportService.Stateless;
 using ESFA.DC.JobContextManager.Interface;
 using ESFA.DC.JobContextManager.Model;
@@ -12,7 +14,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests
         [Fact]
         public void TestRegistrations()
         {
-            ContainerBuilder containerBuilder = DIComposition.BuildContainer(new TestConfigurationHelper());
+            ContainerBuilder containerBuilder = DIComposition.BuildNewContainer();
+            ConfigurationRootModel configModel = DICompositionServiceFabric.BuildContainer(containerBuilder, new TestConfigurationHelper());
+            DIComposition.BuildContainer(containerBuilder, configModel);
             DIComposition.RegisterServicesByYear(Constants.YEAR_1920, containerBuilder);
 
             var c = containerBuilder.Build();
