@@ -40,7 +40,7 @@ namespace ESFA.DC.DataMatch.ReportService.Console
             using (var fileStream = File.Create(Path.Combine(_directory, key)))
             {
                 value.Seek(0, SeekOrigin.Begin);
-                value.CopyTo(fileStream);
+                await value.CopyToAsync(fileStream);
             }
         }
 
