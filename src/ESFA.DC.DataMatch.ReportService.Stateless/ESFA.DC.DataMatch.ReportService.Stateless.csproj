@@ -32,7 +32,7 @@
     <OutputPath>bin\x64\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <CodeAnalysisRuleSet>ESFA.DC.DataMatch.ReportService.Stateless.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
@@ -403,7 +403,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ESFA.DC.DataMatch.ReportService.Core\ESFA.DC.DataMatch.ReportService.Core.csproj">
-      <Project>{7DABC4A8-C522-4925-9847-9A08502DAD5C}</Project>
+      <Project>{7dabc4a8-c522-4925-9847-9a08502dad5c}</Project>
       <Name>ESFA.DC.DataMatch.ReportService.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\ESFA.DC.DataMatch.ReportService.Interface\ESFA.DC.DataMatch.ReportService.Interface.csproj">
