@@ -2,6 +2,7 @@
 using ESFA.DC.DataMatch.ReportService.Core;
 using ESFA.DC.DataMatch.ReportService.Model.Configuration;
 using ESFA.DC.DataMatch.ReportService.Stateless;
+using ESFA.DC.IO.AzureStorage;
 using ESFA.DC.JobContextManager.Interface;
 using ESFA.DC.JobContextManager.Model;
 using FluentAssertions;
@@ -14,12 +15,13 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests
         [Fact]
         public void TestRegistrations()
         {
-            ContainerBuilder containerBuilder = DIComposition.BuildNewContainer();
-            ConfigurationRootModel configModel = DICompositionServiceFabric.BuildContainer(containerBuilder, new TestConfigurationHelper());
-            DIComposition.BuildContainer(containerBuilder, configModel);
-            DIComposition.RegisterServicesByYear(Constants.YEAR_1920, containerBuilder);
+            ContainerBuilder builder = DIComposition.BuildNewContainer();
+            ConfigurationRootModel configurationRoot = DICompositionServiceFabric.BuildContainer(builder, new TestConfigurationHelper());
+            DIComposition.BuildContainer(builder, configurationRoot);
+            DIComposition.RegisterServicesByYear(Constants.YEAR_1920, builder);
+            DIComposition.BuildStorageContainerAzure(builder, configurationRoot.azureBlobStorageOptions);
 
-            var c = containerBuilder.Build();
+            var c = builder.Build();
 
             using (var lifeTime = c.BeginLifetimeScope())
             {
