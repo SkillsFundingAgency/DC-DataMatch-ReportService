@@ -16,5 +16,6 @@
     <Parameter Name="TopicReports" Value="__TopicReports__" />
     <Parameter Name="DASPaymentsConnectionString" Value="__DASPaymentsConnectionString__" />
     <Parameter Name="ProcessingServicePlacementConstraints" Value="__ProcessingServicePlacementConstraints__" />
+    <Parameter Name="TopicMaxCallbackTimeSpanMinutes" Value="__TopicMaxCallbackTimeSpanMinutes__" />
   </Parameters>
 </Application>
