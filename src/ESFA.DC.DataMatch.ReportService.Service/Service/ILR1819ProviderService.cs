@@ -42,8 +42,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                 for (int i = 0; i < count; i += pageSize)
                 {
                     List<DataMatchLearner> learnersList = await ilrContext.Learners
-                        .Include(x => x.LearningDeliveries).ThenInclude(y => y.AppFinRecords)
-                        .Include(x => x.LearningDeliveries).ThenInclude(y => y.LearningDeliveryFAMs)
                         .Where(x => x.UKPRN == ukPrn
                                     && learners.Skip(i).Take(pageSize).Contains(x.ULN)
                                     && x.LearningDeliveries.Any(y =>
