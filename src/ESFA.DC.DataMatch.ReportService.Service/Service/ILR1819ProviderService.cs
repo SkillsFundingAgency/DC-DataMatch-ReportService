@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
-using ESFA.DC.ILR1819.DataStore.EF.Valid;
 using ESFA.DC.ILR1819.DataStore.EF.Valid.Interface;
 using ESFA.DC.Logging.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +22,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             _ilrValidContextFactory = ilrValidContextFactory;
         }
 
-        public async Task<DataMatchILRInfo> GetILRInfoForDataMatchReport(int ukPrn, CancellationToken cancellationToken)
+        public async Task<DataMatchILRInfo> GetILRInfoForDataMatchReport(
+            int ukPrn,
+            List<long> learners,
+            CancellationToken cancellationToken)
         {
             var dataMatchILRInfo = new DataMatchILRInfo
             {
@@ -32,48 +34,55 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             };
 
             cancellationToken.ThrowIfCancellationRequested();
-            List<Learner> learnersList;
             using (var ilrContext = _ilrValidContextFactory())
             {
-                learnersList = await ilrContext.Learners
-                    .Include(x => x.LearningDeliveries).ThenInclude(y => y.AppFinRecords)
-                    .Include(x => x.LearningDeliveries).ThenInclude(y => y.LearningDeliveryFAMs)
-                    .Where(x => x.UKPRN == ukPrn && x.LearningDeliveries.Any(y => y.FundModel == Constants.ApprenticeshipsFundModel
-                                                 && y.LearningDeliveryFAMs.Any(ldf => ldf.LearnDelFAMCode == Constants.LearnDelFAMCode && ldf.LearnDelFAMType == Constants.LearnDelFAMType)))
-                    .Distinct().ToListAsync(cancellationToken);
-            }
+                int count = learners.Count;
+                int pageSize = 1000;
 
-            foreach (var learner in learnersList)
-            {
-                var dataMatchLearner = new DataMatchLearner
+                for (int i = 0; i < count; i += pageSize)
                 {
-                    UkPrn = learner.UKPRN,
-                    LearnRefNumber = learner.LearnRefNumber,
-                    Uln = learner.ULN,
-                    DataMatchLearningDeliveries = learner.LearningDeliveries.Select(x => new DataMatchLearningDelivery()
-                    {
-                        UkPrn = ukPrn,
-                        LearnRefNumber = x.LearnRefNumber,
-                        LearnAimRef = x.LearnAimRef,
-                        AimSeqNumber = x.AimSeqNumber,
-                        LearnStartDate = x.LearnStartDate,
-                        ProgType = x.ProgType,
-                        StdCode = x.StdCode,
-                        FworkCode = x.FworkCode,
-                        PwayCode = x.PwayCode,
-                        AppFinRecords = x.AppFinRecords.Select(y => new AppFinRecordInfo()
+                    List<DataMatchLearner> learnersList = await ilrContext.Learners
+                        .Include(x => x.LearningDeliveries).ThenInclude(y => y.AppFinRecords)
+                        .Include(x => x.LearningDeliveries).ThenInclude(y => y.LearningDeliveryFAMs)
+                        .Where(x => x.UKPRN == ukPrn
+                                    && learners.Skip(i).Take(pageSize).Contains(x.ULN)
+                                    && x.LearningDeliveries.Any(y =>
+                                        y.FundModel == Constants.ApprenticeshipsFundModel
+                                        && y.LearningDeliveryFAMs.Any(ldf =>
+                                            ldf.LearnDelFAMCode == Constants.LearnDelFAMCode &&
+                                            ldf.LearnDelFAMType == Constants.LearnDelFAMType)))
+                        .Select(l => new DataMatchLearner
                         {
-                            LearnRefNumber = y.LearnRefNumber,
-                            AimSeqNumber = y.AimSeqNumber,
-                            AFinType = y.AFinType,
-                            AFinCode = y.AFinCode,
-                            AFinDate = y.AFinDate,
-                            AFinAmount = y.AFinAmount,
-                        }).ToList(),
-                    }).ToList(),
-                };
+                            UkPrn = l.UKPRN,
+                            LearnRefNumber = l.LearnRefNumber,
+                            Uln = l.ULN,
+                            DataMatchLearningDeliveries = l.LearningDeliveries.Select(x => new DataMatchLearningDelivery
+                            {
+                                UkPrn = ukPrn,
+                                LearnRefNumber = x.LearnRefNumber,
+                                LearnAimRef = x.LearnAimRef,
+                                AimSeqNumber = x.AimSeqNumber,
+                                LearnStartDate = x.LearnStartDate,
+                                ProgType = x.ProgType,
+                                StdCode = x.StdCode,
+                                FworkCode = x.FworkCode,
+                                PwayCode = x.PwayCode,
+                                AppFinRecords = x.AppFinRecords.Select(y => new AppFinRecordInfo()
+                                {
+                                    LearnRefNumber = y.LearnRefNumber,
+                                    AimSeqNumber = y.AimSeqNumber,
+                                    AFinType = y.AFinType,
+                                    AFinCode = y.AFinCode,
+                                    AFinDate = y.AFinDate,
+                                    AFinAmount = y.AFinAmount,
+                                }).ToList(),
+                            }).ToList(),
+                        })
+                        .Distinct()
+                        .ToListAsync(cancellationToken);
 
-                dataMatchILRInfo.DataMatchLearners.Add(dataMatchLearner);
+                    dataMatchILRInfo.DataMatchLearners.AddRange(learnersList);
+                }
             }
 
             return dataMatchILRInfo;

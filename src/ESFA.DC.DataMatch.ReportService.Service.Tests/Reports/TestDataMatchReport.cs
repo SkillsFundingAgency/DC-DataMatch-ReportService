@@ -69,7 +69,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
                 .Setup(x => x.GetFM36DataForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dataMatchRulebaseInfo);
             iIlrProviderService
-                .Setup(x => x.GetILRInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetILRInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<List<long>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ilrModelForDataMatchReport);
             dasPaymentProviderMock.Setup(x =>
                     x.GetDasApprenticeshipInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
