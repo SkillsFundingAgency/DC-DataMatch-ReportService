@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using Autofac;
 using Autofac.Integration.ServiceFabric;
-using ESFA.DC.DataMatch.ReportService.Core;
 using ESFA.DC.DataMatch.ReportService.Model.Configuration;
 using ESFA.DC.DataMatch.ReportService.Stateless.Configuration;
 using ESFA.DC.ServiceFabric.Common.Config;
@@ -35,10 +34,10 @@ namespace ESFA.DC.DataMatch.ReportService.Stateless
                 }
 
                 // Setup Autofac
-                ContainerBuilder builder = DIComposition.BuildNewContainer();
+                ContainerBuilder builder = ESFA.DC.DataMatch.ReportService.Core.DIComposition.BuildNewContainer();
                 ConfigurationRootModel configurationRoot = DICompositionServiceFabric.BuildContainer(builder, serviceFabricConfigurationService);
-                DIComposition.BuildContainer(builder, configurationRoot);
-                DIComposition.BuildStorageContainerAzure(builder, configurationRoot.azureBlobStorageOptions);
+                ESFA.DC.DataMatch.ReportService.Core.DIComposition.BuildContainer(builder, configurationRoot);
+                ESFA.DC.DataMatch.ReportService.Core.DIComposition.BuildStorageContainerAzure(builder, configurationRoot.azureBlobStorageOptions);
 
                 // Register the Autofac magic for Service Fabric support.
                 builder.RegisterServiceFabricSupport();
