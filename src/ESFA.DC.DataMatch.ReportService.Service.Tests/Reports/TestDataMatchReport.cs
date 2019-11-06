@@ -40,6 +40,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             reportServiceContextMock.SetupGet(x => x.JobId).Returns(1);
             reportServiceContextMock.SetupGet(x => x.SubmissionDateTimeUtc).Returns(DateTime.UtcNow);
             reportServiceContextMock.SetupGet(x => x.Ukprn).Returns(10033670);
+            reportServiceContextMock.SetupGet(x => x.IsIlrSubmission).Returns(true);
 
             Mock<ILogger> logger = new Mock<ILogger>();
             Mock<IDateTimeProvider> dateTimeProviderMock = new Mock<IDateTimeProvider>();
@@ -68,7 +69,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
                 .Setup(x => x.GetFM36DataForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dataMatchRulebaseInfo);
             iIlrProviderService
-                .Setup(x => x.GetILRInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetILRInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<List<long>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ilrModelForDataMatchReport);
             dasPaymentProviderMock.Setup(x =>
                     x.GetDasApprenticeshipInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))

@@ -13,11 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspose.Cells" Version="19.8.0" />
-    <PackageReference Include="CsvHelper" Version="12.1.2" />
+    <PackageReference Include="Aspose.Cells" Version="19.10.0" />
+    <PackageReference Include="CsvHelper" Version="12.2.1" />
     <PackageReference Include="ESFA.DC.DASPayments.EF" Version="0.1.102" />
     <PackageReference Include="ESFA.DC.Data.DAS.Model" Version="0.1.0" />
     <PackageReference Include="ESFA.DC.ILR1819.Database.EF" Version="0.1.381" />
+    <PackageReference Include="ESFA.DC.IO.AzureStorage" Version="0.1.21-beta0001" />
   </ItemGroup>
 
 </Project>

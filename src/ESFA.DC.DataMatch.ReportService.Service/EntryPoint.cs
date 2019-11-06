@@ -37,7 +37,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service
             cancellationToken.ThrowIfCancellationRequested();
 
             string reportZipFileKey;
-            if (reportServiceContext.CollectionName.StartsWith("ILR", StringComparison.OrdinalIgnoreCase))
+            if (reportServiceContext.IsIlrSubmission)
             {
                 reportZipFileKey = $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_Reports.zip";
             }

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/ESFA.DC.DataMatch.ReportService" xmlns="http://schemas.microsoft.com/2011/01/fabric">
   <Parameters>
-    <Parameter Name="ESFA.DC.DataMatch.ReportService.Stateless_InstanceCount" Value="1" />
+    <Parameter Name="ESFA.DC.DataMatch.ReportService.Stateless_InstanceCount" Value="__InstanceCount__" />
     <Parameter Name="AzureBlobConnectionString" Value="__AzureBlobConnectionString__" />
     <Parameter Name="ServiceBusConnectionString" Value="__ServiceBusConnectionString__" />
     <Parameter Name="ILR1819DataStoreConnectionString" Value="__ILR1819DataStoreConnectionString__" />
@@ -16,5 +16,6 @@
     <Parameter Name="TopicReports" Value="__TopicReports__" />
     <Parameter Name="DASPaymentsConnectionString" Value="__DASPaymentsConnectionString__" />
     <Parameter Name="ProcessingServicePlacementConstraints" Value="__ProcessingServicePlacementConstraints__" />
+    <Parameter Name="TopicMaxCallbackTimeSpanMinutes" Value="__TopicMaxCallbackTimeSpanMinutes__" />
   </Parameters>
 </Application>

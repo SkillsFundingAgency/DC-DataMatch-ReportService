@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ESFA.DC.DataMatch.ReportService.Core\ESFA.DC.DataMatch.ReportService.Core.csproj" />
     <ProjectReference Include="..\ESFA.DC.DataMatch.ReportService.Interface\ESFA.DC.DataMatch.ReportService.Interface.csproj" />
     <ProjectReference Include="..\ESFA.DC.DataMatch.ReportService.Service\ESFA.DC.DataMatch.ReportService.Service.csproj" />
     <ProjectReference Include="..\ESFA.DC.DataMatch.ReportService.Stateless\ESFA.DC.DataMatch.ReportService.Stateless.csproj" />

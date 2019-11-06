@@ -20,6 +20,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\azure-pipelines.yml = ..\azure-pipelines.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESFA.DC.DataMatch.ReportService.Console", "ESFA.DC.DataMatch.ReportService.Console\ESFA.DC.DataMatch.ReportService.Console.csproj", "{D2D8C016-5295-4287-9A94-1FC4FD94A23D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESFA.DC.DataMatch.ReportService.Core", "ESFA.DC.DataMatch.ReportService.Core\ESFA.DC.DataMatch.ReportService.Core.csproj", "{7DABC4A8-C522-4925-9847-9A08502DAD5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +82,22 @@ Global
 		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Release|Any CPU.Build.0 = Release|x64
 		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Release|x64.ActiveCfg = Release|x64
 		{FFFC2A11-E4F7-4BB5-B907-043F0CA50027}.Release|x64.Build.0 = Release|x64
+		{D2D8C016-5295-4287-9A94-1FC4FD94A23D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2D8C016-5295-4287-9A94-1FC4FD94A23D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2D8C016-5295-4287-9A94-1FC4FD94A23D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D2D8C016-5295-4287-9A94-1FC4FD94A23D}.Debug|x64.Build.0 = Debug|Any CPU
+		{D2D8C016-5295-4287-9A94-1FC4FD94A23D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2D8C016-5295-4287-9A94-1FC4FD94A23D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2D8C016-5295-4287-9A94-1FC4FD94A23D}.Release|x64.ActiveCfg = Release|Any CPU
+		{D2D8C016-5295-4287-9A94-1FC4FD94A23D}.Release|x64.Build.0 = Release|Any CPU
+		{7DABC4A8-C522-4925-9847-9A08502DAD5C}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{7DABC4A8-C522-4925-9847-9A08502DAD5C}.Debug|Any CPU.Build.0 = Debug|x64
+		{7DABC4A8-C522-4925-9847-9A08502DAD5C}.Debug|x64.ActiveCfg = Debug|x64
+		{7DABC4A8-C522-4925-9847-9A08502DAD5C}.Debug|x64.Build.0 = Debug|x64
+		{7DABC4A8-C522-4925-9847-9A08502DAD5C}.Release|Any CPU.ActiveCfg = Release|x64
+		{7DABC4A8-C522-4925-9847-9A08502DAD5C}.Release|Any CPU.Build.0 = Release|x64
+		{7DABC4A8-C522-4925-9847-9A08502DAD5C}.Release|x64.ActiveCfg = Release|x64
+		{7DABC4A8-C522-4925-9847-9A08502DAD5C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

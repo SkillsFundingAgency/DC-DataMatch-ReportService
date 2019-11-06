@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
@@ -56,23 +55,28 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             _logger.LogInfo("Generate Internal Data Match Report started", jobIdOverride: reportServiceContext.JobId);
             List<InternalDataMatchModel> dataMatchModels = new List<InternalDataMatchModel>();
 
-            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(-1, -1, reportServiceContext.CollectionName, cancellationToken);
-            IEnumerable<int> ukPrns = dataLockValidationErrorInfo.DataLockValidationErrors.Select(x => (int)x.UkPrn).Distinct().ToList();
+            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, -1, reportServiceContext.CollectionName, cancellationToken);
+            List<int> ukPrns = dataLockValidationErrorInfo.DataLockValidationErrors.Select(x => (int)x.UkPrn).Distinct().ToList();
 
-            _logger.LogInfo($"Ukprns count {ukPrns.Count()}", jobIdOverride: reportServiceContext.JobId);
+            _logger.LogInfo($"Ukprns count {ukPrns.Count}", jobIdOverride: reportServiceContext.JobId);
 
             foreach (int ukPrn in ukPrns)
             {
-                DataMatchILRInfo dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(ukPrn, cancellationToken);
+                List<long> learners = dataLockValidationErrorInfo.DataLockValidationErrors.Where(x => x.UkPrn == ukPrn).Select(x => x.LearnerUln).Distinct().ToList();
+                _logger.LogInfo($"Processing UKPRN {ukPrn} with {learners.Count} learners");
+                DataMatchILRInfo dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(ukPrn, learners, cancellationToken);
                 dataMatchModels.AddRange(_dataMatchModelBuilder.BuildInternalModels(dataMatchILRInfo, dataLockValidationErrorInfo, reportServiceContext.ILRPeriods.ToList(), reportServiceContext.JobId).ToList());
             }
 
+            _logger.LogInfo($"Sorting");
             dataMatchModels.Sort(_dataMatchModelComparer);
 
             string externalFileName = GetFilename(reportServiceContext);
 
+            _logger.LogInfo($"Generating CSV");
             string csv = WriteResults<InternalDataMatchMapper, InternalDataMatchModel>(dataMatchModels);
 
+            _logger.LogInfo($"Persisting");
             await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
             return false;
         }

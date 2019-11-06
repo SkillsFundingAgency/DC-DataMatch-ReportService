@@ -59,18 +59,19 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             CancellationToken cancellationToken)
         {
             _logger.LogInfo("Generate Data Match Report started", jobIdOverride: reportServiceContext.JobId);
-            Task<DataMatchILRInfo> dataMatchILRInfoTask = _ilrProviderService.GetILRInfoForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
             Task<DataMatchRulebaseInfo> dataMatchRulebaseInfoTask = _fm36ProviderService.GetFM36DataForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
 
             Task<DataMatchDataLockValidationErrorInfo> dataLockValidationErrorInfoTask = _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, reportServiceContext.Ukprn, reportServiceContext.CollectionName, cancellationToken);
             Task<DataMatchDasApprenticeshipInfo> dasApprenticeshipPriceInfoTask = _dasPaymentsProviderService.GetDasApprenticeshipInfoForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
 
-            await Task.WhenAll(dataMatchILRInfoTask, dataMatchRulebaseInfoTask, dataLockValidationErrorInfoTask, dasApprenticeshipPriceInfoTask);
+            await Task.WhenAll(dataMatchRulebaseInfoTask, dataLockValidationErrorInfoTask, dasApprenticeshipPriceInfoTask);
 
-            DataMatchILRInfo dataMatchILRInfo = dataMatchILRInfoTask.Result;
             DataMatchRulebaseInfo dataMatchRulebaseInfo = dataMatchRulebaseInfoTask.Result;
             DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo = dataLockValidationErrorInfoTask.Result;
             DataMatchDasApprenticeshipInfo dasApprenticeshipPriceInfo = dasApprenticeshipPriceInfoTask.Result;
+
+            List<long> learners = dataLockValidationErrorInfo.DataLockValidationErrors.Select(x => x.LearnerUln).Distinct().ToList();
+            DataMatchILRInfo dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(reportServiceContext.Ukprn, learners, cancellationToken);
 
             _logger.LogInfo($"dataMatchILRInfo (learners with ACT1 and FM36 in ILR) count {dataMatchILRInfo.DataMatchLearners.Count}", jobIdOverride: reportServiceContext.JobId);
             _logger.LogInfo($"dataMatchRulebaseInfo (AEC_ApprenticeshipPriceEpisodes) count {dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.Count}", jobIdOverride: reportServiceContext.JobId);
@@ -87,7 +88,11 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
 
             string csv = WriteResults<ExternalDataMatchMapper, DataMatchModel>(dataMatchModels);
 
-            await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
+            if (reportServiceContext.IsIlrSubmission)
+            {
+                await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
+            }
+
             await WriteZipEntry(archive, $"{fileName}.csv", csv);
             return true;
         }
@@ -96,7 +101,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
         {
             DateTime dateTime = _dateTimeProvider.ConvertUtcToUk(reportServiceContext.SubmissionDateTimeUtc);
 
-            if (reportServiceContext.CollectionName.StartsWith("ILR", StringComparison.OrdinalIgnoreCase))
+            if (reportServiceContext.IsIlrSubmission)
             {
                 return $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
             }

@@ -23,17 +23,16 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
         {
             DataMatchDataLockValidationErrorInfo dataMatchDataLockValidationErrorInfo = new DataMatchDataLockValidationErrorInfo
             {
-                DataLockValidationErrors = new List<DataLockValidationError>()
+                DataLockValidationErrors = new List<DataLockValidationError>(),
             };
 
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
             {
                 var dataLockValidationErrors = await dasPaymentsContext.DataMatchReport
-                    .Where(x => (ukPrn == -1 || x.UkPrn == ukPrn) &&
-                                (collectionPeriod == -1 || (x.CollectionPeriod == collectionPeriod && x.DeliveryPeriod == collectionPeriod)))
-                    .Distinct()
-                    .Select(x => new DataLockValidationError()
+                    .Where(x => (ukPrn == -1 || x.UkPrn == ukPrn)
+                                && x.CollectionPeriod == collectionPeriod)
+                    .Select(x => new DataLockValidationError
                     {
                         UkPrn = x.UkPrn,
                         LearnerReferenceNumber = x.LearnerReferenceNumber,
@@ -44,6 +43,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                         CollectionPeriod = x.CollectionPeriod,
                         LastSubmission = x.IlrSubmissionDateTime
                     })
+                    .Distinct()
                     .ToListAsync(cancellationToken);
 
                 dataMatchDataLockValidationErrorInfo.DataLockValidationErrors.AddRange(dataLockValidationErrors);
