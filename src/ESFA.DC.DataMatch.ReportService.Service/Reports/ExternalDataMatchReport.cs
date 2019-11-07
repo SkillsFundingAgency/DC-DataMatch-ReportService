@@ -106,8 +106,8 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
         private string GetFilenamePrefix(IReportServiceContext reportServiceContext)
         {
             return reportServiceContext.IsIlrSubmission
-                ? $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_"
-                : $"{reportServiceContext.Ukprn}_R{reportServiceContext.ReturnPeriod:00}_";
+                ? $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}"
+                : $"{reportServiceContext.Ukprn}_R{reportServiceContext.ReturnPeriod:00}";
         }
     }
 }
