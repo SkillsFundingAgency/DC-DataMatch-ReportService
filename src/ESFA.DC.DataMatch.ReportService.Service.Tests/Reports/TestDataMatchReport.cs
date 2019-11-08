@@ -33,7 +33,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
         {
             string csv = string.Empty;
             DateTime dateTime = DateTime.UtcNow;
-            string filename = $"10033670_1_Apprenticeship Data Match Report {dateTime:yyyyMMdd-HHmmss}";
+            string filename = $"10033670_1_Apprenticeship Data Match Report {dateTime:yyyyMMdd-HHmmss}.csv";
             int ukPrn = 10033670;
 
             Mock<IReportServiceContext> reportServiceContextMock = new Mock<IReportServiceContext>();
@@ -50,7 +50,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             Mock<IILRProviderService> iIlrProviderService = new Mock<IILRProviderService>();
             IDataMatchModelBuilder dataMatchModelBuilder = new DataMatchMonthEndModelBuilder(logger.Object);
 
-            storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            storage.Setup(x => x.SaveAsync(filename, It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Callback<string, string, CancellationToken>((key, value, ct) => csv = value)
                 .Returns(Task.CompletedTask);
 
@@ -61,7 +61,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             var dataLockValidationErrorInfoForDataMatchReport = GetDataLockValidationErrorInfoForDataMatchReport(ukPrn);
 
             storage.Setup(x => x.ContainsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
-            storage.Setup(x => x.SaveAsync($"{filename}.csv", It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            storage.Setup(x => x.SaveAsync(filename, It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Callback<string, string, CancellationToken>((key, value, ct) => csv = value)
                 .Returns(Task.CompletedTask);
 
@@ -94,10 +94,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             await report.GenerateReport(reportServiceContextMock.Object, null, CancellationToken.None);
 
             csv.Should().NotBeNullOrEmpty();
-            File.WriteAllText($"{filename}.csv", csv);
+            File.WriteAllText(filename, csv);
             IEnumerable<DataMatchModel> result;
             TestCsvHelper.CheckCsv(csv, new CsvEntry(new ExternalDataMatchMapper(), 1));
-            using (var reader = new StreamReader($"{filename}.csv"))
+            using (var reader = new StreamReader(filename))
             {
                 using (var csvReader = new CsvReader(reader))
                 {

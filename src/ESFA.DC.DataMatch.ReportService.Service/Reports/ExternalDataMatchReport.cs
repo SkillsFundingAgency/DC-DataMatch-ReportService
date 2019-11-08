@@ -83,17 +83,16 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             _logger.LogInfo($"dataMatchModels count (lines to go in the report) {dataMatchModels.Count}", jobIdOverride: reportServiceContext.JobId);
             dataMatchModels.Sort(_dataMatchModelComparer);
 
-            var externalFileName = GetFilename(reportServiceContext);
-            var fileName = GetZipFilename(reportServiceContext);
+            var fileName = GetFilename(reportServiceContext);
 
             string csv = WriteResults<ExternalDataMatchMapper, DataMatchModel>(dataMatchModels);
 
             if (reportServiceContext.IsIlrSubmission)
             {
-                await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
+                await _streamableKeyValuePersistenceService.SaveAsync(fileName, csv, cancellationToken);
             }
 
-            await WriteZipEntry(archive, $"{fileName}.csv", csv);
+            await WriteZipEntry(archive, fileName, csv);
             return true;
         }
 
@@ -101,12 +100,14 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
         {
             DateTime dateTime = _dateTimeProvider.ConvertUtcToUk(reportServiceContext.SubmissionDateTimeUtc);
 
-            if (reportServiceContext.IsIlrSubmission)
-            {
-                return $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
-            }
+            return $"{GetFilenamePrefix(reportServiceContext)}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}.csv";
+        }
 
-            return $"{reportServiceContext.Ukprn}_R{reportServiceContext.ReturnPeriod:00}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}";
+        private string GetFilenamePrefix(IReportServiceContext reportServiceContext)
+        {
+            return reportServiceContext.IsIlrSubmission
+                ? $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}"
+                : $"{reportServiceContext.Ukprn}_R{reportServiceContext.ReturnPeriod:00}";
         }
     }
 }
