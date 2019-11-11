@@ -1,4 +1,6 @@
-﻿namespace ESFA.DC.DataMatch.ReportService.Service
+﻿using System;
+
+namespace ESFA.DC.DataMatch.ReportService.Service
 {
     public static class Constants
     {
@@ -26,5 +28,9 @@
         /// Message Key.
         /// </summary>
         public const string ILRPeriods = "ILRPeriods";
+
+        public static DateTime PriceEpisodeStartDateStart1920 = new DateTime(2019, 08, 01);
+
+        public static DateTime PriceEpisodeStartDateEnd1920 = new DateTime(2020, 07, 31);
     }
 }
