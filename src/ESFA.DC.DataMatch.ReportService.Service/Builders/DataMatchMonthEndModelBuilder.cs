@@ -128,8 +128,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                     CollectionPeriodName = $"{period.CollectionName}-R{dataLockValidationError.CollectionPeriod:D2}",
                     CollectionPeriodMonth = period.CalendarMonth,
                     CollectionPeriodYear = period.CalendarYear,
-                    LastSubmission = dataLockValidationError.LastSubmission,
-                    Tnp = GetILRValue(DataLockValidationMessages.DLOCK_07, learner, dataLockValidationError.AimSeqNumber, jobId)
+                    LastSubmission = dataLockValidationError.LastSubmission
                 };
 
                 dataMatchModels.Add(dataMatchModel);
