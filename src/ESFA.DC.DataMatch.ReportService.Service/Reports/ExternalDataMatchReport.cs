@@ -61,7 +61,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             _logger.LogInfo("Generate Data Match Report started", jobIdOverride: reportServiceContext.JobId);
             Task<DataMatchRulebaseInfo> dataMatchRulebaseInfoTask = _fm36ProviderService.GetFM36DataForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
 
-            Task<DataMatchDataLockValidationErrorInfo> dataLockValidationErrorInfoTask = _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, reportServiceContext.Ukprn, reportServiceContext.CollectionName, cancellationToken);
+            Task<DataMatchDataLockValidationErrorInfo> dataLockValidationErrorInfoTask = _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, reportServiceContext.Ukprn, reportServiceContext.CollectionYear, cancellationToken);
             Task<DataMatchDasApprenticeshipInfo> dasApprenticeshipPriceInfoTask = _dasPaymentsProviderService.GetDasApprenticeshipInfoForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
 
             await Task.WhenAll(dataMatchRulebaseInfoTask, dataLockValidationErrorInfoTask, dasApprenticeshipPriceInfoTask);
