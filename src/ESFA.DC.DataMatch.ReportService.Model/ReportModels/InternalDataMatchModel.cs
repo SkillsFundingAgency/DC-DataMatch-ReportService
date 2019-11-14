@@ -24,8 +24,6 @@ namespace ESFA.DC.DataMatch.ReportService.Model.ReportModels
 
         public DateTime LastSubmission { get; set; }
 
-        public string Tnp { get; set; }
-
         public string OfficialSensitive { get; set; }
     }
 }
