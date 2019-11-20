@@ -100,14 +100,14 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
         {
             DateTime dateTime = _dateTimeProvider.ConvertUtcToUk(reportServiceContext.SubmissionDateTimeUtc);
 
-            return $"{GetFilenamePrefix(reportServiceContext)}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}.csv";
+            return $"{GetFilenamePrefix(reportServiceContext)}{ReportFileName} {dateTime:yyyyMMdd-HHmmss}.csv";
         }
 
         private string GetFilenamePrefix(IReportServiceContext reportServiceContext)
         {
             return reportServiceContext.IsIlrSubmission
-                ? $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}"
-                : $"{reportServiceContext.Ukprn}_R{reportServiceContext.ReturnPeriod:00}";
+                ? string.Empty
+                : $"{reportServiceContext.Ukprn}_R{reportServiceContext.ReturnPeriod:00}_";
         }
     }
 }
