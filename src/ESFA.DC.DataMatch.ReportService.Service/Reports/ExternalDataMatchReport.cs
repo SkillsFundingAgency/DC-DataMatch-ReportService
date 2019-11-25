@@ -84,6 +84,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             dataMatchModels.Sort(_dataMatchModelComparer);
 
             var fileName = GetFilename(reportServiceContext);
+            var zipFileName = $"{GetZipFilename(reportServiceContext)}.csv";
 
             string csv = WriteResults<ExternalDataMatchMapper, DataMatchModel>(dataMatchModels);
 
@@ -92,7 +93,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
                 await _streamableKeyValuePersistenceService.SaveAsync(fileName, csv, cancellationToken);
             }
 
-            await WriteZipEntry(archive, fileName, csv);
+            await WriteZipEntry(archive, zipFileName, csv);
             return true;
         }
 
@@ -100,14 +101,14 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
         {
             DateTime dateTime = _dateTimeProvider.ConvertUtcToUk(reportServiceContext.SubmissionDateTimeUtc);
 
-            return $"{GetFilenamePrefix(reportServiceContext)}{ReportFileName} {dateTime:yyyyMMdd-HHmmss}.csv";
+            return $"{GetFilenamePrefix(reportServiceContext)}_{ReportFileName} {dateTime:yyyyMMdd-HHmmss}.csv";
         }
 
         private string GetFilenamePrefix(IReportServiceContext reportServiceContext)
         {
             return reportServiceContext.IsIlrSubmission
-                ? string.Empty
-                : $"{reportServiceContext.Ukprn}_R{reportServiceContext.ReturnPeriod:00}_";
+                ? $"{reportServiceContext.Ukprn}_{reportServiceContext.JobId}"
+                : $"{reportServiceContext.Ukprn}_R{reportServiceContext.ReturnPeriod:00}";
         }
     }
 }
