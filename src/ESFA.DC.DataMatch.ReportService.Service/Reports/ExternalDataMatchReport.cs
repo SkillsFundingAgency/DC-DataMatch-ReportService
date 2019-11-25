@@ -84,6 +84,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             dataMatchModels.Sort(_dataMatchModelComparer);
 
             var fileName = GetFilename(reportServiceContext);
+            var zipFileName = $"{GetZipFilename(reportServiceContext)}.csv";
 
             string csv = WriteResults<ExternalDataMatchMapper, DataMatchModel>(dataMatchModels);
 
@@ -92,7 +93,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
                 await _streamableKeyValuePersistenceService.SaveAsync(fileName, csv, cancellationToken);
             }
 
-            await WriteZipEntry(archive, fileName, csv);
+            await WriteZipEntry(archive, zipFileName, csv);
             return true;
         }
 

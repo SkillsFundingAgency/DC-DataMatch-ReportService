@@ -33,7 +33,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
         {
             string csv = string.Empty;
             DateTime dateTime = DateTime.UtcNow;
-            string filename = $"10033670_1_Apprenticeship Data Match Report {dateTime:yyyyMMdd-HHmmss}.csv";
+            string filename = $"Apprenticeship Data Match Report {dateTime:yyyyMMdd-HHmmss}.csv";
             int ukPrn = 10033670;
 
             Mock<IReportServiceContext> reportServiceContextMock = new Mock<IReportServiceContext>();
