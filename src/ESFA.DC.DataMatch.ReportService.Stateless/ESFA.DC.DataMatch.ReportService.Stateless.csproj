@@ -66,8 +66,8 @@
     <Reference Include="ESFA.DC.CollectionsManagement.Models, Version=0.2.22.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ESFA.DC.CollectionsManagement.Models.0.2.22-beta0001\lib\netstandard2.0\ESFA.DC.CollectionsManagement.Models.dll</HintPath>
     </Reference>
-    <Reference Include="ESFA.DC.DASPayments.EF, Version=0.1.102.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ESFA.DC.DASPayments.EF.0.1.102\lib\netstandard2.0\ESFA.DC.DASPayments.EF.dll</HintPath>
+    <Reference Include="ESFA.DC.DASPayments.EF, Version=0.1.107.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ESFA.DC.DASPayments.EF.0.1.107\lib\netstandard2.0\ESFA.DC.DASPayments.EF.dll</HintPath>
     </Reference>
     <Reference Include="ESFA.DC.DateTimeProvider, Version=0.1.6.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ESFA.DC.DateTimeProvider.0.1.6-beta0001\lib\netstandard2.0\ESFA.DC.DateTimeProvider.dll</HintPath>

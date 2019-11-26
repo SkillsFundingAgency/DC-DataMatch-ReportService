@@ -31,7 +31,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             using (var ilrContext = _ilrRulebaseContextFactory())
             {
                 var aecApprenticeshipPriceEpisodeInfos = await ilrContext.AEC_ApprenticeshipPriceEpisodes
-                    .Where(x => x.UKPRN == ukPrn)
+                    .Where(x => x.UKPRN == ukPrn &&
+                                x.EpisodeStartDate >= Constants.PriceEpisodeStartDateStart1920 &&
+                                x.EpisodeStartDate <= Constants.PriceEpisodeStartDateEnd1920)
                     .Select(pe => new AECApprenticeshipPriceEpisodeInfo
                     {
                         UkPrn = pe.UKPRN,

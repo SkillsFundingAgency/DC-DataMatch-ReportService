@@ -19,18 +19,21 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             _dasPaymentsContextFactory = dasPaymentsContextFactory;
         }
 
-        public async Task<DataMatchDataLockValidationErrorInfo> GetDataLockValidationErrorInfoForDataMatchReport(int collectionPeriod, int ukPrn, string collectionName, CancellationToken cancellationToken)
+        public async Task<DataMatchDataLockValidationErrorInfo> GetDataLockValidationErrorInfoForDataMatchReport(int collectionPeriod, int ukPrn, string collectionYear, CancellationToken cancellationToken)
         {
             DataMatchDataLockValidationErrorInfo dataMatchDataLockValidationErrorInfo = new DataMatchDataLockValidationErrorInfo
             {
                 DataLockValidationErrors = new List<DataLockValidationError>(),
             };
 
+            var academicYear = Convert.ToInt32(collectionYear);
+
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
             {
                 var dataLockValidationErrors = await dasPaymentsContext.DataMatchReport
                     .Where(x => (ukPrn == -1 || x.UkPrn == ukPrn)
+                                && x.AcademicYear == academicYear
                                 && x.CollectionPeriod == collectionPeriod)
                     .Select(x => new DataLockValidationError
                     {
