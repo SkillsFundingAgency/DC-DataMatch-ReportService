@@ -26,9 +26,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                 DataLockValidationErrors = new List<DataLockValidationError>(),
             };
 
-            var academicYear = 1920;
-
-            int.TryParse(collectionYear, out academicYear);
+            var academicYear = Convert.ToInt32(collectionYear);
 
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
