@@ -55,7 +55,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             _logger.LogInfo("Generate Internal Data Match Report started", jobIdOverride: reportServiceContext.JobId);
             List<InternalDataMatchModel> dataMatchModels = new List<InternalDataMatchModel>();
 
-            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, -1, reportServiceContext.CollectionName, cancellationToken);
+            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, -1, reportServiceContext.CollectionYear, cancellationToken);
             List<int> ukPrns = dataLockValidationErrorInfo.DataLockValidationErrors.Select(x => (int)x.UkPrn).Distinct().ToList();
 
             _logger.LogInfo($"Ukprns count {ukPrns.Count}", jobIdOverride: reportServiceContext.JobId);
