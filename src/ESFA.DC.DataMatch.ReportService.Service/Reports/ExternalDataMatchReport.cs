@@ -84,7 +84,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             dataMatchModels.Sort(_dataMatchModelComparer);
 
             var fileName = GetFilename(reportServiceContext);
-            var zipFileName = $"{GetZipFilename(reportServiceContext)}.csv";
+            var zipFileName = $"{reportServiceContext.Ukprn} {GetZipFilename(reportServiceContext)}.csv";
 
             string csv = WriteResults<ExternalDataMatchMapper, DataMatchModel>(dataMatchModels);
 
