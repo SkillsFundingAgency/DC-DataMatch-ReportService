@@ -154,7 +154,11 @@ namespace ESFA.DC.DataMatch.ReportService.Core
                 var optionsBuilder = new DbContextOptionsBuilder<DASPaymentsContext>();
                 optionsBuilder.UseSqlServer(
                     configurationRoot.reportServiceConfiguration.DASPaymentsConnectionString,
-                    options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
+                    sqlServerOptions =>
+                    {
+                        sqlServerOptions.CommandTimeout(600);
+                        sqlServerOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>());
+                    });
 
                 return optionsBuilder.Options;
             })
