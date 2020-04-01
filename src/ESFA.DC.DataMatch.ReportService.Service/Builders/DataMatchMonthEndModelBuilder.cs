@@ -13,12 +13,8 @@ using ESFA.DC.Logging.Interfaces;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 {
-    public sealed class DataMatchMonthEndModelBuilder : IDataMatchModelBuilder
+    public sealed class DataMatchMonthEndModelBuilder : IExternalDataMatchModelBuilder
     {
-        private const string DLockErrorRuleNamePrefix = "DLOCK_";
-
-        private const string TNP = "TNP";
-
         private readonly ILogger _logger;
 
         private readonly string[] _rulesWithBlankILRValues =
@@ -95,48 +91,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             return dataMatchModels;
         }
 
-        public IEnumerable<InternalDataMatchModel> BuildInternalModels(
-            DataMatchILRInfo dataMatchILRInfo,
-            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
-            List<ReturnPeriod> returnPeriods,
-            long jobId)
-        {
-            List<InternalDataMatchModel> dataMatchModels = new List<InternalDataMatchModel>();
-            foreach (var dataLockValidationError in dataLockValidationErrorInfo.DataLockValidationErrors)
-            {
-                DataMatchLearner learner = dataMatchILRInfo.DataMatchLearners.SingleOrDefault(
-                    x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber) &&
-                         x.DataMatchLearningDeliveries.Any(ld => ld.AimSeqNumber == dataLockValidationError.AimSeqNumber));
-
-                if (learner == null)
-                {
-                    continue;
-                }
-
-                string ruleName = PopulateRuleName(dataLockValidationError.RuleId);
-
-                ReturnPeriod period = returnPeriods.Single(x => x.PeriodNumber == dataLockValidationError.CollectionPeriod);
-
-                InternalDataMatchModel dataMatchModel = new InternalDataMatchModel
-                {
-                    Collection = dataLockValidationError.Collection,
-                    Ukprn = (int)dataLockValidationError.UkPrn,
-                    LearnRefNumber = dataLockValidationError.LearnerReferenceNumber,
-                    Uln = learner.Uln,
-                    AimSeqNumber = dataLockValidationError.AimSeqNumber,
-                    RuleName = ruleName,
-                    CollectionPeriodName = $"{period.CollectionName}-R{dataLockValidationError.CollectionPeriod:D2}",
-                    CollectionPeriodMonth = period.CalendarMonth,
-                    CollectionPeriodYear = period.CalendarYear,
-                    LastSubmission = dataLockValidationError.LastSubmission
-                };
-
-                dataMatchModels.Add(dataMatchModel);
-            }
-
-            return dataMatchModels;
-        }
-
         private string GetILRValue(string ruleName, DataMatchLearner learner, long? dasAimSeqNumber, long jobId)
         {
             if (_rulesWithBlankILRValues.Any(x => x.CaseInsensitiveEquals(ruleName)))
@@ -198,7 +152,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
                 }
 
                 var tnp1 = appFinRecords.Where(x =>
-                    string.Equals(x.AFinType, TNP, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(x.AFinType, Constants.AppFinRecordType_TNP, StringComparison.OrdinalIgnoreCase) &&
                     x.AFinCode == 1).OrderByDescending(x => x.AFinDate).ToList();
 
                 if (tnp1.Count > 1)
@@ -213,7 +167,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
                 var tnp1Value = tnp1.FirstOrDefault();
 
-                var tnp2 = appFinRecords.Where(x => string.Equals(x.AFinType, TNP, StringComparison.OrdinalIgnoreCase) &&
+                var tnp2 = appFinRecords.Where(x => string.Equals(x.AFinType, Constants.AppFinRecordType_TNP, StringComparison.OrdinalIgnoreCase) &&
                                                     x.AFinCode == 2).OrderByDescending(x => x.AFinDate).ToList();
 
                 if (tnp2.Count > 1)
@@ -253,7 +207,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
 
         private string PopulateRuleName(int ruleId)
         {
-            return DLockErrorRuleNamePrefix + ruleId.ToString("00");
+            return Constants.DLockErrorRuleNamePrefix + ruleId.ToString("00");
         }
 
         private string PopulateRuleDescription(string ruleName)

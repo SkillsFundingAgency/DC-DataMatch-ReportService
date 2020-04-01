@@ -6,19 +6,13 @@ using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 
 namespace ESFA.DC.DataMatch.ReportService.Interface.Builders
 {
-    public interface IDataMatchModelBuilder
+    public interface IExternalDataMatchModelBuilder
     {
         IEnumerable<DataMatchModel> BuildExternalModels(
             DataMatchILRInfo dataMatchILRInfo,
             DataMatchRulebaseInfo dataMatchRulebaseInfo,
             DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
             DataMatchDasApprenticeshipInfo dasApprenticeshipPriceInfo,
-            long jobId);
-
-        IEnumerable<InternalDataMatchModel> BuildInternalModels(
-            DataMatchILRInfo dataMatchILRInfo,
-            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
-            List<ReturnPeriod> returnPeriods,
             long jobId);
     }
 }

@@ -48,7 +48,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             Mock<IDASPaymentsProviderService> dasPaymentProviderMock = new Mock<IDASPaymentsProviderService>();
             Mock<IFM36ProviderService> fm36ProviderServiceMock = new Mock<IFM36ProviderService>();
             Mock<IILRProviderService> iIlrProviderService = new Mock<IILRProviderService>();
-            IDataMatchModelBuilder dataMatchModelBuilder = new DataMatchMonthEndModelBuilder(logger.Object);
+            IExternalDataMatchModelBuilder dataMatchModelBuilder = new DataMatchMonthEndModelBuilder(logger.Object);
 
             storage.Setup(x => x.SaveAsync(filename, It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Callback<string, string, CancellationToken>((key, value, ct) => csv = value)

@@ -48,7 +48,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                                         y.FundModel == Constants.ApprenticeshipsFundModel
                                         && y.LearningDeliveryFAMs.Any(ldf =>
                                             ldf.LearnDelFAMCode == Constants.LearnDelFAMCode &&
-                                            ldf.LearnDelFAMType == Constants.LearnDelFAMType)))
+                                            ldf.LearnDelFAMType == Constants.LearnDelFAMType_ACT)))
                         .Select(l => new DataMatchLearner
                         {
                             UkPrn = l.UKPRN,

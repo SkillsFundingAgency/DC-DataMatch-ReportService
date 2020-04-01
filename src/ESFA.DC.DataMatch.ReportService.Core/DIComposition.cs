@@ -15,6 +15,7 @@ using ESFA.DC.DataMatch.ReportService.Service.Builders;
 using ESFA.DC.DataMatch.ReportService.Service.Comparer;
 using ESFA.DC.DataMatch.ReportService.Service.Extensions;
 using ESFA.DC.DataMatch.ReportService.Service.Reports;
+using ESFA.DC.DataMatch.ReportService.Service.Reports.Internal;
 using ESFA.DC.DataMatch.ReportService.Service.Service;
 using ESFA.DC.DataMatch.ReportService.Stateless.Configuration;
 using ESFA.DC.DateTimeProvider.Interface;
@@ -212,7 +213,11 @@ namespace ESFA.DC.DataMatch.ReportService.Core
 
         private static void RegisterBuilders(ContainerBuilder containerBuilder)
         {
-            containerBuilder.RegisterType<DataMatchMonthEndModelBuilder>().As<IDataMatchModelBuilder>()
+            containerBuilder.RegisterType<DataMatchMonthEndModelBuilder>().As<IExternalDataMatchModelBuilder>()
+                .InstancePerLifetimeScope();
+
+
+            containerBuilder.RegisterType<InternalDataMatchMonthEndModelBuilder>().As<IInternalDataMatchModelBuilder>()
                 .InstancePerLifetimeScope();
         }
     }

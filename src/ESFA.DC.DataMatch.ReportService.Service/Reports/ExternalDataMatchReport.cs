@@ -26,7 +26,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
         private readonly IDASPaymentsProviderService _dasPaymentsProviderService;
         private readonly IFM36ProviderService _fm36ProviderService;
         private readonly IILRProviderService _ilrProviderService;
-        private readonly IDataMatchModelBuilder _dataMatchModelBuilder;
+        private readonly IExternalDataMatchModelBuilder _dataMatchModelBuilder;
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly ExternalDataMatchModelComparer _dataMatchModelComparer;
 
@@ -35,7 +35,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             IFM36ProviderService fm36ProviderService,
             IILRProviderService iIlrProviderService,
             IStreamableKeyValuePersistenceService streamableKeyValuePersistenceService,
-            IDataMatchModelBuilder dataMatchModelBuilder,
+            IExternalDataMatchModelBuilder dataMatchModelBuilder,
             IDateTimeProvider dateTimeProvider,
             ExternalDataMatchModelComparer dataMatchModelComparer,
             ILogger logger)
