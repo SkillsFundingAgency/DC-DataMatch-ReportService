@@ -13,13 +13,11 @@ using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 using ESFA.DC.DataMatch.ReportService.Service.Abstract;
-using ESFA.DC.DataMatch.ReportService.Service.Comparer;
-using ESFA.DC.DataMatch.ReportService.Service.Mapper;
 using ESFA.DC.DateTimeProvider.Interface;
 using ESFA.DC.IO.Interfaces;
 using ESFA.DC.Logging.Interfaces;
 
-namespace ESFA.DC.DataMatch.ReportService.Service.Reports
+namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
 {
     public sealed class ExternalDataMatchReport : AbstractReport, IReport
     {

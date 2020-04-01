@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 
-namespace ESFA.DC.DataMatch.ReportService.Service.Comparer
+namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
 {
     public sealed class ExternalDataMatchModelComparer : IComparer<DataMatchModel>
     {

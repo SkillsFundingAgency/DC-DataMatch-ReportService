@@ -11,10 +11,8 @@ using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
-using ESFA.DC.DataMatch.ReportService.Service.Builders;
-using ESFA.DC.DataMatch.ReportService.Service.Comparer;
-using ESFA.DC.DataMatch.ReportService.Service.Mapper;
 using ESFA.DC.DataMatch.ReportService.Service.Reports;
+using ESFA.DC.DataMatch.ReportService.Service.Reports.External;
 using ESFA.DC.DataMatch.ReportService.Service.Tests.Helpers;
 using ESFA.DC.DataMatch.ReportService.Tests.Models;
 using ESFA.DC.DateTimeProvider.Interface;
@@ -48,7 +46,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             Mock<IDASPaymentsProviderService> dasPaymentProviderMock = new Mock<IDASPaymentsProviderService>();
             Mock<IFM36ProviderService> fm36ProviderServiceMock = new Mock<IFM36ProviderService>();
             Mock<IILRProviderService> iIlrProviderService = new Mock<IILRProviderService>();
-            IExternalDataMatchModelBuilder dataMatchModelBuilder = new DataMatchMonthEndModelBuilder(logger.Object);
+            IExternalDataMatchModelBuilder dataMatchModelBuilder = new ExternalDataMatchMonthEndModelBuilder(logger.Object);
 
             storage.Setup(x => x.SaveAsync(filename, It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Callback<string, string, CancellationToken>((key, value, ct) => csv = value)

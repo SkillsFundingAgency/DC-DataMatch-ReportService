@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
-using ESFA.DC.DataMatch.ReportService.Service.Builders;
+using ESFA.DC.DataMatch.ReportService.Service.Reports.External;
 using ESFA.DC.Logging.Interfaces;
 using FluentAssertions;
 using Moq;
@@ -42,7 +42,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             string expectedApprenticeshipValue = "")
         {
             Mock<ILogger> logger = new Mock<ILogger>();
-            var dataMatchModelBuilder = new DataMatchMonthEndModelBuilder(logger.Object);
+            var dataMatchModelBuilder = new ExternalDataMatchMonthEndModelBuilder(logger.Object);
             var dataMatchILRInfo = BuildILRModelForDataMatchReportBuilderTests(ilrukPrn, learnRefNumber, ilrUln, "50117889", 1, ilrFworkCode, ilrProgType, ilrPwayCode, ilrStdCode, "ACT", "1", new DateTime(2019, 10, 10));
             var dataMatchRulebaseInfo = BuildILRRulebaseModelForDataMatchReportBuilderTests(ilrukPrn, learnRefNumber, 1);
             var dataLockValidationErrorInfo =

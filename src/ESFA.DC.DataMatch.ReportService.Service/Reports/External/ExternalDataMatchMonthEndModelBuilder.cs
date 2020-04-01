@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using ESFA.DC.CollectionsManagement.Models;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
@@ -11,9 +10,9 @@ using ESFA.DC.DataMatch.ReportService.Service.Extensions;
 using ESFA.DC.DataMatch.ReportService.Service.ReferenceData;
 using ESFA.DC.Logging.Interfaces;
 
-namespace ESFA.DC.DataMatch.ReportService.Service.Builders
+namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
 {
-    public sealed class DataMatchMonthEndModelBuilder : IExternalDataMatchModelBuilder
+    public sealed class ExternalDataMatchMonthEndModelBuilder : IExternalDataMatchModelBuilder
     {
         private readonly ILogger _logger;
 
@@ -39,7 +38,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Builders
             DataLockValidationMessages.DLOCK_02
         };
 
-        public DataMatchMonthEndModelBuilder(ILogger logger)
+        public ExternalDataMatchMonthEndModelBuilder(ILogger logger)
         {
             _logger = logger;
         }
