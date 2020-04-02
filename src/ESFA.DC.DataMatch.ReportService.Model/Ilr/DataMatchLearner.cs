@@ -8,7 +8,7 @@ namespace ESFA.DC.DataMatch.ReportService.Model.Ilr
 
         public string LearnRefNumber { get; set; }
 
-        public IEnumerable<DataMatchLearningDelivery> DataMatchLearningDeliveries { get; set; }
+        public List<DataMatchLearningDelivery> DataMatchLearningDeliveries { get; set; }
 
         public long Uln { get; set; }
     }

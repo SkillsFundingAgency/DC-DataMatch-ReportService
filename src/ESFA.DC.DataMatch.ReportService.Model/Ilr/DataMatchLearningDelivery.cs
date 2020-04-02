@@ -19,8 +19,8 @@ namespace ESFA.DC.DataMatch.ReportService.Model.Ilr
 
         public int? StdCode { get; set; }
 
-        public IEnumerable<DataMatchLearningDeliveryFAM> DataMatchLearningDeliveryFams { get; set; }
+        public List<DataMatchLearningDeliveryFAM> DataMatchLearningDeliveryFams { get; set; }
 
-        public ICollection<AppFinRecordInfo> AppFinRecords { get; set; }
+        public List<AppFinRecordInfo> AppFinRecords { get; set; }
     }
 }

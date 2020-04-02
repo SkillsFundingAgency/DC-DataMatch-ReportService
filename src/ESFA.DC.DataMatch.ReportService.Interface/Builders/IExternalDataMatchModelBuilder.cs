@@ -12,7 +12,7 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Builders
             ICollection<DataMatchLearner> dataMatchlearners,
             DataMatchRulebaseInfo dataMatchRulebaseInfo,
             ICollection<DataLockValidationError> dataLockValidationErrors,
-            DataMatchDasApprenticeshipInfo dasApprenticeshipPriceInfo,
+            ICollection<DasApprenticeshipInfo> dasApprenticeshipInfos,
             long jobId);
     }
 }

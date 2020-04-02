@@ -59,7 +59,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             result.First().ApprenticeshipServiceValue.Should().Be(expectedApprenticeshipValue);
         }
 
-        private DataMatchDasApprenticeshipInfo BuildDasApprenticeshipInfoForDataMatchReportBuilderTests(
+        private ICollection<DasApprenticeshipInfo> BuildDasApprenticeshipInfoForDataMatchReportBuilderTests(
             int ukPrn,
             long uln,
             DateTime? pausedOnDate,
@@ -71,24 +71,20 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             decimal cost,
             string legalEntityName)
         {
-            return new DataMatchDasApprenticeshipInfo()
+            return new List<DasApprenticeshipInfo>()
             {
-                UkPrn = ukPrn,
-                DasApprenticeshipInfos = new List<DasApprenticeshipInfo>()
+                new DasApprenticeshipInfo()
                 {
-                    new DasApprenticeshipInfo()
-                    {
-                        LearnerUln = uln,
-                        PausedOnDate = pausedOnDate,
-                        WithdrawnOnDate = withdrawnOnDate,
-                        LegalEntityName = legalEntityName,
-                        Cost = cost,
-                        FrameworkCode = frameworkCode,
-                        ProgrammeType = programmeType,
-                        PathwayCode = pathwayCode,
-                        StandardCode = standardCode,
-                        UkPrn = ukPrn,
-                    },
+                    LearnerUln = uln,
+                    PausedOnDate = pausedOnDate,
+                    WithdrawnOnDate = withdrawnOnDate,
+                    LegalEntityName = legalEntityName,
+                    Cost = cost,
+                    FrameworkCode = frameworkCode,
+                    ProgrammeType = programmeType,
+                    PathwayCode = pathwayCode,
+                    StandardCode = standardCode,
+                    UkPrn = ukPrn,
                 },
             };
         }

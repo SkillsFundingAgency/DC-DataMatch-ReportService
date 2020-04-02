@@ -125,25 +125,21 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             };
         }
 
-        private DataMatchDasApprenticeshipInfo GetDasApprenticeshipInfoForDataMatchReport(int ukPrn)
+        private ICollection<DasApprenticeshipInfo> GetDasApprenticeshipInfoForDataMatchReport(int ukPrn)
         {
-            return new DataMatchDasApprenticeshipInfo()
+            return new List<DasApprenticeshipInfo>()
             {
-                UkPrn = ukPrn,
-                DasApprenticeshipInfos = new List<DasApprenticeshipInfo>()
+                new DasApprenticeshipInfo()
                 {
-                    new DasApprenticeshipInfo()
-                    {
-                        LearnerUln = 9900000111,
-                        PausedOnDate = null,
-                        WithdrawnOnDate = null,
-                        LegalEntityName = "LegalEntityName",
-                        Cost = 100,
-                        FrameworkCode = 1,
-                        ProgrammeType = 2,
-                        PathwayCode = 3,
-                        StandardCode = 4,
-                    },
+                    LearnerUln = 9900000111,
+                    PausedOnDate = null,
+                    WithdrawnOnDate = null,
+                    LegalEntityName = "LegalEntityName",
+                    Cost = 100,
+                    FrameworkCode = 1,
+                    ProgrammeType = 2,
+                    PathwayCode = 3,
+                    StandardCode = 4,
                 },
             };
         }

@@ -52,13 +52,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             return dataLockValidationErrors;
         }
 
-        public async Task<DataMatchDasApprenticeshipInfo> GetDasApprenticeshipInfoForDataMatchReport(int ukPrn, CancellationToken cancellationToken)
+        public async Task<ICollection<DasApprenticeshipInfo>> GetDasApprenticeshipInfoForDataMatchReport(int ukPrn, CancellationToken cancellationToken)
         {
-            var dataMatchDasApprenticeshipInfo = new DataMatchDasApprenticeshipInfo
-            {
-                UkPrn = ukPrn,
-                DasApprenticeshipInfos = new List<DasApprenticeshipInfo>()
-            };
+            var dataMatchDasApprenticeshipInfo = new List<DasApprenticeshipInfo>();
 
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
@@ -86,7 +82,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                                 PathwayCode = a.PathwayCode,
                             }).Distinct().ToListAsync(cancellationToken);
 
-                dataMatchDasApprenticeshipInfo.DasApprenticeshipInfos.AddRange(dataMatchDasApprenticeshipPrices);
+                dataMatchDasApprenticeshipInfo.AddRange(dataMatchDasApprenticeshipPrices);
             }
 
             return dataMatchDasApprenticeshipInfo;

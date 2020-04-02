@@ -60,13 +60,13 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
             Task<DataMatchRulebaseInfo> dataMatchRulebaseInfoTask = _fm36ProviderService.GetFM36DataForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
 
             var dataLockValidationErrorInfoTask = _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, reportServiceContext.Ukprn, reportServiceContext.CollectionYear, cancellationToken);
-            Task<DataMatchDasApprenticeshipInfo> dasApprenticeshipPriceInfoTask = _dasPaymentsProviderService.GetDasApprenticeshipInfoForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
+            var dasApprenticeshipPriceInfoTask = _dasPaymentsProviderService.GetDasApprenticeshipInfoForDataMatchReport(reportServiceContext.Ukprn, cancellationToken);
 
             await Task.WhenAll(dataMatchRulebaseInfoTask, dataLockValidationErrorInfoTask, dasApprenticeshipPriceInfoTask);
 
             DataMatchRulebaseInfo dataMatchRulebaseInfo = dataMatchRulebaseInfoTask.Result;
             var dataLockValidationErrorInfo = dataLockValidationErrorInfoTask.Result;
-            DataMatchDasApprenticeshipInfo dasApprenticeshipPriceInfo = dasApprenticeshipPriceInfoTask.Result;
+            var dasApprenticeshipPriceInfo = dasApprenticeshipPriceInfoTask.Result;
 
             List<long> learners = dataLockValidationErrorInfo.Select(x => x.LearnerUln).Distinct().ToList();
             var dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(reportServiceContext.Ukprn, learners, cancellationToken);
@@ -74,7 +74,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
             _logger.LogInfo($"dataMatchILRInfo (learners with ACT1 and FM36 in ILR) count {dataMatchILRInfo.Count}", jobIdOverride: reportServiceContext.JobId);
             _logger.LogInfo($"dataMatchRulebaseInfo (AEC_ApprenticeshipPriceEpisodes) count {dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.Count}", jobIdOverride: reportServiceContext.JobId);
             _logger.LogInfo($"dataLockValidationErrorInfo (DataLockEvents + joins) count {dataLockValidationErrorInfo.Count}", jobIdOverride: reportServiceContext.JobId);
-            _logger.LogInfo($"dasApprenticeshipPriceInfo (Payments.ApprenticeshipPriceEpisodes) count {dasApprenticeshipPriceInfo.DasApprenticeshipInfos.Count}", jobIdOverride: reportServiceContext.JobId);
+            _logger.LogInfo($"dasApprenticeshipPriceInfo (Payments.ApprenticeshipPriceEpisodes) count {dasApprenticeshipPriceInfo.Count}", jobIdOverride: reportServiceContext.JobId);
 
             _logger.LogInfo("using the above to build the model...", jobIdOverride: reportServiceContext.JobId);
             List<DataMatchModel> dataMatchModels = _dataMatchModelBuilder.BuildExternalModels(dataMatchILRInfo, dataMatchRulebaseInfo, dataLockValidationErrorInfo, dasApprenticeshipPriceInfo, reportServiceContext.JobId).ToList();
