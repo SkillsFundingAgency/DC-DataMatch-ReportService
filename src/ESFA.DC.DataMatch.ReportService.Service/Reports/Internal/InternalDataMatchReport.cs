@@ -23,7 +23,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
         private readonly IDASPaymentsProviderService _dasPaymentsProviderService;
         private readonly IILRProviderService _ilrProviderService;
         private readonly IInternalDataMatchModelBuilder _dataMatchModelBuilder;
-        private readonly InternalDataMatchModelComparer _dataMatchModelComparer;
 
         public InternalDataMatchReport(
             IDASPaymentsProviderService dasPaymentsProviderService,
@@ -31,14 +30,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
             IInternalDataMatchModelBuilder dataMatchModelBuilder,
             IDateTimeProvider dateTimeProvider,
             IStreamableKeyValuePersistenceService streamableKeyValuePersistenceService,
-            InternalDataMatchModelComparer dataMatchModelComparer,
             ILogger logger)
             : base(dateTimeProvider, streamableKeyValuePersistenceService, logger)
         {
             _dasPaymentsProviderService = dasPaymentsProviderService;
             _ilrProviderService = iIlrProviderService;
             _dataMatchModelBuilder = dataMatchModelBuilder;
-            _dataMatchModelComparer = dataMatchModelComparer;
         }
 
         public override string ReportTaskName => ReportTaskNameConstants.InternalDataMatchReport;
@@ -51,23 +48,37 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
             CancellationToken cancellationToken)
         {
             _logger.LogInfo("Generate Internal Data Match Report started", jobIdOverride: reportServiceContext.JobId);
-            List<InternalDataMatchModel> dataMatchModels = new List<InternalDataMatchModel>();
 
-            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, -1, reportServiceContext.CollectionYear, cancellationToken);
-            List<int> ukPrns = dataLockValidationErrorInfo.DataLockValidationErrors.Select(x => (int)x.UkPrn).Distinct().ToList();
+            var ilrPeriods = reportServiceContext.ILRPeriods.ToList();
+
+            var dataMatchModels = new List<InternalDataMatchModel>();
+
+            var dataLockValidationErrorInfo = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, -1, reportServiceContext.CollectionYear, cancellationToken);
+
+            var ukPrns = dataLockValidationErrorInfo.DataLockValidationErrors.Select(x => (int)x.UkPrn).Distinct().ToList();
 
             _logger.LogInfo($"Ukprns count {ukPrns.Count}", jobIdOverride: reportServiceContext.JobId);
 
             foreach (int ukPrn in ukPrns)
             {
-                List<long> learners = dataLockValidationErrorInfo.DataLockValidationErrors.Where(x => x.UkPrn == ukPrn).Select(x => x.LearnerUln).Distinct().ToList();
+                var learners = dataLockValidationErrorInfo.DataLockValidationErrors.Where(x => x.UkPrn == ukPrn).Select(x => x.LearnerUln).Distinct().ToList();
+
                 _logger.LogInfo($"Processing UKPRN {ukPrn} with {learners.Count} learners");
-                DataMatchILRInfo dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(ukPrn, learners, cancellationToken);
-                dataMatchModels.AddRange(_dataMatchModelBuilder.BuildInternalModels(dataMatchILRInfo, dataLockValidationErrorInfo, reportServiceContext.ILRPeriods.ToList(), reportServiceContext.JobId).ToList());
+
+                var dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(ukPrn, learners, cancellationToken);
+
+                var reportModels = _dataMatchModelBuilder.BuildInternalModels(dataMatchILRInfo, dataLockValidationErrorInfo, ilrPeriods);
+
+                dataMatchModels.AddRange(reportModels);
             }
 
             _logger.LogInfo($"Sorting");
-            dataMatchModels.Sort(_dataMatchModelComparer);
+
+            dataMatchModels = dataMatchModels
+                .OrderBy(m => m.Collection)
+                .ThenBy(m => m.Ukprn)
+                .ThenBy(m => m.LearnRefNumber)
+                .ToList();
 
             string externalFileName = GetFilename(reportServiceContext);
 

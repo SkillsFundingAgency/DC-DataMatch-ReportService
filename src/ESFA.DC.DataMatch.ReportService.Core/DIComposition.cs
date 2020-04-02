@@ -169,7 +169,6 @@ namespace ESFA.DC.DataMatch.ReportService.Core
             containerBuilder.RegisterType<DateTimeProvider.DateTimeProvider>().As<IDateTimeProvider>().InstancePerLifetimeScope();
 
             containerBuilder.RegisterType<ExternalDataMatchModelComparer>();
-            containerBuilder.RegisterType<InternalDataMatchModelComparer>();
 
             containerBuilder.RegisterType<Handler>().As<IHandler>().InstancePerLifetimeScope();
             containerBuilder.RegisterType<EntryPoint>().InstancePerLifetimeScope();

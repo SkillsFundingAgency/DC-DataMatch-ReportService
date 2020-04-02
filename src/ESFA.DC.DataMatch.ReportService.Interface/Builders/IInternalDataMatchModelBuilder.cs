@@ -8,10 +8,6 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Builders
 {
     public interface IInternalDataMatchModelBuilder
     {
-        IEnumerable<InternalDataMatchModel> BuildInternalModels(
-            DataMatchILRInfo dataMatchILRInfo,
-            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
-            List<ReturnPeriod> returnPeriods,
-            long jobId);
+        IEnumerable<InternalDataMatchModel> BuildInternalModels(DataMatchILRInfo dataMatchILRInfo, DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo, ICollection<ReturnPeriod> returnPeriods);
     }
 }

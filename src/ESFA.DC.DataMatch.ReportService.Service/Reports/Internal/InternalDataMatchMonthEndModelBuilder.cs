@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ESFA.DC.CollectionsManagement.Models;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
+using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
@@ -12,11 +13,14 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
 {
     public class InternalDataMatchMonthEndModelBuilder : IInternalDataMatchModelBuilder
     {
-        public IEnumerable<InternalDataMatchModel> BuildInternalModels(
-            DataMatchILRInfo dataMatchILRInfo,
-            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
-            List<ReturnPeriod> returnPeriods,
-            long jobId)
+        private readonly IDataLockValidationMessageService _dataLockValidationMessageService;
+
+        public InternalDataMatchMonthEndModelBuilder(IDataLockValidationMessageService dataLockValidationMessageService)
+        {
+            _dataLockValidationMessageService = dataLockValidationMessageService;
+        }
+
+        public IEnumerable<InternalDataMatchModel> BuildInternalModels(DataMatchILRInfo dataMatchILRInfo, DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo, ICollection<ReturnPeriod> returnPeriods)
         {
             IDictionary<string, DataMatchLearner> dataMatchLearnerLookup = dataMatchILRInfo.DataMatchLearners.ToDictionary(l => l.LearnRefNumber, l => l, StringComparer.OrdinalIgnoreCase);
             IDictionary<int, ReturnPeriod> returnPeriodLookup = returnPeriods.ToDictionary(r => r.PeriodNumber, r => r);
@@ -30,7 +34,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
                     continue;
                 }
 
-                string ruleName = PopulateRuleName(dataLockValidationError.RuleId);
+                string ruleName = _dataLockValidationMessageService.RuleNameForRuleId(dataLockValidationError.RuleId);
 
                 ReturnPeriod period = returnPeriodLookup[dataLockValidationError.CollectionPeriod];
 
@@ -48,11 +52,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
                     LastSubmission = dataLockValidationError.LastSubmission
                 };
             }
-        }
-
-        private string PopulateRuleName(int ruleId)
-        {
-            return $"{Constants.DLockErrorRuleNamePrefix}{ruleId:D2}";
         }
     }
 }
