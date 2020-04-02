@@ -6,7 +6,7 @@ namespace ESFA.DC.DataMatch.ReportService.Model.ReportModels
     {
         public string Collection { get; set; }
 
-        public int Ukprn { get; set; }
+        public long Ukprn { get; set; }
 
         public string LearnRefNumber { get; set; }
 

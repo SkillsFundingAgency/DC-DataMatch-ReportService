@@ -12,6 +12,7 @@ using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.Configuration;
 using ESFA.DC.DataMatch.ReportService.Service;
 using ESFA.DC.DataMatch.ReportService.Service.Extensions;
+using ESFA.DC.DataMatch.ReportService.Service.ReferenceData;
 using ESFA.DC.DataMatch.ReportService.Service.Reports;
 using ESFA.DC.DataMatch.ReportService.Service.Reports.External;
 using ESFA.DC.DataMatch.ReportService.Service.Reports.Internal;
@@ -212,12 +213,10 @@ namespace ESFA.DC.DataMatch.ReportService.Core
 
         private static void RegisterBuilders(ContainerBuilder containerBuilder)
         {
-            containerBuilder.RegisterType<ExternalDataMatchMonthEndModelBuilder>().As<IExternalDataMatchModelBuilder>()
-                .InstancePerLifetimeScope();
+            containerBuilder.RegisterType<ExternalDataMatchMonthEndModelBuilder>().As<IExternalDataMatchModelBuilder>();
+            containerBuilder.RegisterType<InternalDataMatchMonthEndModelBuilder>().As<IInternalDataMatchModelBuilder>();
 
-
-            containerBuilder.RegisterType<InternalDataMatchMonthEndModelBuilder>().As<IInternalDataMatchModelBuilder>()
-                .InstancePerLifetimeScope();
+            containerBuilder.RegisterType<DataLockValidationMessageService>().As<IDataLockValidationMessageService>();
         }
     }
 }

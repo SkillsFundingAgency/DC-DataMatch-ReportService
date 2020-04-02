@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ESFA.DC.CollectionsManagement.Models;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
@@ -17,26 +18,26 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
             List<ReturnPeriod> returnPeriods,
             long jobId)
         {
-            List<InternalDataMatchModel> dataMatchModels = new List<InternalDataMatchModel>();
+            IDictionary<string, DataMatchLearner> dataMatchLearnerLookup = dataMatchILRInfo.DataMatchLearners.ToDictionary(l => l.LearnRefNumber, l => l, StringComparer.OrdinalIgnoreCase);
+            IDictionary<int, ReturnPeriod> returnPeriodLookup = returnPeriods.ToDictionary(r => r.PeriodNumber, r => r);
+
             foreach (var dataLockValidationError in dataLockValidationErrorInfo.DataLockValidationErrors)
             {
-                DataMatchLearner learner = dataMatchILRInfo.DataMatchLearners.SingleOrDefault(
-                    x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber) &&
-                         x.DataMatchLearningDeliveries.Any(ld => ld.AimSeqNumber == dataLockValidationError.AimSeqNumber));
+                var learner = dataMatchLearnerLookup.GetValueOrDefault(dataLockValidationError.LearnerReferenceNumber);
 
-                if (learner == null)
+                if (learner == null || learner.DataMatchLearningDeliveries.All(ld => ld.AimSeqNumber != dataLockValidationError.AimSeqNumber))
                 {
                     continue;
                 }
 
                 string ruleName = PopulateRuleName(dataLockValidationError.RuleId);
 
-                ReturnPeriod period = returnPeriods.Single(x => x.PeriodNumber == dataLockValidationError.CollectionPeriod);
+                ReturnPeriod period = returnPeriodLookup[dataLockValidationError.CollectionPeriod];
 
-                InternalDataMatchModel dataMatchModel = new InternalDataMatchModel
+                yield return new InternalDataMatchModel
                 {
                     Collection = dataLockValidationError.Collection,
-                    Ukprn = (int)dataLockValidationError.UkPrn,
+                    Ukprn = dataLockValidationError.UkPrn,
                     LearnRefNumber = dataLockValidationError.LearnerReferenceNumber,
                     Uln = learner.Uln,
                     AimSeqNumber = dataLockValidationError.AimSeqNumber,
@@ -46,16 +47,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
                     CollectionPeriodYear = period.CalendarYear,
                     LastSubmission = dataLockValidationError.LastSubmission
                 };
-
-                dataMatchModels.Add(dataMatchModel);
             }
-
-            return dataMatchModels;
         }
 
         private string PopulateRuleName(int ruleId)
         {
-            return Constants.DLockErrorRuleNamePrefix + ruleId.ToString("00");
+            return $"{Constants.DLockErrorRuleNamePrefix}{ruleId:D2}";
         }
     }
 }
