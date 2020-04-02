@@ -69,9 +69,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
             DataMatchDasApprenticeshipInfo dasApprenticeshipPriceInfo = dasApprenticeshipPriceInfoTask.Result;
 
             List<long> learners = dataLockValidationErrorInfo.DataLockValidationErrors.Select(x => x.LearnerUln).Distinct().ToList();
-            DataMatchILRInfo dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(reportServiceContext.Ukprn, learners, cancellationToken);
+            var dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(reportServiceContext.Ukprn, learners, cancellationToken);
 
-            _logger.LogInfo($"dataMatchILRInfo (learners with ACT1 and FM36 in ILR) count {dataMatchILRInfo.DataMatchLearners.Count}", jobIdOverride: reportServiceContext.JobId);
+            _logger.LogInfo($"dataMatchILRInfo (learners with ACT1 and FM36 in ILR) count {dataMatchILRInfo.Count}", jobIdOverride: reportServiceContext.JobId);
             _logger.LogInfo($"dataMatchRulebaseInfo (AEC_ApprenticeshipPriceEpisodes) count {dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.Count}", jobIdOverride: reportServiceContext.JobId);
             _logger.LogInfo($"dataLockValidationErrorInfo (DataLockEvents + joins) count {dataLockValidationErrorInfo.DataLockValidationErrors.Count}", jobIdOverride: reportServiceContext.JobId);
             _logger.LogInfo($"dasApprenticeshipPriceInfo (Payments.ApprenticeshipPriceEpisodes) count {dasApprenticeshipPriceInfo.DasApprenticeshipInfos.Count}", jobIdOverride: reportServiceContext.JobId);

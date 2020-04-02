@@ -47,7 +47,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
         }
 
         public IEnumerable<DataMatchModel> BuildExternalModels(
-            DataMatchILRInfo dataMatchILRInfo,
+            ICollection<DataMatchLearner> dataMatchLearners,
             DataMatchRulebaseInfo dataMatchRulebaseInfo,
             DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
             DataMatchDasApprenticeshipInfo dasApprenticeshipInfo,
@@ -56,7 +56,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
             List<DataMatchModel> dataMatchModels = new List<DataMatchModel>();
             foreach (var dataLockValidationError in dataLockValidationErrorInfo.DataLockValidationErrors)
             {
-                DataMatchLearner learner = dataMatchILRInfo.DataMatchLearners.SingleOrDefault(
+                DataMatchLearner learner = dataMatchLearners.SingleOrDefault(
                     x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber) &&
                          x.DataMatchLearningDeliveries.Any(ld => ld.AimSeqNumber == dataLockValidationError.AimSeqNumber));
 

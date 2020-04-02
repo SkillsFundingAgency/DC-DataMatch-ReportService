@@ -173,51 +173,47 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             };
         }
 
-        private DataMatchILRInfo BuildILRModelForDataMatchReport(int ukPrn)
+        private ICollection<DataMatchLearner> BuildILRModelForDataMatchReport(int ukPrn)
         {
-            return new DataMatchILRInfo()
+            return new List<DataMatchLearner>()
             {
-                UkPrn = ukPrn,
-                DataMatchLearners = new List<DataMatchLearner>()
+                new DataMatchLearner()
                 {
-                    new DataMatchLearner()
+                    UkPrn = ukPrn,
+                    LearnRefNumber = "9900000306",
+                    Uln = 9900000111,
+                    DataMatchLearningDeliveries = new List<DataMatchLearningDelivery>()
                     {
-                        UkPrn = ukPrn,
-                        LearnRefNumber = "9900000306",
-                        Uln = 9900000111,
-                        DataMatchLearningDeliveries = new List<DataMatchLearningDelivery>()
+                        new DataMatchLearningDelivery()
                         {
-                            new DataMatchLearningDelivery()
+                            LearnRefNumber = "9900000306",
+                            LearnAimRef = "50117889",
+                            AimSeqNumber = 1,
+                            ProgType = 3,
+                            StdCode = 0,
+                            FworkCode = 421,
+                            PwayCode = 2,
+                            DataMatchLearningDeliveryFams = new List<DataMatchLearningDeliveryFAM>()
                             {
-                                LearnRefNumber = "9900000306",
-                                LearnAimRef = "50117889",
-                                AimSeqNumber = 1,
-                                ProgType = 3,
-                                StdCode = 0,
-                                FworkCode = 421,
-                                PwayCode = 2,
-                                DataMatchLearningDeliveryFams = new List<DataMatchLearningDeliveryFAM>()
+                                new DataMatchLearningDeliveryFAM()
                                 {
-                                    new DataMatchLearningDeliveryFAM()
-                                    {
-                                        LearnDelFAMType = "ACT",
-                                        LearnDelFAMCode = "1",
-                                        UKPRN = ukPrn,
-                                    },
+                                    LearnDelFAMType = "ACT",
+                                    LearnDelFAMCode = "1",
+                                    UKPRN = ukPrn,
                                 },
-                                UkPrn = ukPrn,
-                                LearnStartDate = new DateTime(2017, 06, 30),
-                                AppFinRecords = new List<AppFinRecordInfo>
+                            },
+                            UkPrn = ukPrn,
+                            LearnStartDate = new DateTime(2017, 06, 30),
+                            AppFinRecords = new List<AppFinRecordInfo>
+                            {
+                                new AppFinRecordInfo()
                                 {
-                                    new AppFinRecordInfo()
-                                    {
-                                        LearnRefNumber = "9900000306",
-                                        AimSeqNumber = 1,
-                                        AFinAmount = 100,
-                                        AFinCode = 1,
-                                        AFinType = "TNP",
-                                        AFinDate = new DateTime(2017, 07, 30),
-                                    },
+                                    LearnRefNumber = "9900000306",
+                                    AimSeqNumber = 1,
+                                    AFinAmount = 100,
+                                    AFinCode = 1,
+                                    AFinType = "TNP",
+                                    AFinDate = new DateTime(2017, 07, 30),
                                 },
                             },
                         },

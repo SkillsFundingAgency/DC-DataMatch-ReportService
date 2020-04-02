@@ -118,7 +118,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             };
         }
 
-        private DataMatchILRInfo BuildILRModelForDataMatchReportBuilderTests(
+        private ICollection<DataMatchLearner> BuildILRModelForDataMatchReportBuilderTests(
             int ukPrn,
             string learnerReferenceNumber,
             long uln,
@@ -132,32 +132,28 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             string learnDelFAMCode,
             DateTime learnStartDate)
         {
-            return new DataMatchILRInfo()
+            return new List<DataMatchLearner>()
             {
-                UkPrn = ukPrn,
-                DataMatchLearners = new List<DataMatchLearner>()
+                new DataMatchLearner()
                 {
-                    new DataMatchLearner()
+                    UkPrn = ukPrn,
+                    LearnRefNumber = learnerReferenceNumber,
+                    Uln = uln,
+                    DataMatchLearningDeliveries = new List<DataMatchLearningDelivery>()
                     {
-                        UkPrn = ukPrn,
-                        LearnRefNumber = learnerReferenceNumber,
-                        Uln = uln,
-                        DataMatchLearningDeliveries = new List<DataMatchLearningDelivery>()
+                        new DataMatchLearningDelivery()
                         {
-                            new DataMatchLearningDelivery()
-                            {
-                                LearnRefNumber = learnerReferenceNumber,
-                                LearnAimRef = learnAimRef,
-                                AimSeqNumber = aimSeqNumber,
-                                ProgType = programmeType,
-                                StdCode = standardCode,
-                                FworkCode = frameworkCode,
-                                PwayCode = pathwayCode,
-                                DataMatchLearningDeliveryFams = GetLearningDeliveryFAMs(ukPrn, learnDelFAMType, learnDelFAMCode),
-                                UkPrn = ukPrn,
-                                LearnStartDate = learnStartDate,
-                                AppFinRecords = GetAppFinRecords(learnerReferenceNumber, aimSeqNumber, 100, 1, "TNP", new DateTime(2017, 07, 30)),
-                            },
+                            LearnRefNumber = learnerReferenceNumber,
+                            LearnAimRef = learnAimRef,
+                            AimSeqNumber = aimSeqNumber,
+                            ProgType = programmeType,
+                            StdCode = standardCode,
+                            FworkCode = frameworkCode,
+                            PwayCode = pathwayCode,
+                            DataMatchLearningDeliveryFams = GetLearningDeliveryFAMs(ukPrn, learnDelFAMType, learnDelFAMCode),
+                            UkPrn = ukPrn,
+                            LearnStartDate = learnStartDate,
+                            AppFinRecords = GetAppFinRecords(learnerReferenceNumber, aimSeqNumber, 100, 1, "TNP", new DateTime(2017, 07, 30)),
                         },
                     },
                 },

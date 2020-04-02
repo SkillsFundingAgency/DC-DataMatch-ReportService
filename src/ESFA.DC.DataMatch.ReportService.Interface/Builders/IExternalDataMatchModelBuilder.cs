@@ -9,7 +9,7 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Builders
     public interface IExternalDataMatchModelBuilder
     {
         IEnumerable<DataMatchModel> BuildExternalModels(
-            DataMatchILRInfo dataMatchILRInfo,
+            ICollection<DataMatchLearner> dataMatchlearners,
             DataMatchRulebaseInfo dataMatchRulebaseInfo,
             DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
             DataMatchDasApprenticeshipInfo dasApprenticeshipPriceInfo,

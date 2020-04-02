@@ -22,16 +22,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             _ilrValidContextFactory = ilrValidContextFactory;
         }
 
-        public async Task<DataMatchILRInfo> GetILRInfoForDataMatchReport(
+        public async Task<ICollection<DataMatchLearner>> GetILRInfoForDataMatchReport(
             int ukPrn,
             List<long> learners,
             CancellationToken cancellationToken)
         {
-            var dataMatchILRInfo = new DataMatchILRInfo
-            {
-                UkPrn = ukPrn,
-                DataMatchLearners = new List<DataMatchLearner>()
-            };
+            var dataMatchLearners = new List<DataMatchLearner>();
 
             cancellationToken.ThrowIfCancellationRequested();
             using (var ilrContext = _ilrValidContextFactory())
@@ -79,11 +75,11 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                         .Distinct()
                         .ToListAsync(cancellationToken);
 
-                    dataMatchILRInfo.DataMatchLearners.AddRange(learnersList);
+                    dataMatchLearners.AddRange(learnersList);
                 }
             }
 
-            return dataMatchILRInfo;
+            return dataMatchLearners;
         }
     }
 }
