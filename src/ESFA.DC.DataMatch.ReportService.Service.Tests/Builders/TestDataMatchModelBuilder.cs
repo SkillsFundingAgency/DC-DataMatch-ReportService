@@ -93,7 +93,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             };
         }
 
-        private DataMatchDataLockValidationErrorInfo BuildDataLockValidationErrorInfoForDataMatchReportBuildTests(
+        private ICollection<DataLockValidationError> BuildDataLockValidationErrorInfoForDataMatchReportBuildTests(
             int ukPrn,
             string learnerReferenceNumber,
             int aimSeqNumber,
@@ -101,19 +101,16 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             int ruleId,
             long priceEpisodeMatchAppId)
         {
-            return new DataMatchDataLockValidationErrorInfo()
+            return new List<DataLockValidationError>()
             {
-                DataLockValidationErrors = new List<DataLockValidationError>()
+                new DataLockValidationError()
                 {
-                    new DataLockValidationError()
-                    {
-                        UkPrn = ukPrn,
-                        LearnerReferenceNumber = learnerReferenceNumber,
-                        AimSeqNumber = aimSeqNumber,
-                        LearnerUln = uln,
-                        RuleId = ruleId,
-                        PriceEpisodeMatchAppId = priceEpisodeMatchAppId,
-                    },
+                    UkPrn = ukPrn,
+                    LearnerReferenceNumber = learnerReferenceNumber,
+                    AimSeqNumber = aimSeqNumber,
+                    LearnerUln = uln,
+                    RuleId = ruleId,
+                    PriceEpisodeMatchAppId = priceEpisodeMatchAppId,
                 },
             };
         }

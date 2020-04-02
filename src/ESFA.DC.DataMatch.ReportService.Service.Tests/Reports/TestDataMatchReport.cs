@@ -109,21 +109,18 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             result.Count().Should().Be(1);
         }
 
-        private DataMatchDataLockValidationErrorInfo GetDataLockValidationErrorInfoForDataMatchReport(int ukPrn)
+        private ICollection<DataLockValidationError> GetDataLockValidationErrorInfoForDataMatchReport(int ukPrn)
         {
-            return new DataMatchDataLockValidationErrorInfo()
+            return new List<DataLockValidationError>()
             {
-                DataLockValidationErrors = new List<DataLockValidationError>()
+                new DataLockValidationError()
                 {
-                    new DataLockValidationError()
-                    {
-                        UkPrn = ukPrn,
-                        LearnerReferenceNumber = "9900000306",
-                        AimSeqNumber = 1,
-                        LearnerUln = 9900000111,
-                        RuleId = 1,
-                        PriceEpisodeMatchAppId = 12345,
-                    },
+                    UkPrn = ukPrn,
+                    LearnerReferenceNumber = "9900000306",
+                    AimSeqNumber = 1,
+                    LearnerUln = 9900000111,
+                    RuleId = 1,
+                    PriceEpisodeMatchAppId = 12345,
                 },
             };
         }

@@ -53,21 +53,21 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
 
             var dataMatchModels = new List<InternalDataMatchModel>();
 
-            var dataLockValidationErrorInfo = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, -1, reportServiceContext.CollectionYear, cancellationToken);
+            var dataLockValidationErrors = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, -1, reportServiceContext.CollectionYear, cancellationToken);
 
-            var ukPrns = dataLockValidationErrorInfo.DataLockValidationErrors.Select(x => (int)x.UkPrn).Distinct().ToList();
+            var ukPrns = dataLockValidationErrors.Select(x => (int)x.UkPrn).Distinct().ToList();
 
             _logger.LogInfo($"Ukprns count {ukPrns.Count}", jobIdOverride: reportServiceContext.JobId);
 
             foreach (int ukPrn in ukPrns)
             {
-                var learners = dataLockValidationErrorInfo.DataLockValidationErrors.Where(x => x.UkPrn == ukPrn).Select(x => x.LearnerUln).Distinct().ToList();
+                var learners = dataLockValidationErrors.Where(x => x.UkPrn == ukPrn).Select(x => x.LearnerUln).Distinct().ToList();
 
                 _logger.LogInfo($"Processing UKPRN {ukPrn} with {learners.Count} learners");
 
                 var dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(ukPrn, learners, cancellationToken);
 
-                var reportModels = _dataMatchModelBuilder.BuildInternalModels(dataMatchILRInfo, dataLockValidationErrorInfo, ilrPeriods);
+                var reportModels = _dataMatchModelBuilder.BuildInternalModels(dataMatchILRInfo, dataLockValidationErrors, ilrPeriods);
 
                 dataMatchModels.AddRange(reportModels);
             }

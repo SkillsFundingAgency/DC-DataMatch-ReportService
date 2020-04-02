@@ -20,12 +20,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
             _dataLockValidationMessageService = dataLockValidationMessageService;
         }
 
-        public IEnumerable<InternalDataMatchModel> BuildInternalModels(ICollection<DataMatchLearner> dataMatchLearners, DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo, ICollection<ReturnPeriod> returnPeriods)
+        public IEnumerable<InternalDataMatchModel> BuildInternalModels(ICollection<DataMatchLearner> dataMatchLearners, ICollection<DataLockValidationError> dataLockValidationErrors, ICollection<ReturnPeriod> returnPeriods)
         {
             IDictionary<string, DataMatchLearner> dataMatchLearnerLookup = dataMatchLearners.ToDictionary(l => l.LearnRefNumber, l => l, StringComparer.OrdinalIgnoreCase);
             IDictionary<int, ReturnPeriod> returnPeriodLookup = returnPeriods.ToDictionary(r => r.PeriodNumber, r => r);
 
-            foreach (var dataLockValidationError in dataLockValidationErrorInfo.DataLockValidationErrors)
+            foreach (var dataLockValidationError in dataLockValidationErrors)
             {
                 var learner = dataMatchLearnerLookup.GetValueOrDefault(dataLockValidationError.LearnerReferenceNumber);
 

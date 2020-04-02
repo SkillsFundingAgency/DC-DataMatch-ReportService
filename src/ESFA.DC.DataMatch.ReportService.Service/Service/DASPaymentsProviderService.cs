@@ -19,19 +19,16 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             _dasPaymentsContextFactory = dasPaymentsContextFactory;
         }
 
-        public async Task<DataMatchDataLockValidationErrorInfo> GetDataLockValidationErrorInfoForDataMatchReport(int collectionPeriod, int ukPrn, string collectionYear, CancellationToken cancellationToken)
+        public async Task<ICollection<DataLockValidationError>> GetDataLockValidationErrorInfoForDataMatchReport(int collectionPeriod, int ukPrn, string collectionYear, CancellationToken cancellationToken)
         {
-            DataMatchDataLockValidationErrorInfo dataMatchDataLockValidationErrorInfo = new DataMatchDataLockValidationErrorInfo
-            {
-                DataLockValidationErrors = new List<DataLockValidationError>(),
-            };
+            var dataLockValidationErrors = new List<DataLockValidationError>();
 
             var academicYear = Convert.ToInt32(collectionYear);
 
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
             {
-                var dataLockValidationErrors = await dasPaymentsContext.DataMatchReport
+                var validationErrors = await dasPaymentsContext.DataMatchReport
                     .Where(x => (ukPrn == -1 || x.UkPrn == ukPrn)
                                 && x.AcademicYear == academicYear
                                 && x.CollectionPeriod == collectionPeriod)
@@ -49,10 +46,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                     .Distinct()
                     .ToListAsync(cancellationToken);
 
-                dataMatchDataLockValidationErrorInfo.DataLockValidationErrors.AddRange(dataLockValidationErrors);
+                dataLockValidationErrors.AddRange(validationErrors);
             }
 
-            return dataMatchDataLockValidationErrorInfo;
+            return dataLockValidationErrors;
         }
 
         public async Task<DataMatchDasApprenticeshipInfo> GetDasApprenticeshipInfoForDataMatchReport(int ukPrn, CancellationToken cancellationToken)

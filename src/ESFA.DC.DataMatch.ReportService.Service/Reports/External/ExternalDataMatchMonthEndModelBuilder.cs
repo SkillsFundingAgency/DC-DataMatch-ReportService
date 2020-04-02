@@ -49,12 +49,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
         public IEnumerable<DataMatchModel> BuildExternalModels(
             ICollection<DataMatchLearner> dataMatchLearners,
             DataMatchRulebaseInfo dataMatchRulebaseInfo,
-            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo,
+            ICollection<DataLockValidationError> dataLockValidationErrors,
             DataMatchDasApprenticeshipInfo dasApprenticeshipInfo,
             long jobId)
         {
             List<DataMatchModel> dataMatchModels = new List<DataMatchModel>();
-            foreach (var dataLockValidationError in dataLockValidationErrorInfo.DataLockValidationErrors)
+            foreach (var dataLockValidationError in dataLockValidationErrors)
             {
                 DataMatchLearner learner = dataMatchLearners.SingleOrDefault(
                     x => x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber) &&
