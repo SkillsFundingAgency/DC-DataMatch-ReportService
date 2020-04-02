@@ -5,10 +5,6 @@ namespace ESFA.DC.DataMatch.ReportService.Model.Ilr
 {
     public class DataMatchLearningDelivery
     {
-        public int UkPrn { get; set; }
-
-        public string LearnRefNumber { get; set; }
-
         public string LearnAimRef { get; set; }
 
         public int AimSeqNumber { get; set; }

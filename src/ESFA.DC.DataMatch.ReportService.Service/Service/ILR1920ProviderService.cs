@@ -52,8 +52,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                             Uln = l.ULN,
                             DataMatchLearningDeliveries = l.LearningDeliveries.Select(x => new DataMatchLearningDelivery
                             {
-                                UkPrn = ukPrn,
-                                LearnRefNumber = x.LearnRefNumber,
                                 LearnAimRef = x.LearnAimRef,
                                 AimSeqNumber = x.AimSeqNumber,
                                 LearnStartDate = x.LearnStartDate,
@@ -63,8 +61,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                                 PwayCode = x.PwayCode,
                                 AppFinRecords = x.AppFinRecords.Select(y => new AppFinRecordInfo()
                                 {
-                                    LearnRefNumber = y.LearnRefNumber,
-                                    AimSeqNumber = y.AimSeqNumber,
                                     AFinType = y.AFinType,
                                     AFinCode = y.AFinCode,
                                     AFinDate = y.AFinDate,

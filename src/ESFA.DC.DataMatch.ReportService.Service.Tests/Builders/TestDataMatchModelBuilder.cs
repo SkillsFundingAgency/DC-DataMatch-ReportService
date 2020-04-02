@@ -143,15 +143,13 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
                     {
                         new DataMatchLearningDelivery()
                         {
-                            LearnRefNumber = learnerReferenceNumber,
                             LearnAimRef = learnAimRef,
                             AimSeqNumber = aimSeqNumber,
                             ProgType = programmeType,
                             StdCode = standardCode,
                             FworkCode = frameworkCode,
                             PwayCode = pathwayCode,
-                            DataMatchLearningDeliveryFams = GetLearningDeliveryFAMs(ukPrn, learnDelFAMType, learnDelFAMCode),
-                            UkPrn = ukPrn,
+                            DataMatchLearningDeliveryFams = GetLearningDeliveryFAMs(learnDelFAMType, learnDelFAMCode),
                             LearnStartDate = learnStartDate,
                             AppFinRecords = GetAppFinRecords(learnerReferenceNumber, aimSeqNumber, 100, 1, "TNP", new DateTime(2017, 07, 30)),
                         },
@@ -160,7 +158,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             };
         }
 
-        private List<DataMatchLearningDeliveryFAM> GetLearningDeliveryFAMs(int ukPrn, string learnDelFAMType, string learnDelFAMCode)
+        private List<DataMatchLearningDeliveryFAM> GetLearningDeliveryFAMs(string learnDelFAMType, string learnDelFAMCode)
         {
             return new List<DataMatchLearningDeliveryFAM>()
             {
@@ -168,7 +166,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
                 {
                     LearnDelFAMType = learnDelFAMType,
                     LearnDelFAMCode = learnDelFAMCode,
-                    UKPRN = ukPrn,
                 },
             };
         }
@@ -179,8 +176,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             {
                 new AppFinRecordInfo()
                 {
-                    LearnRefNumber = learnerReferenceNumber,
-                    AimSeqNumber = aimSeqNumber,
                     AFinAmount = aFinAmount,
                     AFinCode = aFinCode,
                     AFinType = aFinType,

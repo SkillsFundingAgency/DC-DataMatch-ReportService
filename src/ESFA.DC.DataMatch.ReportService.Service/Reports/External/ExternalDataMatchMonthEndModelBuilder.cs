@@ -163,7 +163,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
                     foreach (var tnp in tnp1)
                     {
                         _logger.LogInfo(
-                            $"TNP1_AFinAmount-{tnp.AFinAmount}_AFinDate-{tnp.AFinDate}_AimSeqNumber-{tnp.AimSeqNumber}", jobIdOverride: jobId);
+                            $"TNP1_AFinAmount-{tnp.AFinAmount}_AFinDate-{tnp.AFinDate}_AimSeqNumber-{validLearningDelivery.AimSeqNumber}", jobIdOverride: jobId);
                     }
                 }
 
@@ -178,7 +178,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
                     foreach (var tnp in tnp2)
                     {
                         _logger.LogInfo(
-                            $"TNP2_AFinAmount-{tnp.AFinAmount}_AFinDate-{tnp.AFinDate}_AimSeqNumber-{tnp.AimSeqNumber}", jobIdOverride: jobId);
+                            $"TNP2_AFinAmount-{tnp.AFinAmount}_AFinDate-{tnp.AFinDate}_AimSeqNumber-{validLearningDelivery.AimSeqNumber}", jobIdOverride: jobId);
                     }
                 }
 

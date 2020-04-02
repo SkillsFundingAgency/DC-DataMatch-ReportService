@@ -186,7 +186,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
                     {
                         new DataMatchLearningDelivery()
                         {
-                            LearnRefNumber = "9900000306",
                             LearnAimRef = "50117889",
                             AimSeqNumber = 1,
                             ProgType = 3,
@@ -199,17 +198,13 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
                                 {
                                     LearnDelFAMType = "ACT",
                                     LearnDelFAMCode = "1",
-                                    UKPRN = ukPrn,
                                 },
                             },
-                            UkPrn = ukPrn,
                             LearnStartDate = new DateTime(2017, 06, 30),
                             AppFinRecords = new List<AppFinRecordInfo>
                             {
                                 new AppFinRecordInfo()
                                 {
-                                    LearnRefNumber = "9900000306",
-                                    AimSeqNumber = 1,
                                     AFinAmount = 100,
                                     AFinCode = 1,
                                     AFinType = "TNP",
