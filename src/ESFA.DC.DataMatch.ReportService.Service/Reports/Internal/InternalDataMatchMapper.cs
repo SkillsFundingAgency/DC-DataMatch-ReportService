@@ -1,7 +1,7 @@
 ﻿using CsvHelper.Configuration;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 
-namespace ESFA.DC.DataMatch.ReportService.Service.Mapper
+namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
 {
     public sealed class InternalDataMatchMapper : ClassMap<InternalDataMatchModel>
     {

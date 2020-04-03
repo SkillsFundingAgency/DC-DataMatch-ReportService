@@ -11,10 +11,9 @@ using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
-using ESFA.DC.DataMatch.ReportService.Service.Builders;
-using ESFA.DC.DataMatch.ReportService.Service.Comparer;
-using ESFA.DC.DataMatch.ReportService.Service.Mapper;
+using ESFA.DC.DataMatch.ReportService.Service.ReferenceData;
 using ESFA.DC.DataMatch.ReportService.Service.Reports;
+using ESFA.DC.DataMatch.ReportService.Service.Reports.External;
 using ESFA.DC.DataMatch.ReportService.Service.Tests.Helpers;
 using ESFA.DC.DataMatch.ReportService.Tests.Models;
 using ESFA.DC.DateTimeProvider.Interface;
@@ -48,7 +47,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             Mock<IDASPaymentsProviderService> dasPaymentProviderMock = new Mock<IDASPaymentsProviderService>();
             Mock<IFM36ProviderService> fm36ProviderServiceMock = new Mock<IFM36ProviderService>();
             Mock<IILRProviderService> iIlrProviderService = new Mock<IILRProviderService>();
-            IDataMatchModelBuilder dataMatchModelBuilder = new DataMatchMonthEndModelBuilder(logger.Object);
+            IExternalDataMatchModelBuilder dataMatchModelBuilder = new ExternalDataMatchMonthEndModelBuilder(new DataLockValidationMessageService(),  logger.Object);
 
             storage.Setup(x => x.SaveAsync(filename, It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Callback<string, string, CancellationToken>((key, value, ct) => csv = value)
@@ -75,7 +74,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
                     x.GetDasApprenticeshipInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dasApprenticeshipInfoForDataMatchReport);
 
-            dasPaymentProviderMock.Setup(x => x.GetDataLockValidationErrorInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            dasPaymentProviderMock.Setup(x => x.GetDataLockValidationErrorInfoForUkprnAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dataLockValidationErrorInfoForDataMatchReport);
 
             dateTimeProviderMock.Setup(x => x.GetNowUtc()).Returns(dateTime);
@@ -110,44 +109,37 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             result.Count().Should().Be(1);
         }
 
-        private DataMatchDataLockValidationErrorInfo GetDataLockValidationErrorInfoForDataMatchReport(int ukPrn)
+        private ICollection<DataLockValidationError> GetDataLockValidationErrorInfoForDataMatchReport(int ukPrn)
         {
-            return new DataMatchDataLockValidationErrorInfo()
+            return new List<DataLockValidationError>()
             {
-                DataLockValidationErrors = new List<DataLockValidationError>()
+                new DataLockValidationError()
                 {
-                    new DataLockValidationError()
-                    {
-                        UkPrn = ukPrn,
-                        LearnerReferenceNumber = "9900000306",
-                        AimSeqNumber = 1,
-                        LearnerUln = 9900000111,
-                        RuleId = 1,
-                        PriceEpisodeMatchAppId = 12345,
-                    },
+                    UkPrn = ukPrn,
+                    LearnerReferenceNumber = "9900000306",
+                    AimSeqNumber = 1,
+                    LearnerUln = 9900000111,
+                    RuleId = 1,
+                    PriceEpisodeMatchAppId = 12345,
                 },
             };
         }
 
-        private DataMatchDasApprenticeshipInfo GetDasApprenticeshipInfoForDataMatchReport(int ukPrn)
+        private ICollection<DasApprenticeshipInfo> GetDasApprenticeshipInfoForDataMatchReport(int ukPrn)
         {
-            return new DataMatchDasApprenticeshipInfo()
+            return new List<DasApprenticeshipInfo>()
             {
-                UkPrn = ukPrn,
-                DasApprenticeshipInfos = new List<DasApprenticeshipInfo>()
+                new DasApprenticeshipInfo()
                 {
-                    new DasApprenticeshipInfo()
-                    {
-                        LearnerUln = 9900000111,
-                        PausedOnDate = null,
-                        WithdrawnOnDate = null,
-                        LegalEntityName = "LegalEntityName",
-                        Cost = 100,
-                        FrameworkCode = 1,
-                        ProgrammeType = 2,
-                        PathwayCode = 3,
-                        StandardCode = 4,
-                    },
+                    LearnerUln = 9900000111,
+                    PausedOnDate = null,
+                    WithdrawnOnDate = null,
+                    LegalEntityName = "LegalEntityName",
+                    Cost = 100,
+                    FrameworkCode = 1,
+                    ProgrammeType = 2,
+                    PathwayCode = 3,
+                    StandardCode = 4,
                 },
             };
         }
@@ -174,51 +166,42 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             };
         }
 
-        private DataMatchILRInfo BuildILRModelForDataMatchReport(int ukPrn)
+        private ICollection<DataMatchLearner> BuildILRModelForDataMatchReport(int ukPrn)
         {
-            return new DataMatchILRInfo()
+            return new List<DataMatchLearner>()
             {
-                UkPrn = ukPrn,
-                DataMatchLearners = new List<DataMatchLearner>()
+                new DataMatchLearner()
                 {
-                    new DataMatchLearner()
+                    UkPrn = ukPrn,
+                    LearnRefNumber = "9900000306",
+                    Uln = 9900000111,
+                    DataMatchLearningDeliveries = new List<DataMatchLearningDelivery>()
                     {
-                        UkPrn = ukPrn,
-                        LearnRefNumber = "9900000306",
-                        Uln = 9900000111,
-                        DataMatchLearningDeliveries = new List<DataMatchLearningDelivery>()
+                        new DataMatchLearningDelivery()
                         {
-                            new DataMatchLearningDelivery()
+                            LearnAimRef = "50117889",
+                            AimSeqNumber = 1,
+                            ProgType = 3,
+                            StdCode = 0,
+                            FworkCode = 421,
+                            PwayCode = 2,
+                            DataMatchLearningDeliveryFams = new List<DataMatchLearningDeliveryFAM>()
                             {
-                                LearnRefNumber = "9900000306",
-                                LearnAimRef = "50117889",
-                                AimSeqNumber = 1,
-                                ProgType = 3,
-                                StdCode = 0,
-                                FworkCode = 421,
-                                PwayCode = 2,
-                                DataMatchLearningDeliveryFams = new List<DataMatchLearningDeliveryFAM>()
+                                new DataMatchLearningDeliveryFAM()
                                 {
-                                    new DataMatchLearningDeliveryFAM()
-                                    {
-                                        LearnDelFAMType = "ACT",
-                                        LearnDelFAMCode = "1",
-                                        UKPRN = ukPrn,
-                                    },
+                                    LearnDelFAMType = "ACT",
+                                    LearnDelFAMCode = "1",
                                 },
-                                UkPrn = ukPrn,
-                                LearnStartDate = new DateTime(2017, 06, 30),
-                                AppFinRecords = new List<AppFinRecordInfo>
+                            },
+                            LearnStartDate = new DateTime(2017, 06, 30),
+                            AppFinRecords = new List<AppFinRecordInfo>
+                            {
+                                new AppFinRecordInfo()
                                 {
-                                    new AppFinRecordInfo()
-                                    {
-                                        LearnRefNumber = "9900000306",
-                                        AimSeqNumber = 1,
-                                        AFinAmount = 100,
-                                        AFinCode = 1,
-                                        AFinType = "TNP",
-                                        AFinDate = new DateTime(2017, 07, 30),
-                                    },
+                                    AFinAmount = 100,
+                                    AFinCode = 1,
+                                    AFinType = "TNP",
+                                    AFinDate = new DateTime(2017, 07, 30),
                                 },
                             },
                         },

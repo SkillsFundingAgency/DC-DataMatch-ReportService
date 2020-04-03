@@ -7,9 +7,6 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Service
 {
     public interface IILRProviderService
     {
-        Task<DataMatchILRInfo> GetILRInfoForDataMatchReport(
-            int ukPrn,
-            List<long> learners,
-            CancellationToken cancellationToken);
+        Task<ICollection<DataMatchLearner>> GetILRInfoForDataMatchReport(int ukPrn, List<long> learners, CancellationToken cancellationToken);
     }
 }

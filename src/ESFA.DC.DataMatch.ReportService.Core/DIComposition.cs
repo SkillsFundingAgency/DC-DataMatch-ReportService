@@ -11,10 +11,11 @@ using ESFA.DC.DataMatch.ReportService.Interface.Reports;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.Configuration;
 using ESFA.DC.DataMatch.ReportService.Service;
-using ESFA.DC.DataMatch.ReportService.Service.Builders;
-using ESFA.DC.DataMatch.ReportService.Service.Comparer;
 using ESFA.DC.DataMatch.ReportService.Service.Extensions;
+using ESFA.DC.DataMatch.ReportService.Service.ReferenceData;
 using ESFA.DC.DataMatch.ReportService.Service.Reports;
+using ESFA.DC.DataMatch.ReportService.Service.Reports.External;
+using ESFA.DC.DataMatch.ReportService.Service.Reports.Internal;
 using ESFA.DC.DataMatch.ReportService.Service.Service;
 using ESFA.DC.DataMatch.ReportService.Stateless.Configuration;
 using ESFA.DC.DateTimeProvider.Interface;
@@ -168,7 +169,6 @@ namespace ESFA.DC.DataMatch.ReportService.Core
             containerBuilder.RegisterType<DateTimeProvider.DateTimeProvider>().As<IDateTimeProvider>().InstancePerLifetimeScope();
 
             containerBuilder.RegisterType<ExternalDataMatchModelComparer>();
-            containerBuilder.RegisterType<InternalDataMatchModelComparer>();
 
             containerBuilder.RegisterType<Handler>().As<IHandler>().InstancePerLifetimeScope();
             containerBuilder.RegisterType<EntryPoint>().InstancePerLifetimeScope();
@@ -212,8 +212,10 @@ namespace ESFA.DC.DataMatch.ReportService.Core
 
         private static void RegisterBuilders(ContainerBuilder containerBuilder)
         {
-            containerBuilder.RegisterType<DataMatchMonthEndModelBuilder>().As<IDataMatchModelBuilder>()
-                .InstancePerLifetimeScope();
+            containerBuilder.RegisterType<ExternalDataMatchMonthEndModelBuilder>().As<IExternalDataMatchModelBuilder>();
+            containerBuilder.RegisterType<InternalDataMatchMonthEndModelBuilder>().As<IInternalDataMatchModelBuilder>();
+
+            containerBuilder.RegisterType<DataLockValidationMessageService>().As<IDataLockValidationMessageService>();
         }
     }
 }

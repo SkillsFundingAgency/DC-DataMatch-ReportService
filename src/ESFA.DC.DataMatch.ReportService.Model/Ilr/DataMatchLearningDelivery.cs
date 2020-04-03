@@ -5,10 +5,6 @@ namespace ESFA.DC.DataMatch.ReportService.Model.Ilr
 {
     public class DataMatchLearningDelivery
     {
-        public int UkPrn { get; set; }
-
-        public string LearnRefNumber { get; set; }
-
         public string LearnAimRef { get; set; }
 
         public int AimSeqNumber { get; set; }
@@ -23,8 +19,8 @@ namespace ESFA.DC.DataMatch.ReportService.Model.Ilr
 
         public int? StdCode { get; set; }
 
-        public IEnumerable<DataMatchLearningDeliveryFAM> DataMatchLearningDeliveryFams { get; set; }
+        public List<DataMatchLearningDeliveryFAM> DataMatchLearningDeliveryFams { get; set; }
 
-        public ICollection<AppFinRecordInfo> AppFinRecords { get; set; }
+        public List<AppFinRecordInfo> AppFinRecords { get; set; }
     }
 }

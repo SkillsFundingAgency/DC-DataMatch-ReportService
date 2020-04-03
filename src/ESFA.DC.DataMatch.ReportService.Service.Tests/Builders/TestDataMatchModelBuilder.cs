@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
-using ESFA.DC.DataMatch.ReportService.Service.Builders;
+using ESFA.DC.DataMatch.ReportService.Service.Reports.External;
 using ESFA.DC.Logging.Interfaces;
 using FluentAssertions;
 using Moq;
@@ -41,8 +42,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             string expectedIlrValue = "",
             string expectedApprenticeshipValue = "")
         {
-            Mock<ILogger> logger = new Mock<ILogger>();
-            var dataMatchModelBuilder = new DataMatchMonthEndModelBuilder(logger.Object);
+            var dataMatchModelBuilder = new ExternalDataMatchMonthEndModelBuilder(Mock.Of<IDataLockValidationMessageService>(), Mock.Of<ILogger>());
             var dataMatchILRInfo = BuildILRModelForDataMatchReportBuilderTests(ilrukPrn, learnRefNumber, ilrUln, "50117889", 1, ilrFworkCode, ilrProgType, ilrPwayCode, ilrStdCode, "ACT", "1", new DateTime(2019, 10, 10));
             var dataMatchRulebaseInfo = BuildILRRulebaseModelForDataMatchReportBuilderTests(ilrukPrn, learnRefNumber, 1);
             var dataLockValidationErrorInfo =
@@ -59,7 +59,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             result.First().ApprenticeshipServiceValue.Should().Be(expectedApprenticeshipValue);
         }
 
-        private DataMatchDasApprenticeshipInfo BuildDasApprenticeshipInfoForDataMatchReportBuilderTests(
+        private ICollection<DasApprenticeshipInfo> BuildDasApprenticeshipInfoForDataMatchReportBuilderTests(
             int ukPrn,
             long uln,
             DateTime? pausedOnDate,
@@ -71,29 +71,25 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             decimal cost,
             string legalEntityName)
         {
-            return new DataMatchDasApprenticeshipInfo()
+            return new List<DasApprenticeshipInfo>()
             {
-                UkPrn = ukPrn,
-                DasApprenticeshipInfos = new List<DasApprenticeshipInfo>()
+                new DasApprenticeshipInfo()
                 {
-                    new DasApprenticeshipInfo()
-                    {
-                        LearnerUln = uln,
-                        PausedOnDate = pausedOnDate,
-                        WithdrawnOnDate = withdrawnOnDate,
-                        LegalEntityName = legalEntityName,
-                        Cost = cost,
-                        FrameworkCode = frameworkCode,
-                        ProgrammeType = programmeType,
-                        PathwayCode = pathwayCode,
-                        StandardCode = standardCode,
-                        UkPrn = ukPrn,
-                    },
+                    LearnerUln = uln,
+                    PausedOnDate = pausedOnDate,
+                    WithdrawnOnDate = withdrawnOnDate,
+                    LegalEntityName = legalEntityName,
+                    Cost = cost,
+                    FrameworkCode = frameworkCode,
+                    ProgrammeType = programmeType,
+                    PathwayCode = pathwayCode,
+                    StandardCode = standardCode,
+                    UkPrn = ukPrn,
                 },
             };
         }
 
-        private DataMatchDataLockValidationErrorInfo BuildDataLockValidationErrorInfoForDataMatchReportBuildTests(
+        private ICollection<DataLockValidationError> BuildDataLockValidationErrorInfoForDataMatchReportBuildTests(
             int ukPrn,
             string learnerReferenceNumber,
             int aimSeqNumber,
@@ -101,24 +97,21 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             int ruleId,
             long priceEpisodeMatchAppId)
         {
-            return new DataMatchDataLockValidationErrorInfo()
+            return new List<DataLockValidationError>()
             {
-                DataLockValidationErrors = new List<DataLockValidationError>()
+                new DataLockValidationError()
                 {
-                    new DataLockValidationError()
-                    {
-                        UkPrn = ukPrn,
-                        LearnerReferenceNumber = learnerReferenceNumber,
-                        AimSeqNumber = aimSeqNumber,
-                        LearnerUln = uln,
-                        RuleId = ruleId,
-                        PriceEpisodeMatchAppId = priceEpisodeMatchAppId,
-                    },
+                    UkPrn = ukPrn,
+                    LearnerReferenceNumber = learnerReferenceNumber,
+                    AimSeqNumber = aimSeqNumber,
+                    LearnerUln = uln,
+                    RuleId = ruleId,
+                    PriceEpisodeMatchAppId = priceEpisodeMatchAppId,
                 },
             };
         }
 
-        private DataMatchILRInfo BuildILRModelForDataMatchReportBuilderTests(
+        private ICollection<DataMatchLearner> BuildILRModelForDataMatchReportBuilderTests(
             int ukPrn,
             string learnerReferenceNumber,
             long uln,
@@ -132,39 +125,33 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             string learnDelFAMCode,
             DateTime learnStartDate)
         {
-            return new DataMatchILRInfo()
+            return new List<DataMatchLearner>()
             {
-                UkPrn = ukPrn,
-                DataMatchLearners = new List<DataMatchLearner>()
+                new DataMatchLearner()
                 {
-                    new DataMatchLearner()
+                    UkPrn = ukPrn,
+                    LearnRefNumber = learnerReferenceNumber,
+                    Uln = uln,
+                    DataMatchLearningDeliveries = new List<DataMatchLearningDelivery>()
                     {
-                        UkPrn = ukPrn,
-                        LearnRefNumber = learnerReferenceNumber,
-                        Uln = uln,
-                        DataMatchLearningDeliveries = new List<DataMatchLearningDelivery>()
+                        new DataMatchLearningDelivery()
                         {
-                            new DataMatchLearningDelivery()
-                            {
-                                LearnRefNumber = learnerReferenceNumber,
-                                LearnAimRef = learnAimRef,
-                                AimSeqNumber = aimSeqNumber,
-                                ProgType = programmeType,
-                                StdCode = standardCode,
-                                FworkCode = frameworkCode,
-                                PwayCode = pathwayCode,
-                                DataMatchLearningDeliveryFams = GetLearningDeliveryFAMs(ukPrn, learnDelFAMType, learnDelFAMCode),
-                                UkPrn = ukPrn,
-                                LearnStartDate = learnStartDate,
-                                AppFinRecords = GetAppFinRecords(learnerReferenceNumber, aimSeqNumber, 100, 1, "TNP", new DateTime(2017, 07, 30)),
-                            },
+                            LearnAimRef = learnAimRef,
+                            AimSeqNumber = aimSeqNumber,
+                            ProgType = programmeType,
+                            StdCode = standardCode,
+                            FworkCode = frameworkCode,
+                            PwayCode = pathwayCode,
+                            DataMatchLearningDeliveryFams = GetLearningDeliveryFAMs(learnDelFAMType, learnDelFAMCode),
+                            LearnStartDate = learnStartDate,
+                            AppFinRecords = GetAppFinRecords(learnerReferenceNumber, aimSeqNumber, 100, 1, "TNP", new DateTime(2017, 07, 30)),
                         },
                     },
                 },
             };
         }
 
-        private List<DataMatchLearningDeliveryFAM> GetLearningDeliveryFAMs(int ukPrn, string learnDelFAMType, string learnDelFAMCode)
+        private List<DataMatchLearningDeliveryFAM> GetLearningDeliveryFAMs(string learnDelFAMType, string learnDelFAMCode)
         {
             return new List<DataMatchLearningDeliveryFAM>()
             {
@@ -172,7 +159,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
                 {
                     LearnDelFAMType = learnDelFAMType,
                     LearnDelFAMCode = learnDelFAMCode,
-                    UKPRN = ukPrn,
                 },
             };
         }
@@ -183,8 +169,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             {
                 new AppFinRecordInfo()
                 {
-                    LearnRefNumber = learnerReferenceNumber,
-                    AimSeqNumber = aimSeqNumber,
                     AFinAmount = aFinAmount,
                     AFinCode = aFinCode,
                     AFinType = aFinType,

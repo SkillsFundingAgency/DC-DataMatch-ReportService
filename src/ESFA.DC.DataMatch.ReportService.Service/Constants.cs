@@ -16,13 +16,17 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
         public const string LearnDelFAMCode = "1";
 
-        public const string LearnDelFAMType = "ACT";
+        public const string LearnDelFAMType_ACT = "ACT";
+
+        public const string AppFinRecordType_TNP = "TNP";
 
         public const string PeriodEnd = "DAS_PE";
 
         public const int SubmissionInMonth = 1;
 
         public const int SubmissionPeriodEnd = 2;
+
+        public const string DLockErrorRuleNamePrefix = "DLOCK_";
 
         /// <summary>
         /// Message Key.

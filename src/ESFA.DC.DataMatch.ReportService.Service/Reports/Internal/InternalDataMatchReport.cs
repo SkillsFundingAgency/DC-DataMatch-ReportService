@@ -12,35 +12,27 @@ using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
 using ESFA.DC.DataMatch.ReportService.Service.Abstract;
-using ESFA.DC.DataMatch.ReportService.Service.Comparer;
-using ESFA.DC.DataMatch.ReportService.Service.Mapper;
 using ESFA.DC.DateTimeProvider.Interface;
 using ESFA.DC.IO.Interfaces;
 using ESFA.DC.Logging.Interfaces;
 
-namespace ESFA.DC.DataMatch.ReportService.Service.Reports
+namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
 {
     public sealed class InternalDataMatchReport : AbstractReport, IReport
     {
         private readonly IDASPaymentsProviderService _dasPaymentsProviderService;
-        private readonly IILRProviderService _ilrProviderService;
-        private readonly IDataMatchModelBuilder _dataMatchModelBuilder;
-        private readonly InternalDataMatchModelComparer _dataMatchModelComparer;
+        private readonly IInternalDataMatchModelBuilder _dataMatchModelBuilder;
 
         public InternalDataMatchReport(
             IDASPaymentsProviderService dasPaymentsProviderService,
-            IILRProviderService iIlrProviderService,
-            IDataMatchModelBuilder dataMatchModelBuilder,
+            IInternalDataMatchModelBuilder dataMatchModelBuilder,
             IDateTimeProvider dateTimeProvider,
             IStreamableKeyValuePersistenceService streamableKeyValuePersistenceService,
-            InternalDataMatchModelComparer dataMatchModelComparer,
             ILogger logger)
             : base(dateTimeProvider, streamableKeyValuePersistenceService, logger)
         {
             _dasPaymentsProviderService = dasPaymentsProviderService;
-            _ilrProviderService = iIlrProviderService;
             _dataMatchModelBuilder = dataMatchModelBuilder;
-            _dataMatchModelComparer = dataMatchModelComparer;
         }
 
         public override string ReportTaskName => ReportTaskNameConstants.InternalDataMatchReport;
@@ -53,31 +45,22 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports
             CancellationToken cancellationToken)
         {
             _logger.LogInfo("Generate Internal Data Match Report started", jobIdOverride: reportServiceContext.JobId);
-            List<InternalDataMatchModel> dataMatchModels = new List<InternalDataMatchModel>();
 
-            DataMatchDataLockValidationErrorInfo dataLockValidationErrorInfo = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, -1, reportServiceContext.CollectionYear, cancellationToken);
-            List<int> ukPrns = dataLockValidationErrorInfo.DataLockValidationErrors.Select(x => (int)x.UkPrn).Distinct().ToList();
+            var ilrPeriods = reportServiceContext.ILRPeriods.ToList();
 
-            _logger.LogInfo($"Ukprns count {ukPrns.Count}", jobIdOverride: reportServiceContext.JobId);
+            var dataLockValidationErrors = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForAllUkprnsAsync(reportServiceContext.ReturnPeriod, reportServiceContext.CollectionYear, cancellationToken);
 
-            foreach (int ukPrn in ukPrns)
-            {
-                List<long> learners = dataLockValidationErrorInfo.DataLockValidationErrors.Where(x => x.UkPrn == ukPrn).Select(x => x.LearnerUln).Distinct().ToList();
-                _logger.LogInfo($"Processing UKPRN {ukPrn} with {learners.Count} learners");
-                DataMatchILRInfo dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(ukPrn, learners, cancellationToken);
-                dataMatchModels.AddRange(_dataMatchModelBuilder.BuildInternalModels(dataMatchILRInfo, dataLockValidationErrorInfo, reportServiceContext.ILRPeriods.ToList(), reportServiceContext.JobId).ToList());
-            }
-
-            _logger.LogInfo($"Sorting");
-            dataMatchModels.Sort(_dataMatchModelComparer);
+            _logger.LogInfo($"Generating Report Models for {dataLockValidationErrors.Count} Data Lock Validation Errors");
+            var reportModels = _dataMatchModelBuilder.BuildInternalModels(dataLockValidationErrors, ilrPeriods).ToList();
 
             string externalFileName = GetFilename(reportServiceContext);
 
             _logger.LogInfo($"Generating CSV");
-            string csv = WriteResults<InternalDataMatchMapper, InternalDataMatchModel>(dataMatchModels);
+            string csv = WriteResults<InternalDataMatchMapper, InternalDataMatchModel>(reportModels);
 
             _logger.LogInfo($"Persisting");
             await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
+
             return false;
         }
 

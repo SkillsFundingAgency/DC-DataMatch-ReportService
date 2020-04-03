@@ -15,23 +15,14 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
     {
         private readonly Func<IIlr1920ValidContext> _ilrValidContextFactory;
 
-        public ILR1920ProviderService(
-            ILogger logger,
-            Func<IIlr1920ValidContext> ilrValidContextFactory)
+        public ILR1920ProviderService(Func<IIlr1920ValidContext> ilrValidContextFactory)
         {
             _ilrValidContextFactory = ilrValidContextFactory;
         }
 
-        public async Task<DataMatchILRInfo> GetILRInfoForDataMatchReport(
-            int ukPrn,
-            List<long> learners,
-            CancellationToken cancellationToken)
+        public async Task<ICollection<DataMatchLearner>> GetILRInfoForDataMatchReport(int ukPrn, List<long> learners, CancellationToken cancellationToken)
         {
-            var dataMatchILRInfo = new DataMatchILRInfo
-            {
-                UkPrn = ukPrn,
-                DataMatchLearners = new List<DataMatchLearner>()
-            };
+            var dataMatchLearners = new List<DataMatchLearner>();
 
             cancellationToken.ThrowIfCancellationRequested();
             using (var ilrContext = _ilrValidContextFactory())
@@ -41,14 +32,16 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
 
                 for (int i = 0; i < count; i += pageSize)
                 {
+                    var learnerUlnPage = learners.Skip(i).Take(pageSize).ToList();
+
                     List<DataMatchLearner> learnersList = await ilrContext.Learners
                         .Where(x => x.UKPRN == ukPrn
-                                    && learners.Skip(i).Take(pageSize).Contains(x.ULN)
+                                    && learnerUlnPage.Contains(x.ULN)
                                     && x.LearningDeliveries.Any(y =>
                                         y.FundModel == Constants.ApprenticeshipsFundModel
                                         && y.LearningDeliveryFAMs.Any(ldf =>
                                             ldf.LearnDelFAMCode == Constants.LearnDelFAMCode &&
-                                            ldf.LearnDelFAMType == Constants.LearnDelFAMType)))
+                                            ldf.LearnDelFAMType == Constants.LearnDelFAMType_ACT)))
                         .Select(l => new DataMatchLearner
                         {
                             UkPrn = l.UKPRN,
@@ -56,8 +49,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                             Uln = l.ULN,
                             DataMatchLearningDeliveries = l.LearningDeliveries.Select(x => new DataMatchLearningDelivery
                             {
-                                UkPrn = ukPrn,
-                                LearnRefNumber = x.LearnRefNumber,
                                 LearnAimRef = x.LearnAimRef,
                                 AimSeqNumber = x.AimSeqNumber,
                                 LearnStartDate = x.LearnStartDate,
@@ -67,8 +58,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                                 PwayCode = x.PwayCode,
                                 AppFinRecords = x.AppFinRecords.Select(y => new AppFinRecordInfo()
                                 {
-                                    LearnRefNumber = y.LearnRefNumber,
-                                    AimSeqNumber = y.AimSeqNumber,
                                     AFinType = y.AFinType,
                                     AFinCode = y.AFinCode,
                                     AFinDate = y.AFinDate,
@@ -79,11 +68,11 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                         .Distinct()
                         .ToListAsync(cancellationToken);
 
-                    dataMatchILRInfo.DataMatchLearners.AddRange(learnersList);
+                    dataMatchLearners.AddRange(learnersList);
                 }
             }
 
-            return dataMatchILRInfo;
+            return dataMatchLearners;
         }
     }
 }

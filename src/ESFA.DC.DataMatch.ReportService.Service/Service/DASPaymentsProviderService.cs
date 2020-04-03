@@ -19,20 +19,14 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             _dasPaymentsContextFactory = dasPaymentsContextFactory;
         }
 
-        public async Task<DataMatchDataLockValidationErrorInfo> GetDataLockValidationErrorInfoForDataMatchReport(int collectionPeriod, int ukPrn, string collectionYear, CancellationToken cancellationToken)
+        public async Task<ICollection<DataLockValidationError>> GetDataLockValidationErrorInfoForUkprnAsync(int collectionPeriod, int ukPrn, string collectionYear, CancellationToken cancellationToken)
         {
-            DataMatchDataLockValidationErrorInfo dataMatchDataLockValidationErrorInfo = new DataMatchDataLockValidationErrorInfo
-            {
-                DataLockValidationErrors = new List<DataLockValidationError>(),
-            };
-
             var academicYear = Convert.ToInt32(collectionYear);
 
-            cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
             {
-                var dataLockValidationErrors = await dasPaymentsContext.DataMatchReport
-                    .Where(x => (ukPrn == -1 || x.UkPrn == ukPrn)
+                return await dasPaymentsContext.DataMatchReport
+                    .Where(x => x.UkPrn == ukPrn
                                 && x.AcademicYear == academicYear
                                 && x.CollectionPeriod == collectionPeriod)
                     .Select(x => new DataLockValidationError
@@ -48,20 +42,36 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                     })
                     .Distinct()
                     .ToListAsync(cancellationToken);
-
-                dataMatchDataLockValidationErrorInfo.DataLockValidationErrors.AddRange(dataLockValidationErrors);
             }
-
-            return dataMatchDataLockValidationErrorInfo;
         }
 
-        public async Task<DataMatchDasApprenticeshipInfo> GetDasApprenticeshipInfoForDataMatchReport(int ukPrn, CancellationToken cancellationToken)
+        public async Task<ICollection<DataLockValidationError>> GetDataLockValidationErrorInfoForAllUkprnsAsync(int collectionPeriod, string collectionYear, CancellationToken cancellationToken)
         {
-            var dataMatchDasApprenticeshipInfo = new DataMatchDasApprenticeshipInfo
+            var academicYear = Convert.ToInt32(collectionYear);
+
+            using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
             {
-                UkPrn = ukPrn,
-                DasApprenticeshipInfos = new List<DasApprenticeshipInfo>()
-            };
+                return await dasPaymentsContext.DataMatchReport
+                    .Where(x => x.AcademicYear == academicYear && x.CollectionPeriod == collectionPeriod)
+                    .Select(x => new DataLockValidationError
+                    {
+                        UkPrn = x.UkPrn,
+                        LearnerReferenceNumber = x.LearnerReferenceNumber,
+                        LearnerUln = x.LearnerUln,
+                        RuleId = x.DataLockFailureId,
+                        AimSeqNumber = x.LearningAimSequenceNumber,
+                        Collection = x.DataLockSourceId == Constants.SubmissionInMonth ? Constants.ILR : Constants.PeriodEnd,
+                        CollectionPeriod = x.CollectionPeriod,
+                        LastSubmission = x.IlrSubmissionDateTime
+                    })
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+            }
+        }
+
+        public async Task<ICollection<DasApprenticeshipInfo>> GetDasApprenticeshipInfoForDataMatchReport(int ukPrn, CancellationToken cancellationToken)
+        {
+            var dataMatchDasApprenticeshipInfo = new List<DasApprenticeshipInfo>();
 
             cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
@@ -89,7 +99,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                                 PathwayCode = a.PathwayCode,
                             }).Distinct().ToListAsync(cancellationToken);
 
-                dataMatchDasApprenticeshipInfo.DasApprenticeshipInfos.AddRange(dataMatchDasApprenticeshipPrices);
+                dataMatchDasApprenticeshipInfo.AddRange(dataMatchDasApprenticeshipPrices);
             }
 
             return dataMatchDasApprenticeshipInfo;
