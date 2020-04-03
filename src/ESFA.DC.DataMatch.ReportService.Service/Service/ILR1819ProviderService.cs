@@ -15,21 +15,17 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
     {
         private readonly Func<IIlr1819ValidContext> _ilrValidContextFactory;
 
-        public ILR1819ProviderService(
-            ILogger logger,
-            Func<IIlr1819ValidContext> ilrValidContextFactory)
+        public ILR1819ProviderService(Func<IIlr1819ValidContext> ilrValidContextFactory)
         {
             _ilrValidContextFactory = ilrValidContextFactory;
         }
 
-        public async Task<ICollection<DataMatchLearner>> GetILRInfoForDataMatchReport(
-            int ukPrn,
-            List<long> learners,
-            CancellationToken cancellationToken)
+        public async Task<ICollection<DataMatchLearner>> GetILRInfoForDataMatchReport(int ukPrn, List<long> learners, CancellationToken cancellationToken)
         {
             var dataMatchLearners = new List<DataMatchLearner>();
 
             cancellationToken.ThrowIfCancellationRequested();
+
             using (var ilrContext = _ilrValidContextFactory())
             {
                 int count = learners.Count;
@@ -37,9 +33,11 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
 
                 for (int i = 0; i < count; i += pageSize)
                 {
+                    var learnerUlnPage = learners.Skip(i).Take(pageSize).ToList();
+
                     List<DataMatchLearner> learnersList = await ilrContext.Learners
                         .Where(x => x.UKPRN == ukPrn
-                                    && learners.Skip(i).Take(pageSize).Contains(x.ULN)
+                                    && learnerUlnPage.Contains(x.ULN)
                                     && x.LearningDeliveries.Any(y =>
                                         y.FundModel == Constants.ApprenticeshipsFundModel
                                         && y.LearningDeliveryFAMs.Any(ldf =>

@@ -19,17 +19,14 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             _dasPaymentsContextFactory = dasPaymentsContextFactory;
         }
 
-        public async Task<ICollection<DataLockValidationError>> GetDataLockValidationErrorInfoForDataMatchReport(int collectionPeriod, int ukPrn, string collectionYear, CancellationToken cancellationToken)
+        public async Task<ICollection<DataLockValidationError>> GetDataLockValidationErrorInfoForUkprnAsync(int collectionPeriod, int ukPrn, string collectionYear, CancellationToken cancellationToken)
         {
-            var dataLockValidationErrors = new List<DataLockValidationError>();
-
             var academicYear = Convert.ToInt32(collectionYear);
 
-            cancellationToken.ThrowIfCancellationRequested();
             using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
             {
-                var validationErrors = await dasPaymentsContext.DataMatchReport
-                    .Where(x => (ukPrn == -1 || x.UkPrn == ukPrn)
+                return await dasPaymentsContext.DataMatchReport
+                    .Where(x => x.UkPrn == ukPrn
                                 && x.AcademicYear == academicYear
                                 && x.CollectionPeriod == collectionPeriod)
                     .Select(x => new DataLockValidationError
@@ -45,11 +42,31 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
                     })
                     .Distinct()
                     .ToListAsync(cancellationToken);
-
-                dataLockValidationErrors.AddRange(validationErrors);
             }
+        }
 
-            return dataLockValidationErrors;
+        public async Task<ICollection<DataLockValidationError>> GetDataLockValidationErrorInfoForAllUkprnsAsync(int collectionPeriod, string collectionYear, CancellationToken cancellationToken)
+        {
+            var academicYear = Convert.ToInt32(collectionYear);
+
+            using (IDASPaymentsContext dasPaymentsContext = _dasPaymentsContextFactory())
+            {
+                return await dasPaymentsContext.DataMatchReport
+                    .Where(x => x.AcademicYear == academicYear && x.CollectionPeriod == collectionPeriod)
+                    .Select(x => new DataLockValidationError
+                    {
+                        UkPrn = x.UkPrn,
+                        LearnerReferenceNumber = x.LearnerReferenceNumber,
+                        LearnerUln = x.LearnerUln,
+                        RuleId = x.DataLockFailureId,
+                        AimSeqNumber = x.LearningAimSequenceNumber,
+                        Collection = x.DataLockSourceId == Constants.SubmissionInMonth ? Constants.ILR : Constants.PeriodEnd,
+                        CollectionPeriod = x.CollectionPeriod,
+                        LastSubmission = x.IlrSubmissionDateTime
+                    })
+                    .Distinct()
+                    .ToListAsync(cancellationToken);
+            }
         }
 
         public async Task<ICollection<DasApprenticeshipInfo>> GetDasApprenticeshipInfoForDataMatchReport(int ukPrn, CancellationToken cancellationToken)

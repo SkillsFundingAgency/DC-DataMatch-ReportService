@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using ESFA.DC.CollectionsManagement.Models;
 using ESFA.DC.DataMatch.ReportService.Interface.Builders;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
-using ESFA.DC.DataMatch.ReportService.Model.Ilr;
 using ESFA.DC.DataMatch.ReportService.Model.ReportModels;
-using ESFA.DC.DataMatch.ReportService.Service.Extensions;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
 {
@@ -20,38 +17,32 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
             _dataLockValidationMessageService = dataLockValidationMessageService;
         }
 
-        public IEnumerable<InternalDataMatchModel> BuildInternalModels(ICollection<DataMatchLearner> dataMatchLearners, ICollection<DataLockValidationError> dataLockValidationErrors, ICollection<ReturnPeriod> returnPeriods)
+        public IEnumerable<InternalDataMatchModel> BuildInternalModels(ICollection<DataLockValidationError> dataLockValidationErrors, ICollection<ReturnPeriod> returnPeriods)
         {
-            IDictionary<string, DataMatchLearner> dataMatchLearnerLookup = dataMatchLearners.ToDictionary(l => l.LearnRefNumber, l => l, StringComparer.OrdinalIgnoreCase);
             IDictionary<int, ReturnPeriod> returnPeriodLookup = returnPeriods.ToDictionary(r => r.PeriodNumber, r => r);
 
-            foreach (var dataLockValidationError in dataLockValidationErrors)
-            {
-                var learner = dataMatchLearnerLookup.GetValueOrDefault(dataLockValidationError.LearnerReferenceNumber);
-
-                if (learner == null || learner.DataMatchLearningDeliveries.All(ld => ld.AimSeqNumber != dataLockValidationError.AimSeqNumber))
+            return dataLockValidationErrors
+                .Select(dataLockValidationError =>
                 {
-                    continue;
-                }
+                    var period = returnPeriodLookup[dataLockValidationError.CollectionPeriod];
 
-                string ruleName = _dataLockValidationMessageService.RuleNameForRuleId(dataLockValidationError.RuleId);
-
-                ReturnPeriod period = returnPeriodLookup[dataLockValidationError.CollectionPeriod];
-
-                yield return new InternalDataMatchModel
-                {
-                    Collection = dataLockValidationError.Collection,
-                    Ukprn = dataLockValidationError.UkPrn,
-                    LearnRefNumber = dataLockValidationError.LearnerReferenceNumber,
-                    Uln = learner.Uln,
-                    AimSeqNumber = dataLockValidationError.AimSeqNumber,
-                    RuleName = ruleName,
-                    CollectionPeriodName = $"{period.CollectionName}-R{dataLockValidationError.CollectionPeriod:D2}",
-                    CollectionPeriodMonth = period.CalendarMonth,
-                    CollectionPeriodYear = period.CalendarYear,
-                    LastSubmission = dataLockValidationError.LastSubmission
-                };
-            }
+                    return new InternalDataMatchModel
+                    {
+                        Collection = dataLockValidationError.Collection,
+                        Ukprn = dataLockValidationError.UkPrn,
+                        LearnRefNumber = dataLockValidationError.LearnerReferenceNumber,
+                        Uln = dataLockValidationError.LearnerUln,
+                        AimSeqNumber = dataLockValidationError.AimSeqNumber,
+                        RuleName = _dataLockValidationMessageService.RuleNameForRuleId(dataLockValidationError.RuleId),
+                        CollectionPeriodName = $"{period.CollectionName}-R{dataLockValidationError.CollectionPeriod:D2}",
+                        CollectionPeriodMonth = period.CalendarMonth,
+                        CollectionPeriodYear = period.CalendarYear,
+                        LastSubmission = dataLockValidationError.LastSubmission
+                    };
+                })
+                .OrderBy(m => m.Collection)
+                .ThenBy(m => m.Ukprn)
+                .ThenBy(m => m.LearnRefNumber);
         }
     }
 }

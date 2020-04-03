@@ -15,17 +15,12 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
     {
         private readonly Func<IIlr1920ValidContext> _ilrValidContextFactory;
 
-        public ILR1920ProviderService(
-            ILogger logger,
-            Func<IIlr1920ValidContext> ilrValidContextFactory)
+        public ILR1920ProviderService(Func<IIlr1920ValidContext> ilrValidContextFactory)
         {
             _ilrValidContextFactory = ilrValidContextFactory;
         }
 
-        public async Task<ICollection<DataMatchLearner>> GetILRInfoForDataMatchReport(
-            int ukPrn,
-            List<long> learners,
-            CancellationToken cancellationToken)
+        public async Task<ICollection<DataMatchLearner>> GetILRInfoForDataMatchReport(int ukPrn, List<long> learners, CancellationToken cancellationToken)
         {
             var dataMatchLearners = new List<DataMatchLearner>();
 
@@ -37,9 +32,11 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
 
                 for (int i = 0; i < count; i += pageSize)
                 {
+                    var learnerUlnPage = learners.Skip(i).Take(pageSize).ToList();
+
                     List<DataMatchLearner> learnersList = await ilrContext.Learners
                         .Where(x => x.UKPRN == ukPrn
-                                    && learners.Skip(i).Take(pageSize).Contains(x.ULN)
+                                    && learnerUlnPage.Contains(x.ULN)
                                     && x.LearningDeliveries.Any(y =>
                                         y.FundModel == Constants.ApprenticeshipsFundModel
                                         && y.LearningDeliveryFAMs.Any(ldf =>

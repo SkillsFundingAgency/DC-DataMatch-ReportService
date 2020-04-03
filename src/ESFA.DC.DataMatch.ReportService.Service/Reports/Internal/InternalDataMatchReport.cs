@@ -21,12 +21,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
     public sealed class InternalDataMatchReport : AbstractReport, IReport
     {
         private readonly IDASPaymentsProviderService _dasPaymentsProviderService;
-        private readonly IILRProviderService _ilrProviderService;
         private readonly IInternalDataMatchModelBuilder _dataMatchModelBuilder;
 
         public InternalDataMatchReport(
             IDASPaymentsProviderService dasPaymentsProviderService,
-            IILRProviderService iIlrProviderService,
             IInternalDataMatchModelBuilder dataMatchModelBuilder,
             IDateTimeProvider dateTimeProvider,
             IStreamableKeyValuePersistenceService streamableKeyValuePersistenceService,
@@ -34,7 +32,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
             : base(dateTimeProvider, streamableKeyValuePersistenceService, logger)
         {
             _dasPaymentsProviderService = dasPaymentsProviderService;
-            _ilrProviderService = iIlrProviderService;
             _dataMatchModelBuilder = dataMatchModelBuilder;
         }
 
@@ -51,42 +48,19 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
 
             var ilrPeriods = reportServiceContext.ILRPeriods.ToList();
 
-            var dataMatchModels = new List<InternalDataMatchModel>();
+            var dataLockValidationErrors = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForAllUkprnsAsync(reportServiceContext.ReturnPeriod, reportServiceContext.CollectionYear, cancellationToken);
 
-            var dataLockValidationErrors = await _dasPaymentsProviderService.GetDataLockValidationErrorInfoForDataMatchReport(reportServiceContext.ReturnPeriod, -1, reportServiceContext.CollectionYear, cancellationToken);
-
-            var ukPrns = dataLockValidationErrors.Select(x => (int)x.UkPrn).Distinct().ToList();
-
-            _logger.LogInfo($"Ukprns count {ukPrns.Count}", jobIdOverride: reportServiceContext.JobId);
-
-            foreach (int ukPrn in ukPrns)
-            {
-                var learners = dataLockValidationErrors.Where(x => x.UkPrn == ukPrn).Select(x => x.LearnerUln).Distinct().ToList();
-
-                _logger.LogInfo($"Processing UKPRN {ukPrn} with {learners.Count} learners");
-
-                var dataMatchILRInfo = await _ilrProviderService.GetILRInfoForDataMatchReport(ukPrn, learners, cancellationToken);
-
-                var reportModels = _dataMatchModelBuilder.BuildInternalModels(dataMatchILRInfo, dataLockValidationErrors, ilrPeriods);
-
-                dataMatchModels.AddRange(reportModels);
-            }
-
-            _logger.LogInfo($"Sorting");
-
-            dataMatchModels = dataMatchModels
-                .OrderBy(m => m.Collection)
-                .ThenBy(m => m.Ukprn)
-                .ThenBy(m => m.LearnRefNumber)
-                .ToList();
+            _logger.LogInfo($"Generating Report Models for {dataLockValidationErrors.Count} Data Lock Validation Errors");
+            var reportModels = _dataMatchModelBuilder.BuildInternalModels(dataLockValidationErrors, ilrPeriods).ToList();
 
             string externalFileName = GetFilename(reportServiceContext);
 
             _logger.LogInfo($"Generating CSV");
-            string csv = WriteResults<InternalDataMatchMapper, InternalDataMatchModel>(dataMatchModels);
+            string csv = WriteResults<InternalDataMatchMapper, InternalDataMatchModel>(reportModels);
 
             _logger.LogInfo($"Persisting");
             await _streamableKeyValuePersistenceService.SaveAsync($"{externalFileName}.csv", csv, cancellationToken);
+
             return false;
         }
 
