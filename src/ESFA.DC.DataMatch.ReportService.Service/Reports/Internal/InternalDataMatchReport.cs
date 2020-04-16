@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
@@ -66,7 +67,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.Internal
 
         private string GetFilename(IReportServiceContext reportServiceContext)
         {
-            return $"R{reportServiceContext.ReturnPeriod:00}_{ReportFileName}";
+            var dateTime = _dateTimeProvider.ConvertUtcToUk(reportServiceContext.SubmissionDateTimeUtc);
+            var returnPeriod = $"R{reportServiceContext.ReturnPeriod:00}";
+
+            return $"{returnPeriod}_{ReportFileName} {returnPeriod} {dateTime:yyyyMMdd-HHmmss}";
         }
     }
 }

@@ -21,7 +21,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Abstract
 
         protected readonly IStreamableKeyValuePersistenceService _streamableKeyValuePersistenceService;
 
-        private readonly IDateTimeProvider _dateTimeProvider;
+        protected readonly IDateTimeProvider _dateTimeProvider;
 
         protected AbstractReport(IDateTimeProvider dateTimeProvider, IStreamableKeyValuePersistenceService streamableKeyValuePersistenceService, ILogger logger)
         {
