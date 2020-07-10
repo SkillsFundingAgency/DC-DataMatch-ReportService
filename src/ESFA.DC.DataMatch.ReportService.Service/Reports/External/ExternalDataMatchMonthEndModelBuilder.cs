@@ -48,7 +48,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
 
         public IEnumerable<DataMatchModel> BuildExternalModels(
             ICollection<DataMatchLearner> dataMatchLearners,
-            DataMatchRulebaseInfo dataMatchRulebaseInfo,
+            ICollection<AECApprenticeshipPriceEpisodeInfo> priceEpisodes,
             ICollection<DataLockValidationError> dataLockValidationErrors,
             ICollection<DasApprenticeshipInfo> dasApprenticeshipInfos,
             long jobId)
@@ -65,7 +65,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Reports.External
                     continue;
                 }
 
-                AECApprenticeshipPriceEpisodeInfo matchedRulebaseInfo = dataMatchRulebaseInfo.AECApprenticeshipPriceEpisodes.LastOrDefault(x =>
+                AECApprenticeshipPriceEpisodeInfo matchedRulebaseInfo = priceEpisodes.LastOrDefault(x =>
                     x.LearnRefNumber.CaseInsensitiveEquals(dataLockValidationError.LearnerReferenceNumber));
 
                 DasApprenticeshipInfo matchedDasPriceInfo = dasApprenticeshipInfos.FirstOrDefault(x => x.LearnerUln == dataLockValidationError.LearnerUln);

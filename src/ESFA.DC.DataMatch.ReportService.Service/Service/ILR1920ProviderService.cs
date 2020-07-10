@@ -5,22 +5,29 @@ using System.Threading;
 using System.Threading.Tasks;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.Ilr;
+using ESFA.DC.ILR1920.DataStore.EF.Interface;
 using ESFA.DC.ILR1920.DataStore.EF.Valid.Interface;
-using ESFA.DC.Logging.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace ESFA.DC.DataMatch.ReportService.Service.Service
 {
     public class ILR1920ProviderService : IILRProviderService
     {
-        private readonly Func<IIlr1920ValidContext> _ilrValidContextFactory;
+        private const int PageSize = 1000;
 
-        public ILR1920ProviderService(Func<IIlr1920ValidContext> ilrValidContextFactory)
+        private readonly Func<IIlr1920ValidContext> _ilrValidContextFactory;
+        private readonly Func<IIlr1920RulebaseContext> _ilrRulebaseContextFactory;
+
+        private readonly DateTime PriceEpisodeStartDateStart = new DateTime(2019, 08, 01);
+        private readonly DateTime PriceEpisodeStartDateEnd = new DateTime(2020, 07, 31);
+
+        public ILR1920ProviderService(Func<IIlr1920ValidContext> ilrValidContextFactory, Func<IIlr1920RulebaseContext> ilrRulebaseContextFactory)
         {
             _ilrValidContextFactory = ilrValidContextFactory;
+            _ilrRulebaseContextFactory = ilrRulebaseContextFactory;
         }
 
-        public async Task<ICollection<DataMatchLearner>> GetILRInfoForDataMatchReport(int ukPrn, List<long> learners, CancellationToken cancellationToken)
+        public async Task<ICollection<DataMatchLearner>> GetILRInfoForDataMatchReportAsync(int ukPrn, List<long> learners, CancellationToken cancellationToken)
         {
             var dataMatchLearners = new List<DataMatchLearner>();
 
@@ -28,11 +35,10 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             using (var ilrContext = _ilrValidContextFactory())
             {
                 int count = learners.Count;
-                int pageSize = 1000;
 
-                for (int i = 0; i < count; i += pageSize)
+                for (int i = 0; i < count; i += PageSize)
                 {
-                    var learnerUlnPage = learners.Skip(i).Take(pageSize).ToList();
+                    var learnerUlnPage = learners.Skip(i).Take(PageSize).ToList();
 
                     List<DataMatchLearner> learnersList = await ilrContext.Learners
                         .Where(x => x.UKPRN == ukPrn
@@ -73,6 +79,28 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
             }
 
             return dataMatchLearners;
+        }
+
+        public async Task<ICollection<AECApprenticeshipPriceEpisodeInfo>> GetFM36DataForDataMatchReportAsync(int ukPrn, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            using (var ilrContext = _ilrRulebaseContextFactory())
+            {
+                return await ilrContext.AEC_ApprenticeshipPriceEpisodes
+                    .Where(x => x.UKPRN == ukPrn &&
+                                x.EpisodeStartDate >= PriceEpisodeStartDateStart &&
+                                x.EpisodeStartDate <= PriceEpisodeStartDateEnd)
+                    .Select(pe => new AECApprenticeshipPriceEpisodeInfo
+                    {
+                        UkPrn = pe.UKPRN,
+                        AimSequenceNumber = (int)pe.PriceEpisodeAimSeqNumber,
+                        LearnRefNumber = pe.LearnRefNumber,
+                        PriceEpisodeActualEndDate = pe.PriceEpisodeActualEndDate,
+                        PriceEpisodeAgreeId = pe.PriceEpisodeAgreeId,
+                        EpisodeStartDate = pe.EpisodeStartDate,
+                        EffectiveTnpStartDate = pe.EpisodeEffectiveTNPStartDate,
+                    }).ToListAsync(cancellationToken);
+            }
         }
     }
 }

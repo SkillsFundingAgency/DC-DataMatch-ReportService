@@ -8,9 +8,9 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
         public const string ILR = "ILR";
 
-        public const string YEAR_1819 = "1819";
-
         public const string YEAR_1920 = "1920";
+
+        public const string YEAR_2021 = "2021";
 
         public const int ApprenticeshipsFundModel = 36;
 
@@ -24,17 +24,11 @@ namespace ESFA.DC.DataMatch.ReportService.Service
 
         public const int SubmissionInMonth = 1;
 
-        public const int SubmissionPeriodEnd = 2;
-
         public const string DLockErrorRuleNamePrefix = "DLOCK_";
 
         /// <summary>
         /// Message Key.
         /// </summary>
         public const string ILRPeriods = "ILRPeriods";
-
-        public static DateTime PriceEpisodeStartDateStart1920 = new DateTime(2019, 08, 01);
-
-        public static DateTime PriceEpisodeStartDateEnd1920 = new DateTime(2020, 07, 31);
     }
 }

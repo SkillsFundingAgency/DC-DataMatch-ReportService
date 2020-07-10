@@ -177,23 +177,18 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Builders
             };
         }
 
-        private DataMatchRulebaseInfo BuildILRRulebaseModelForDataMatchReportBuilderTests(int ukPrn, string learnRefNumber, int aimSeqNumber)
+        private ICollection<AECApprenticeshipPriceEpisodeInfo> BuildILRRulebaseModelForDataMatchReportBuilderTests(int ukPrn, string learnRefNumber, int aimSeqNumber)
         {
-            return new DataMatchRulebaseInfo()
+            return new List<AECApprenticeshipPriceEpisodeInfo>()
             {
-                UkPrn = ukPrn,
-                LearnRefNumber = learnRefNumber,
-                AECApprenticeshipPriceEpisodes = new List<AECApprenticeshipPriceEpisodeInfo>()
+                new AECApprenticeshipPriceEpisodeInfo()
                 {
-                    new AECApprenticeshipPriceEpisodeInfo()
-                    {
-                        LearnRefNumber = learnRefNumber,
-                        PriceEpisodeAgreeId = "YZ2V7Y",
-                        EpisodeStartDate = new DateTime(2019, 06, 28),
-                        PriceEpisodeActualEndDate = new DateTime(2020, 06, 28),
-                        UkPrn = ukPrn,
-                        AimSequenceNumber = aimSeqNumber,
-                    },
+                    LearnRefNumber = learnRefNumber,
+                    PriceEpisodeAgreeId = "YZ2V7Y",
+                    EpisodeStartDate = new DateTime(2019, 06, 28),
+                    PriceEpisodeActualEndDate = new DateTime(2020, 06, 28),
+                    UkPrn = ukPrn,
+                    AimSequenceNumber = aimSeqNumber,
                 },
             };
         }
