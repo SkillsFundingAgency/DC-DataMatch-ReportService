@@ -39,8 +39,8 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests
                     return (T)(object)new ReportServiceConfiguration()
                     {
                         DASPaymentsConnectionString = "DASPaymentsConnectionString",
-                        ILR1819DataStoreConnectionString = "ILR1819DataStoreConnectionString",
-                        ILR1920DataStoreConnectionString = "ILR1920DataStoreConnectionString"
+                        ILR1920DataStoreConnectionString = "ILR1920DataStoreConnectionString",
+                        ILR2021DataStoreConnectionString = "ILR2021DataStoreConnectionString",
                     };
                 case "AzureStorageSection":
                     return (T)(object)new AzureStorageOptions()

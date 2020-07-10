@@ -9,7 +9,7 @@ using ESFA.DC.ILR1920.DataStore.EF.Interface;
 using ESFA.DC.ILR1920.DataStore.EF.Valid.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace ESFA.DC.DataMatch.ReportService.Service.Service
+namespace ESFA.DC.DataMatch.ReportService.Service.Data
 {
     public class ILR1920ProviderService : IILRProviderService
     {
@@ -18,20 +18,22 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
         private readonly Func<IIlr1920ValidContext> _ilrValidContextFactory;
         private readonly Func<IIlr1920RulebaseContext> _ilrRulebaseContextFactory;
 
-        private readonly DateTime PriceEpisodeStartDateStart = new DateTime(2019, 08, 01);
-        private readonly DateTime PriceEpisodeStartDateEnd = new DateTime(2020, 07, 31);
-
         public ILR1920ProviderService(Func<IIlr1920ValidContext> ilrValidContextFactory, Func<IIlr1920RulebaseContext> ilrRulebaseContextFactory)
         {
             _ilrValidContextFactory = ilrValidContextFactory;
             _ilrRulebaseContextFactory = ilrRulebaseContextFactory;
         }
 
+        public DateTime PriceEpisodeStartDateStart { get; } = new DateTime(2019, 08, 01);
+
+        public DateTime PriceEpisodeStartDateEnd { get; } = new DateTime(2020, 07, 31);
+
         public async Task<ICollection<DataMatchLearner>> GetILRInfoForDataMatchReportAsync(int ukPrn, List<long> learners, CancellationToken cancellationToken)
         {
             var dataMatchLearners = new List<DataMatchLearner>();
 
             cancellationToken.ThrowIfCancellationRequested();
+
             using (var ilrContext = _ilrValidContextFactory())
             {
                 int count = learners.Count;
@@ -84,6 +86,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Service
         public async Task<ICollection<AECApprenticeshipPriceEpisodeInfo>> GetFM36DataForDataMatchReportAsync(int ukPrn, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
             using (var ilrContext = _ilrRulebaseContextFactory())
             {
                 return await ilrContext.AEC_ApprenticeshipPriceEpisodes

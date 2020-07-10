@@ -22,6 +22,7 @@
     <PackageReference Include="ESFA.DC.DateTimeProvider.Interface" Version="0.1.6-beta0001" />
     <PackageReference Include="ESFA.DC.FileService" Version="0.1.21-beta0001" />
     <PackageReference Include="ESFA.DC.FileService.Interface" Version="0.1.20-beta0001" />
+    <PackageReference Include="ESFA.DC.ILR.2021.Database.EF" Version="0.1.144" />
     <PackageReference Include="ESFA.DC.ILR1920.Database.EF" Version="0.0.415" />
     <PackageReference Include="ESFA.DC.IO.AzureStorage" Version="0.1.21-beta0001" />
     <PackageReference Include="ESFA.DC.IO.Interfaces" Version="0.1.20-beta0001" />

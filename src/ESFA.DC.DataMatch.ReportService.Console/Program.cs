@@ -54,8 +54,8 @@ namespace ESFA.DC.DataMatch.ReportService.Console
                 reportServiceConfiguration = new ReportServiceConfiguration
                 {
                     DASPaymentsConnectionString = configuration["DASPaymentsConnectionString"],
-                    ILR1819DataStoreConnectionString = configuration["ILR1819DataStoreConnectionString"],
-                    ILR1920DataStoreConnectionString = configuration["ILR1920DataStoreConnectionString"]
+                    ILR1920DataStoreConnectionString = configuration["ILR1920DataStoreConnectionString"],
+                    ILR2021DataStoreConnectionString = configuration["ILR2021DataStoreConnectionString"],
                 },
                 versionInfo = new VersionInfo
                 {
