@@ -11,26 +11,23 @@ using ESFA.DC.DataMatch.ReportService.Interface.Reports;
 using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.Configuration;
 using ESFA.DC.DataMatch.ReportService.Service;
+using ESFA.DC.DataMatch.ReportService.Service.Data;
 using ESFA.DC.DataMatch.ReportService.Service.Extensions;
 using ESFA.DC.DataMatch.ReportService.Service.ReferenceData;
-using ESFA.DC.DataMatch.ReportService.Service.Reports;
 using ESFA.DC.DataMatch.ReportService.Service.Reports.External;
 using ESFA.DC.DataMatch.ReportService.Service.Reports.Internal;
-using ESFA.DC.DataMatch.ReportService.Service.Service;
 using ESFA.DC.DataMatch.ReportService.Stateless.Configuration;
 using ESFA.DC.DateTimeProvider.Interface;
 using ESFA.DC.FileService;
 using ESFA.DC.FileService.Config;
 using ESFA.DC.FileService.Config.Interface;
 using ESFA.DC.FileService.Interface;
-using ESFA.DC.ILR1819.DataStore.EF;
-using ESFA.DC.ILR1819.DataStore.EF.Interface;
-using ESFA.DC.ILR1819.DataStore.EF.Valid;
-using ESFA.DC.ILR1819.DataStore.EF.Valid.Interface;
 using ESFA.DC.ILR1920.DataStore.EF;
 using ESFA.DC.ILR1920.DataStore.EF.Interface;
 using ESFA.DC.ILR1920.DataStore.EF.Valid;
 using ESFA.DC.ILR1920.DataStore.EF.Valid.Interface;
+using ESFA.DC.ILR2021.DataStore.EF;
+using ESFA.DC.ILR2021.DataStore.EF.Interface;
 using ESFA.DC.IO.AzureStorage;
 using ESFA.DC.IO.AzureStorage.Config.Interfaces;
 using ESFA.DC.IO.Interfaces;
@@ -86,9 +83,52 @@ namespace ESFA.DC.DataMatch.ReportService.Core
             containerBuilder.RegisterType<AzureStorageFileService>().As<IFileService>();
         }
 
-        public static void BuildContainer(
-            ContainerBuilder containerBuilder,
-            ConfigurationRootModel configurationRoot)
+        public static void Register1920DatabaseContext(ContainerBuilder containerBuilder, ConfigurationRootModel configurationRoot)
+        {
+            containerBuilder.RegisterType<ILR1920_DataStoreEntitiesValid>().As<IIlr1920ValidContext>();
+            containerBuilder.Register(context =>
+                {
+                    var optionsBuilder = new DbContextOptionsBuilder<ILR1920_DataStoreEntitiesValid>();
+                    optionsBuilder.UseSqlServer(
+                        configurationRoot.reportServiceConfiguration.ILR1920DataStoreConnectionString,
+                        options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
+
+                    return optionsBuilder.Options;
+                })
+                .As<DbContextOptions<ILR1920_DataStoreEntitiesValid>>()
+                .SingleInstance();
+
+            containerBuilder.RegisterType<ILR1920_DataStoreEntities>().As<IIlr1920RulebaseContext>();
+            containerBuilder.Register(context =>
+                {
+                    var optionsBuilder = new DbContextOptionsBuilder<ILR1920_DataStoreEntities>();
+                    optionsBuilder.UseSqlServer(
+                        configurationRoot.reportServiceConfiguration.ILR1920DataStoreConnectionString,
+                        options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
+
+                    return optionsBuilder.Options;
+                })
+                .As<DbContextOptions<ILR1920_DataStoreEntities>>()
+                .SingleInstance();
+        }
+
+        public static void Register2021DatabaseContext(ContainerBuilder containerBuilder, ConfigurationRootModel configurationRoot)
+        {
+            containerBuilder.RegisterType<ILR2021_DataStoreEntities>().As<IIlr2021Context>();
+            containerBuilder.Register(context =>
+                {
+                    var optionsBuilder = new DbContextOptionsBuilder<ILR2021_DataStoreEntities>();
+                    optionsBuilder.UseSqlServer(
+                        configurationRoot.reportServiceConfiguration.ILR2021DataStoreConnectionString,
+                        options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
+
+                    return optionsBuilder.Options;
+                })
+                .As<DbContextOptions<ILR2021_DataStoreEntities>>()
+                .SingleInstance();
+        }
+
+        public static void BuildContainer(ContainerBuilder containerBuilder, ConfigurationRootModel configurationRoot)
         {
             containerBuilder.RegisterInstance(configurationRoot.reportServiceConfiguration).As<IReportServiceConfiguration>();
             
@@ -97,57 +137,8 @@ namespace ESFA.DC.DataMatch.ReportService.Core
 
             containerBuilder.RegisterInstance(configurationRoot.versionInfo).As<IVersionInfo>().SingleInstance();
 
-            containerBuilder.RegisterType<ILR1819_DataStoreEntitiesValid>().As<IIlr1819ValidContext>();
-            containerBuilder.Register(context =>
-            {
-                var optionsBuilder = new DbContextOptionsBuilder<ILR1819_DataStoreEntitiesValid>();
-                optionsBuilder.UseSqlServer(
-                    configurationRoot.reportServiceConfiguration.ILR1819DataStoreConnectionString,
-                    options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
-
-                return optionsBuilder.Options;
-            })
-            .As<DbContextOptions<ILR1819_DataStoreEntitiesValid>>()
-            .SingleInstance();
-
-            containerBuilder.RegisterType<ILR1920_DataStoreEntitiesValid>().As<IIlr1920ValidContext>();
-            containerBuilder.Register(context =>
-            {
-                var optionsBuilder = new DbContextOptionsBuilder<ILR1920_DataStoreEntitiesValid>();
-                optionsBuilder.UseSqlServer(
-                    configurationRoot.reportServiceConfiguration.ILR1920DataStoreConnectionString,
-                    options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
-
-                return optionsBuilder.Options;
-            })
-            .As<DbContextOptions<ILR1920_DataStoreEntitiesValid>>()
-            .SingleInstance();
-
-            containerBuilder.RegisterType<ILR1819_DataStoreEntities>().As<IIlr1819RulebaseContext>();
-            containerBuilder.Register(context =>
-            {
-                var optionsBuilder = new DbContextOptionsBuilder<ILR1819_DataStoreEntities>();
-                optionsBuilder.UseSqlServer(
-                    configurationRoot.reportServiceConfiguration.ILR1819DataStoreConnectionString,
-                    options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
-
-                return optionsBuilder.Options;
-            })
-            .As<DbContextOptions<ILR1819_DataStoreEntities>>()
-            .SingleInstance();
-
-            containerBuilder.RegisterType<ILR1920_DataStoreEntities>().As<IIlr1920RulebaseContext>();
-            containerBuilder.Register(context =>
-            {
-                var optionsBuilder = new DbContextOptionsBuilder<ILR1920_DataStoreEntities>();
-                optionsBuilder.UseSqlServer(
-                    configurationRoot.reportServiceConfiguration.ILR1920DataStoreConnectionString,
-                    options => options.EnableRetryOnFailure(3, TimeSpan.FromSeconds(3), new List<int>()));
-
-                return optionsBuilder.Options;
-            })
-            .As<DbContextOptions<ILR1920_DataStoreEntities>>()
-            .SingleInstance();
+            Register1920DatabaseContext(containerBuilder, configurationRoot);
+            Register2021DatabaseContext(containerBuilder, configurationRoot);
 
             containerBuilder.RegisterType<DASPaymentsContext>().As<IDASPaymentsContext>();
             containerBuilder.Register(context =>
@@ -180,19 +171,13 @@ namespace ESFA.DC.DataMatch.ReportService.Core
 
         public static void RegisterServicesByYear(string year, ContainerBuilder containerBuilder)
         {
-            if (year.CaseInsensitiveEquals(Constants.YEAR_1819))
+            if (year.CaseInsensitiveEquals(Constants.YEAR_1920))
             {
-                containerBuilder.RegisterType<ILR1819ProviderService>().As<IILRProviderService>()
-                    .InstancePerLifetimeScope();
-                containerBuilder.RegisterType<FM361819ProviderService>().As<IFM36ProviderService>()
-                    .InstancePerLifetimeScope();
+                containerBuilder.RegisterType<ILR1920ProviderService>().As<IILRProviderService>().InstancePerLifetimeScope();
             }
-            else if (year.CaseInsensitiveEquals(Constants.YEAR_1920))
+            else if (year.CaseInsensitiveEquals(Constants.YEAR_2021))
             {
-                containerBuilder.RegisterType<ILR1920ProviderService>().As<IILRProviderService>()
-                    .InstancePerLifetimeScope();
-                containerBuilder.RegisterType<FM361920ProviderService>().As<IFM36ProviderService>()
-                    .InstancePerLifetimeScope();
+                containerBuilder.RegisterType<ILR2021ProviderService>().As<IILRProviderService>().InstancePerLifetimeScope();
             }
         }
 

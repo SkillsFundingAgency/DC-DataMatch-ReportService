@@ -45,7 +45,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             Mock<IDateTimeProvider> dateTimeProviderMock = new Mock<IDateTimeProvider>();
             Mock<IStreamableKeyValuePersistenceService> storage = new Mock<IStreamableKeyValuePersistenceService>();
             Mock<IDASPaymentsProviderService> dasPaymentProviderMock = new Mock<IDASPaymentsProviderService>();
-            Mock<IFM36ProviderService> fm36ProviderServiceMock = new Mock<IFM36ProviderService>();
             Mock<IILRProviderService> iIlrProviderService = new Mock<IILRProviderService>();
             IExternalDataMatchModelBuilder dataMatchModelBuilder = new ExternalDataMatchMonthEndModelBuilder(new DataLockValidationMessageService(),  logger.Object);
 
@@ -64,11 +63,11 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
                 .Callback<string, string, CancellationToken>((key, value, ct) => csv = value)
                 .Returns(Task.CompletedTask);
 
-            fm36ProviderServiceMock
-                .Setup(x => x.GetFM36DataForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            iIlrProviderService
+                .Setup(x => x.GetFM36DataForDataMatchReportAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dataMatchRulebaseInfo);
             iIlrProviderService
-                .Setup(x => x.GetILRInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<List<long>>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetILRInfoForDataMatchReportAsync(It.IsAny<int>(), It.IsAny<List<long>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ilrModelForDataMatchReport);
             dasPaymentProviderMock.Setup(x =>
                     x.GetDasApprenticeshipInfoForDataMatchReport(It.IsAny<int>(), It.IsAny<CancellationToken>()))
@@ -82,7 +81,6 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
 
             var report = new ExternalDataMatchReport(
                 dasPaymentProviderMock.Object,
-                fm36ProviderServiceMock.Object,
                 iIlrProviderService.Object,
                 storage.Object,
                 dataMatchModelBuilder,
@@ -144,24 +142,19 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Tests.Reports
             };
         }
 
-        private DataMatchRulebaseInfo BuildFm36Model(int ukPrn)
+        private ICollection<AECApprenticeshipPriceEpisodeInfo> BuildFm36Model(int ukPrn)
         {
-            return new DataMatchRulebaseInfo()
+            return new List<AECApprenticeshipPriceEpisodeInfo>()
             {
-                UkPrn = ukPrn,
-                LearnRefNumber = "9900000306",
-                AECApprenticeshipPriceEpisodes = new List<AECApprenticeshipPriceEpisodeInfo>()
+                new AECApprenticeshipPriceEpisodeInfo()
                 {
-                    new AECApprenticeshipPriceEpisodeInfo()
-                    {
-                        LearnRefNumber = "9900000306",
-                        PriceEpisodeAgreeId = "YZ2V7Y",
-                        EpisodeStartDate = new DateTime(2019, 06, 28),
-                        PriceEpisodeActualEndDate = new DateTime(2020, 06, 28),
-                        UkPrn = ukPrn,
-                        AimSequenceNumber = 1,
-                        EffectiveTnpStartDate = new DateTime(2017, 07, 30),
-                    },
+                    LearnRefNumber = "9900000306",
+                    PriceEpisodeAgreeId = "YZ2V7Y",
+                    EpisodeStartDate = new DateTime(2019, 06, 28),
+                    PriceEpisodeActualEndDate = new DateTime(2020, 06, 28),
+                    UkPrn = ukPrn,
+                    AimSequenceNumber = 1,
+                    EffectiveTnpStartDate = new DateTime(2017, 07, 30),
                 },
             };
         }

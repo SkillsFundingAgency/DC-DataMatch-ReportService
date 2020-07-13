@@ -8,7 +8,7 @@ using ESFA.DC.DataMatch.ReportService.Interface.Service;
 using ESFA.DC.DataMatch.ReportService.Model.DASPayments;
 using Microsoft.EntityFrameworkCore;
 
-namespace ESFA.DC.DataMatch.ReportService.Service.Service
+namespace ESFA.DC.DataMatch.ReportService.Service.Data
 {
     public sealed class DASPaymentsProviderService : IDASPaymentsProviderService
     {

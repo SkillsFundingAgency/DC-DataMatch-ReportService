@@ -10,7 +10,7 @@ namespace ESFA.DC.DataMatch.ReportService.Interface.Builders
     {
         IEnumerable<DataMatchModel> BuildExternalModels(
             ICollection<DataMatchLearner> dataMatchlearners,
-            DataMatchRulebaseInfo dataMatchRulebaseInfo,
+            ICollection<AECApprenticeshipPriceEpisodeInfo> priceEpisodes,
             ICollection<DataLockValidationError> dataLockValidationErrors,
             ICollection<DasApprenticeshipInfo> dasApprenticeshipInfos,
             long jobId);

@@ -20,8 +20,8 @@
 
   <Section Name="ReportServiceConfiguration">
     <Parameter Name="DASPaymentsConnectionString" Value="" />
-    <Parameter Name="ILR1819DataStoreConnectionString" Value="" />
     <Parameter Name="ILR1920DataStoreConnectionString" Value="" />
+    <Parameter Name="ILR2021DataStoreConnectionString" Value="" />
   </Section>
 
   <Section Name="SoftwareLicenceSection">
