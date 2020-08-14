@@ -81,7 +81,7 @@ namespace ESFA.DC.DataMatch.ReportService.Service.Data
                             join ape in dasPaymentsContext.ApprenticeshipPriceEpisodes on a.Id equals ape.ApprenticeshipId
                                 into appPriceEpisodesJoin
                             from apej in appPriceEpisodesJoin.DefaultIfEmpty()
-                            join ap in dasPaymentsContext.ApprenticeshipPauses on apej.Id equals ap.ApprenticeshipId
+                            join ap in dasPaymentsContext.ApprenticeshipPauses on a.Id equals ap.ApprenticeshipId
                                 into appPriceEpisodePausesJoin
                             from apepj in appPriceEpisodePausesJoin.DefaultIfEmpty()
                             where a.Ukprn == ukPrn
